@@ -150,6 +150,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               soundtrack: form.soundtrack,
               custom_backdrop_url: form.custom_backdrop_url || null,
               ai_recommendation: form.ai_recommendation || null,
+              ai_related_movies: form.ai_related_movies || [],
             }
           : {
               tmdb_id: form.tmdb_id,
@@ -166,6 +167,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               watch_dates: form.watch_dates,
               custom_backdrop_url: form.custom_backdrop_url || null,
               ai_recommendation: form.ai_recommendation || null,
+              ai_related_movies: form.ai_related_movies || [],
             };
 
         const res = await fetch(endpoint, {

@@ -254,20 +254,37 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           </div>
         </motion.div>
 
-        {/* AI Recommendation */}
-        {review.ai_recommendation && (
+        {/* AI Recommendation & Related Movies */}
+        {(review.ai_recommendation || (review.ai_related_movies && review.ai_related_movies.length > 0)) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65 }}
-            className="border-4 border-accent-blue bg-black p-6 my-8 shadow-[8px_8px_0_var(--color-accent-blue)]"
+            className="border-4 border-accent-blue bg-[#1A1A1A] p-6 my-8 shadow-[8px_8px_0_var(--color-accent-blue)]"
           >
             <h3 className="text-3xl font-black font-[var(--font-bebas)] uppercase text-accent-blue mb-4">
               🤖 AI Director's Cut
             </h3>
-            <p className="text-text-primary text-lg font-medium leading-relaxed font-[var(--font-inter)]">
-              {review.ai_recommendation}
-            </p>
+            {review.ai_recommendation && (
+              <p className="text-white text-lg font-medium leading-relaxed font-[var(--font-inter)] mb-6">
+                {review.ai_recommendation}
+              </p>
+            )}
+            
+            {review.ai_related_movies && review.ai_related_movies.length > 0 && (
+              <div className="border-t-2 border-accent-blue/30 pt-4">
+                <h4 className="text-sm font-bold uppercase text-accent-blue/80 tracking-widest mb-3">
+                  Also Watch
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {review.ai_related_movies.map((movieTitle, i) => (
+                    <span key={i} className="px-3 py-1 bg-accent-blue/10 text-accent-blue font-bold text-sm border border-accent-blue/30">
+                      {movieTitle}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
 
@@ -277,21 +294,22 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.68 }}
+            className="mt-12"
           >
-            <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-white uppercase tracking-wider mb-4 border-b-4 border-white pb-2">
-              Cast
+            <h3 className="text-4xl font-black font-[var(--font-bebas)] text-[#1A1A1A] uppercase tracking-wider mb-6 bg-accent-amber inline-block px-4 py-1 -rotate-1">
+              Top Cast
             </h3>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-              {review.cast_info.map(actor => (
-                <div key={actor.id} className="group cursor-pointer" onClick={() => window.open(`https://www.themoviedb.org/person/${actor.id}`, '_blank')}>
-                  <div className="aspect-[2/3] overflow-hidden border-2 border-border-subtle group-hover:border-accent-red mb-2 bg-bg-card transition-colors">
+              {review.cast_info.map((actor, idx) => (
+                <div key={actor.id} className="group cursor-pointer flex flex-col" onClick={() => window.open(`https://www.themoviedb.org/person/${actor.id}`, '_blank')}>
+                  <div className={`aspect-[2/3] overflow-hidden border-2 border-[#1A1A1A] bg-[#1A1A1A] transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[4px_4px_0_#FE494A] ${idx % 2 === 0 ? 'rotate-1' : '-rotate-1'} mb-3`}>
                     {actor.profile_path ? (
-                      <img src={`${TMDB_IMG_BASE}w185${actor.profile_path}`} className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-300" alt={actor.name} />
+                      <img src={`${TMDB_IMG_BASE}w185${actor.profile_path}`} className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-300 opacity-90 group-hover:opacity-100" alt={actor.name} />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl bg-bg-deep text-text-muted">👤</div>
+                      <div className="w-full h-full flex items-center justify-center text-4xl bg-[#1A1A1A] text-white/20">👤</div>
                     )}
                   </div>
-                  <p className="text-[11px] font-bold uppercase truncate text-white leading-tight">{actor.name}</p>
+                  <p className="text-xs font-black uppercase truncate text-[#1A1A1A] leading-tight mb-0.5">{actor.name}</p>
                   <p className="text-[10px] text-accent-red uppercase truncate font-bold">{actor.character}</p>
                 </div>
               ))}

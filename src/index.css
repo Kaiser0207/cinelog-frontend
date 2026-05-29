@@ -3,20 +3,20 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-deep: #000000;
-  --color-bg-surface: #0a0a0a;
-  --color-bg-glass: rgba(10, 10, 10, 0.9);
-  --color-bg-card: #111111;
-  --color-bg-elevated: #1a1a1a;
-  --color-accent-red: #FE494A;
-  --color-accent-gold: #f5c518;
-  --color-accent-blue: #0800FF;
-  --color-accent-amber: #ff6b35;
-  --color-text-primary: #ffffff;
-  --color-text-muted: #888888;
-  --color-text-dim: #333333;
-  --color-border-subtle: rgba(255, 255, 255, 0.1);
-  --color-border-active: #FE494A;
+  --color-bg-deep: #FF4F4F; /* Vibrant Coral Red */
+  --color-bg-surface: #FF6B6B;
+  --color-bg-glass: rgba(255, 79, 79, 0.9);
+  --color-bg-card: #FF3838;
+  --color-bg-elevated: #FF7A7A;
+  --color-accent-red: #FF1493; /* Bright Pink / Soft Pink */
+  --color-accent-gold: #CCFF00; /* Neon Lime Green */
+  --color-accent-blue: #00FFCC; /* Cyan / Lime */
+  --color-accent-amber: #CCFF00; /* Neon Lime Green */
+  --color-text-primary: #0A0A0A; /* Black for high contrast on red */
+  --color-text-muted: #501010;
+  --color-text-dim: #702020;
+  --color-border-subtle: rgba(10, 10, 10, 0.2);
+  --color-border-active: #CCFF00;
 
   --font-inter: 'Inter', system-ui, sans-serif;
   --font-outfit: 'Outfit', system-ui, sans-serif;
@@ -42,6 +42,12 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (pointer: fine) {
+  body, a, button, input, textarea, select {
+    cursor: none !important;
+  }
 }
 
 /* ── Custom Scrollbar ── */
