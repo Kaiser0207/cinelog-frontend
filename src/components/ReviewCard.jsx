@@ -51,9 +51,9 @@ export default function ReviewCard({ review, index = 0 }) {
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6">
         {/* Top: Score Badge */}
-        <div className="flex justify-end">
+        <div className="flex justify-end -mt-2 -mr-2 md:-mt-1 md:-mr-1">
           <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0"
+            className="w-14 h-14 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0 scale-90 md:scale-100"
             style={{
               background: `rgba(0,0,0,0.5)`,
               boxShadow: `0 0 20px ${getScoreColor(total)}30`,
