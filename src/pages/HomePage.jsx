@@ -40,24 +40,31 @@ export default function HomePage() {
           CINELOG
         </motion.h1>
         
-        <div className="absolute top-6 right-6 flex items-center gap-4 z-[60]" data-cursor="FILTER">
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="text-sm bg-[#E8E2D2] border border-border-subtle rounded-full px-5 py-2.5 font-bold uppercase tracking-wider focus:border-[#FFB6C1] outline-none text-[#1A1A1A] transition-all"
-          >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+        <div className="absolute top-6 right-6 z-[60]" data-cursor="FILTER">
+          <div className="relative">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="appearance-none text-sm bg-[#E8E2D2] border border-border-subtle rounded-full pl-5 pr-12 py-2.5 font-bold uppercase tracking-wider focus:border-[#FFB6C1] outline-none text-[#1A1A1A] transition-all cursor-pointer"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[#1A1A1A]">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Genre Filter - Floating overlapping the title */}
-      <div className="relative z-10 max-w-7xl mx-auto px-5 -mt-12 mb-16">
-        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none items-center justify-center flex-wrap">
+      <div className="relative z-10 w-full px-5 -mt-12 mb-16 overflow-hidden">
+        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none items-center justify-start md:justify-center px-4 w-full">
           {GENRE_PILLS.map((g) => {
             const isActive = (g === 'All' && genre === '') || genre === g;
             return (
@@ -65,13 +72,17 @@ export default function HomePage() {
                 key={g}
                 data-cursor={isActive ? '' : 'FILTER'}
                 onClick={() => setGenre(g === 'All' ? '' : g)}
-                className={`flex-shrink-0 px-6 py-2.5 text-sm font-bold font-[var(--font-jetbrains)] uppercase rounded-full transition-all duration-300 ${
+                className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D4FF00] hover:border-[#D4FF00] ${
                   isActive
-                    ? 'bg-[#FFB6C1] text-black shadow-none border-none scale-105'
-                    : 'bg-[#E8E2D2] border border-border-subtle text-[#1A1A1A]/70 hover:text-black hover:border-black/40 hover:-translate-y-0.5'
+                    ? 'bg-[#FFB6C1] shadow-none border-transparent'
+                    : 'bg-[#E8E2D2] border border-border-subtle'
                 }`}
               >
-                {g}
+                <span className={`inline-block text-sm font-bold font-[var(--font-jetbrains)] uppercase transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
+                  isActive ? 'text-black' : 'text-[#1A1A1A]/70'
+                }`}>
+                  {g}
+                </span>
               </button>
             );
           })}
@@ -88,7 +99,7 @@ export default function HomePage() {
         onClick={() => setShowEditor(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg bg-[#CCFF00] hover:bg-[#D4FF00] text-black text-3xl font-black flex items-center justify-center transition-all shadow-lg border-none cursor-pointer"
+        className="fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg bg-[#FE494A] hover:bg-[#ff6b6c] text-white text-3xl font-black flex items-center justify-center transition-all shadow-lg border-none cursor-pointer"
       >
         +
       </motion.button>

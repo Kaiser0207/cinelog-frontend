@@ -38,6 +38,7 @@ const EMPTY_STATE = {
   spotify_track_name: '',
   // Watch dates
   watch_dates: [],
+  cast_info: [],
 };
 
 export default function ReviewEditor({ review = null, onClose, onSaved }) {
@@ -69,6 +70,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
         spotify_track_id: review.spotify_track_id || '',
         spotify_track_name: review.spotify_track_name || '',
         watch_dates: review.watch_dates || [],
+        cast_info: review.cast_info || [],
       };
     }
     return { ...EMPTY_STATE };
@@ -95,6 +97,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       release_date: movie.release_date || '',
       overview: movie.overview || '',
       backdrops: movie.backdrops || [],
+      cast_info: movie.cast || [],
     }));
   };
 
@@ -169,6 +172,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               custom_backdrop_url: form.custom_backdrop_url || null,
               ai_recommendation: form.ai_recommendation || null,
               ai_related_movies: form.ai_related_movies || [],
+              cast_info: form.cast_info || [],
             };
 
         const res = await fetch(endpoint, {
@@ -298,7 +302,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                     value={form.custom_backdrop_url}
                     onChange={(e) => update('custom_backdrop_url', e.target.value)}
                     placeholder="Or paste a custom image URL..."
-                    className="w-full bg-black border-2 border-border-subtle p-3 font-[var(--font-jetbrains)] text-sm rounded-none focus:border-accent-red transition-colors"
+                    className="w-full bg-[#E8E2D2] border border-border-subtle p-3 text-sm rounded-lg focus:outline-none focus:border-black/50 transition-colors text-black placeholder-black/40"
                   />
                 </div>
               )}

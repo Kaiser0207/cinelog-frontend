@@ -46,24 +46,21 @@ export default function ReviewCard({ review, index = 0 }) {
       )}
 
       {/* Dark Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6">
-        {/* Top: Score Badge - Absolute positioned flush at the top-right */}
-        <div className="absolute top-0 right-0 z-20">
+        {/* Top: Score Badge - Floating with some space */}
+        <div className="absolute top-3 right-3 z-20">
           <div
-            className="w-14 h-14 rounded-bl-lg rounded-tr-none flex items-center justify-center backdrop-blur-md border-l border-b border-white/10 shrink-0"
+            className="w-12 h-12 rounded-lg flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0 shadow-lg"
             style={{
               background: `rgba(0, 0, 0, 0.65)`,
             }}
           >
             <span
-              className="text-2xl font-black font-[var(--font-outfit)] text-[#FE494A]"
-              style={{
-                textShadow: `0 0 12px rgba(254, 73, 74, 0.4)`,
-              }}
+              className="text-xl font-black font-[var(--font-outfit)] text-[#FE494A]"
             >
               {total.toFixed(1)}
             </span>
@@ -80,14 +77,14 @@ export default function ReviewCard({ review, index = 0 }) {
                 return (
                   <span
                     key={i}
-                    className="text-[10px] uppercase tracking-wider font-semibold text-white/70 bg-white/10 backdrop-blur-sm px-2 py-0.5 rounded-md"
+                    className="text-[10px] uppercase tracking-wider font-bold text-white bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-md"
                   >
                     {genreName}
                   </span>
                 );
               })}
               {review.runtime && (
-                <span className="text-[10px] uppercase tracking-wider font-semibold text-accent-gold/80 bg-accent-gold/10 backdrop-blur-sm px-2 py-0.5 rounded-md">
+                <span className="text-[10px] uppercase tracking-wider font-bold text-white bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-md">
                   {review.runtime} min
                 </span>
               )}
@@ -95,13 +92,13 @@ export default function ReviewCard({ review, index = 0 }) {
           )}
 
           {/* Title */}
-          <h3 className="text-xl md:text-2xl font-bold font-[var(--font-outfit)] text-white leading-tight mb-1 drop-shadow-lg truncate">
+          <h3 className="text-xl md:text-2xl font-bold font-[var(--font-outfit)] text-white leading-tight mb-1 truncate">
             {review.title}
           </h3>
 
           {/* Release Year */}
           {review.release_date && (
-            <p className="text-xs text-white/50 mb-2">
+            <p className="text-xs font-semibold text-white/90 mb-2">
               {new Date(review.release_date).getFullYear()}
             </p>
           )}
@@ -127,7 +124,7 @@ export default function ReviewCard({ review, index = 0 }) {
 export function ReviewCardSkeleton() {
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-border-subtle"
+      className="relative overflow-hidden rounded-lg border border-border-subtle"
       style={{ aspectRatio: '16/10' }}
     >
       <div className="skeleton absolute inset-0" />

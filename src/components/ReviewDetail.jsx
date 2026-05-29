@@ -79,9 +79,11 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Back Button - Fixed float to avoid being blocked by content */}
       <button
         onClick={() => navigate('/')}
-        className="fixed top-6 left-6 z-[100] px-5 py-2 bg-[#FFB6C1] hover:bg-[#FBA3B5] text-black font-bold font-[var(--font-jetbrains)] text-sm rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 border-none"
+        className="group fixed top-6 left-6 z-[100] px-5 py-2 bg-[#FFB6C1] hover:bg-[#D4FF00] rounded-full shadow-lg transition-all flex items-center gap-2 border-none"
       >
-        ← BACK
+        <span className="inline-block text-black font-bold font-[var(--font-jetbrains)] text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
+          ← BACK
+        </span>
       </button>
 
       {/* Hero */}
@@ -100,8 +102,16 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         )}
 
         {/* Hero Overlay - lightened to make the background cover image much more obvious */}
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-deep/80 via-bg-deep/15 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-bg-deep/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg-deep/90 via-bg-deep/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg-deep/10 to-transparent" />
+
+        {/* Score Badge floating top right */}
+        <div className="absolute top-6 right-6 z-50">
+          <div className="w-16 h-16 rounded-lg flex flex-col items-center justify-center backdrop-blur-md border border-white/20 shadow-lg bg-black/60">
+             <span className="text-2xl font-black font-[var(--font-outfit)] text-[#FE494A]">{total.toFixed(1)}</span>
+             <span className="text-[10px] font-bold text-white/70 uppercase">Score</span>
+          </div>
+        </div>
 
         {/* Hero Content */}
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex items-end gap-6">
@@ -175,19 +185,10 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="grid md:grid-cols-3 gap-6"
+          className="grid md:grid-cols-2 gap-6"
         >
-          {/* Total Score */}
-          <div className="glass p-6 flex flex-col items-center justify-center text-center border-4 border-black shadow-[8px_8px_0_rgba(255,255,255,0.1)]">
-            <p className="text-xl font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted mb-2">Total Score</p>
-            <span className="text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#1A1A1A]">
-              {total.toFixed(1)}
-            </span>
-            <p className="text-sm font-bold font-[var(--font-bebas)] text-text-dim mt-2">/ 10.0</p>
-          </div>
-
           {/* Entertainment */}
-          <div className="glass p-6 space-y-4">
+          <div className="glass p-6 space-y-4 rounded-lg border border-border-subtle">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-text-primary">🎭 Entertainment</h3>
               <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
@@ -199,7 +200,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           </div>
 
           {/* Cinematic */}
-          <div className="glass p-6 space-y-3">
+          <div className="glass p-6 space-y-3 rounded-lg border border-border-subtle">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-text-primary">🎬 Cinematic</h3>
               <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
@@ -220,7 +221,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="glass p-6"
+            className="glass p-6 rounded-lg border border-border-subtle"
           >
             <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
               Synopsis
@@ -254,7 +255,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65 }}
-            className="border-4 border-accent-blue bg-[#1A1A1A] p-6 my-8 shadow-[8px_8px_0_var(--color-accent-blue)]"
+            className="border border-accent-blue/30 rounded-lg bg-[#1A1A1A] p-6 my-8"
           >
             <h3 className="text-3xl font-black font-[var(--font-bebas)] uppercase text-accent-blue mb-4">
               🤖 AI Director's Cut
@@ -290,22 +291,20 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             transition={{ delay: 0.68 }}
             className="mt-12"
           >
-            <h3 className="text-4xl font-black font-[var(--font-bebas)] text-[#1A1A1A] uppercase tracking-wider mb-6 bg-accent-amber inline-block px-4 py-1 -rotate-1">
-              Top Cast
+            <h3 className="text-sm font-bold uppercase text-accent-blue/80 tracking-widest mb-4">
+              CAST
             </h3>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            <div className="flex flex-wrap gap-2">
               {review.cast_info.map((actor, idx) => (
-                <div key={actor.id} className="group cursor-pointer flex flex-col" onClick={() => window.open(`https://www.themoviedb.org/person/${actor.id}`, '_blank')}>
-                  <div className={`aspect-[2/3] overflow-hidden border-2 border-[#1A1A1A] bg-[#1A1A1A] transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[4px_4px_0_#FE494A] ${idx % 2 === 0 ? 'rotate-1' : '-rotate-1'} mb-3`}>
-                    {actor.profile_path ? (
-                      <img src={`${TMDB_IMG_BASE}w185${actor.profile_path}`} className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-300 opacity-90 group-hover:opacity-100" alt={actor.name} />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl bg-[#1A1A1A] text-white/20">👤</div>
-                    )}
-                  </div>
-                  <p className="text-xs font-black uppercase truncate text-[#1A1A1A] leading-tight mb-0.5">{actor.name}</p>
-                  <p className="text-[10px] text-accent-red uppercase truncate font-bold">{actor.character}</p>
-                </div>
+                <a
+                  key={idx}
+                  href={`https://www.themoviedb.org/person/${actor.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 bg-[#2C3440] hover:bg-[#455568] text-[#89A1BB] hover:text-white rounded-md text-[13px] transition-colors cursor-pointer border border-[#14181C]"
+                >
+                  {actor.name}
+                </a>
               ))}
             </div>
           </motion.div>
@@ -331,7 +330,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="glass p-6"
+            className="glass p-6 rounded-lg border border-border-subtle"
           >
             <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-4">
               Watch History
@@ -361,18 +360,22 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         >
           <button
             onClick={onEdit}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#FFB6C1] hover:bg-[#FBA3B5] text-black font-bold hover:scale-105 active:scale-95 transition-all text-sm border-none shadow-sm cursor-pointer"
+            className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] transition-all border-none shadow-sm cursor-pointer"
           >
-            ✏️ Edit
+            <span className="inline-block text-black font-bold text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
+              ✏️ Edit
+            </span>
           </button>
 
           <ShareCard review={review} />
 
           <button
             onClick={handleDelete}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20 font-bold hover:scale-105 active:scale-95 transition-all text-sm cursor-pointer ml-auto"
+            className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-all cursor-pointer ml-auto"
           >
-            🗑️ Delete
+            <span className="inline-block text-red-600 font-bold text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
+              🗑️ Delete
+            </span>
           </button>
         </motion.div>
 
