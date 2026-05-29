@@ -49,9 +49,9 @@ export default function ReviewCard({ review, index = 0 }) {
       <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
 
       {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6">
-        {/* Top: Score Badge */}
-        <div className="flex justify-end -mt-2 -mr-2 md:-mt-1 md:-mr-1">
+      <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6 pt-24">
+        {/* Top: Score Badge - Absolute Positioned to top right */}
+        <div className="absolute top-2 right-2 md:top-3 md:right-3">
           <div
             className="w-14 h-14 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0 scale-90 md:scale-100"
             style={{
