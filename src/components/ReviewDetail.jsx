@@ -99,9 +99,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           <div className="absolute inset-0 bg-gradient-to-br from-bg-card to-bg-deep" />
         )}
 
-        {/* Hero Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-bg-deep/60 to-transparent" />
+        {/* Hero Overlay - lightened to make the background cover image much more obvious */}
+        <div className="absolute inset-0 bg-gradient-to-t from-bg-deep/80 via-bg-deep/15 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg-deep/20 to-transparent" />
 
         {/* Hero Content */}
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex items-end gap-6">
@@ -138,12 +138,11 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               </motion.div>
             )}
 
-            {/* Title */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] text-white uppercase leading-none mb-4 drop-shadow-[4px_4px_0_rgba(254,73,74,1)]"
+              className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] text-white uppercase leading-none mb-4 drop-shadow-md"
             >
               {review.title}
             </motion.h1>

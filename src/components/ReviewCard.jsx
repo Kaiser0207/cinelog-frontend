@@ -30,7 +30,7 @@ export default function ReviewCard({ review, index = 0 }) {
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
       onClick={() => navigate(`/review/${review.id}`)}
-      className="relative cursor-pointer card-hover group overflow-hidden rounded-2xl border border-border-subtle"
+      className="relative cursor-pointer card-hover group overflow-hidden rounded-lg border border-border-subtle"
       style={{ aspectRatio: '16/10' }}
     >
       {/* Background Image */}
@@ -51,20 +51,18 @@ export default function ReviewCard({ review, index = 0 }) {
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6">
-        {/* Top: Score Badge */}
-        <div className="flex justify-end -mt-2 -mr-2 md:-mt-1 md:-mr-1">
+        {/* Top: Score Badge - Absolute positioned flush at the top-right */}
+        <div className="absolute top-0 right-0 z-20">
           <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0 scale-90 md:scale-100"
+            className="w-14 h-14 rounded-bl-lg rounded-tr-none flex items-center justify-center backdrop-blur-md border-l border-b border-white/10 shrink-0"
             style={{
-              background: `rgba(0,0,0,0.5)`,
-              boxShadow: `0 0 20px ${getScoreColor(total)}30`,
+              background: `rgba(0, 0, 0, 0.65)`,
             }}
           >
             <span
-              className="text-2xl font-black font-[var(--font-outfit)]"
+              className="text-2xl font-black font-[var(--font-outfit)] text-[#FE494A]"
               style={{
-                color: getScoreColor(total),
-                textShadow: `0 0 16px ${getScoreColor(total)}60`,
+                textShadow: `0 0 12px rgba(254, 73, 74, 0.4)`,
               }}
             >
               {total.toFixed(1)}
