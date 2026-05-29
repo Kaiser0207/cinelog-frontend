@@ -30,20 +30,7 @@ export default function ScoreSlider({
         </motion.span>
       </div>
 
-      <div className="relative">
-        {/* Track background */}
-        <div className="absolute inset-0 h-[6px] top-1/2 -translate-y-1/2 rounded-full bg-bg-card overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{
-              width: `${pct}%`,
-              ...gradientStyle,
-              maskImage: `linear-gradient(to right, black ${pct}%, transparent ${pct}%)`,
-              WebkitMaskImage: `linear-gradient(to right, black ${pct}%, transparent ${pct}%)`,
-            }}
-          />
-        </div>
-
+      <div className="relative pt-1 pb-1">
         <input
           type="range"
           min={0}
@@ -52,9 +39,12 @@ export default function ScoreSlider({
           value={value}
           onChange={(e) => onChange?.(parseFloat(e.target.value))}
           disabled={readOnly}
-          className={`relative z-10 bg-transparent ${readOnly ? 'opacity-70 cursor-default' : 'cursor-pointer'}`}
+          className={`relative z-10 w-full ${readOnly ? 'opacity-70 cursor-default' : 'cursor-pointer'}`}
           style={{
-            background: 'transparent',
+            background: `linear-gradient(to right, #e50914 0%, #ff6b35 30%, #f5c518 60%, #1db954 100%)`,
+            backgroundSize: `${pct}% 100%`,
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: 'var(--color-bg-card)'
           }}
         />
       </div>
