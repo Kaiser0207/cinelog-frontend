@@ -201,18 +201,16 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           </div>
 
           {/* Cinematic */}
-          <div className="glass p-6 space-y-3 rounded-lg border border-border-subtle">
+          <div className="glass p-6 space-y-4 rounded-lg border border-border-subtle">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-text-primary">🎬 Cinematic</h3>
               <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
                 {cinematic.toFixed(1)}
               </span>
             </div>
-            <RadarChart
-              acting={review.acting || 0}
-              cinematography={review.cinematography || 0}
-              soundtrack={review.soundtrack || 0}
-            />
+            <ScoreSlider label="Acting" value={review.acting || 0} readOnly />
+            <ScoreSlider label="Cinematography" value={review.cinematography || 0} readOnly />
+            <ScoreSlider label="Soundtrack" value={review.soundtrack || 0} readOnly />
           </div>
         </motion.div>
 
