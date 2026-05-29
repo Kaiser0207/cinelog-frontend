@@ -235,7 +235,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-accent-red uppercase tracking-wider mb-4 border-b-4 border-accent-red pb-2">
+          <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FFB6C1] uppercase tracking-wider mb-4 border-b-4 border-[#FFB6C1] pb-2">
             Review
           </h3>
           <div
