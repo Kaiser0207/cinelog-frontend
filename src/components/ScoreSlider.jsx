@@ -23,8 +23,7 @@ export default function ScoreSlider({
           key={value}
           initial={animated ? { scale: 1.4, opacity: 0 } : false}
           animate={{ scale: 1, opacity: 1 }}
-          className="text-lg font-bold tabular-nums"
-          style={{ color }}
+          className="text-lg font-bold tabular-nums text-text-primary"
         >
           {value.toFixed(1)}
         </motion.span>
@@ -41,10 +40,10 @@ export default function ScoreSlider({
           disabled={readOnly}
           className={`relative z-10 w-full ${readOnly ? 'opacity-70 cursor-default' : 'cursor-pointer'}`}
           style={{
-            background: `linear-gradient(to right, #e50914 0%, #ff6b35 30%, #f5c518 60%, #1db954 100%)`,
+            background: `var(--color-text-primary)`,
             backgroundSize: `${pct}% 100%`,
             backgroundRepeat: 'no-repeat',
-            backgroundColor: 'var(--color-bg-card)'
+            backgroundColor: 'var(--color-border-subtle)'
           }}
         />
       </div>
