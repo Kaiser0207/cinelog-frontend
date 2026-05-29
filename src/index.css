@@ -3,20 +3,20 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-deep: #FF4F4F; /* Vibrant Coral Red */
-  --color-bg-surface: #FF6B6B;
-  --color-bg-glass: rgba(255, 79, 79, 0.9);
-  --color-bg-card: #FF3838;
-  --color-bg-elevated: #FF7A7A;
-  --color-accent-red: #FF1493; /* Bright Pink / Soft Pink */
+  --color-bg-deep: #E3DAC9;
+  --color-bg-surface: #F0EAD6;
+  --color-bg-glass: rgba(240, 234, 214, 0.9);
+  --color-bg-card: #E8E2D2;
+  --color-bg-elevated: #F5EFE1;
+  --color-accent-red: #FF1493; /* Bright Pink */
   --color-accent-gold: #CCFF00; /* Neon Lime Green */
   --color-accent-blue: #00FFCC; /* Cyan / Lime */
   --color-accent-amber: #CCFF00; /* Neon Lime Green */
-  --color-text-primary: #0A0A0A; /* Black for high contrast on red */
-  --color-text-muted: #501010;
-  --color-text-dim: #702020;
-  --color-border-subtle: rgba(10, 10, 10, 0.2);
-  --color-border-active: #CCFF00;
+  --color-text-primary: #1A1A1A;
+  --color-text-muted: #5A5A5A;
+  --color-text-dim: #8A8A8A;
+  --color-border-subtle: rgba(26, 26, 26, 0.15);
+  --color-border-active: #FE494A;
 
   --font-inter: 'Inter', system-ui, sans-serif;
   --font-outfit: 'Outfit', system-ui, sans-serif;

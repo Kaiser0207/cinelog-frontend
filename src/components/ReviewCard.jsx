@@ -23,19 +23,17 @@ export default function ReviewCard({ review, index = 0 }) {
     ? review.review_text.replace(/[#*_~`>]/g, '').slice(0, 120) + (review.review_text.length > 120 ? '...' : '')
     : '';
 
-  // Calculate random slight rotation for broken grid feel
-  const rotation = index % 2 === 0 ? 1 : -1;
-
   return (
     <motion.article
-      initial={{ opacity: 0, y: 50, rotate: 0 }}
-      whileInView={{ opacity: 1, y: 0, rotate: rotation }}
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      whileHover={{ scale: 1.02, rotate: 0, y: -5 }}
+      whileHover={{ scale: 1.02, y: -5 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       onClick={() => navigate(`/review/${review.id}`)}
-      className="relative group overflow-hidden border-2 border-[#1A1A1A] bg-[#1A1A1A] transition-all"
-      style={{ aspectRatio: '4/5', boxShadow: '8px 8px 0px #1a1a1a' }}
+      className="relative cursor-pointer card-hover group overflow-hidden border-2 border-border-subtle bg-bg-card transition-all hover:border-accent-red"
+      style={{ aspectRatio: '16/10', boxShadow: '8px 8px 0px rgba(0,0,0,0.1)' }}
+      data-cursor="READ"
     >
       {/* Background Image */}
       {backdropUrl ? (

@@ -88,9 +88,9 @@ export default function HomePage() {
         onClick={() => setShowEditor(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-6 right-6 z-40 w-16 h-16 bg-accent-amber text-[#1A1A1A] text-4xl font-bold flex items-center justify-center border-4 border-[#1A1A1A]"
+        className="fixed bottom-6 right-6 z-40 w-16 h-16 rounded-full bg-accent-amber text-[#1A1A1A] text-4xl font-bold flex items-center justify-center border-4 border-[#1A1A1A]"
         style={{
-          boxShadow: '8px 8px 0px #1a1a1a',
+          boxShadow: '4px 4px 0px #1a1a1a',
         }}
       >
         +

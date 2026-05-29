@@ -91,18 +91,12 @@ export default function ReviewFeed({ sort = 'newest', genre = '' }) {
 
   return (
     <>
-      <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 pb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {reviews.map((review, i) => (
-          <div key={review.id} className="break-inside-avoid" data-cursor="READ">
-            <ReviewCard review={review} index={i % LIMIT} />
-          </div>
+          <ReviewCard key={review.id} review={review} index={i % LIMIT} />
         ))}
         {loading &&
-          [...Array(3)].map((_, i) => (
-            <div key={`skel-${i}`} className="break-inside-avoid">
-              <ReviewCardSkeleton />
-            </div>
-          ))}
+          [...Array(3)].map((_, i) => <ReviewCardSkeleton key={`skel-${i}`} />)}
       </div>
 
       {/* Sentinel for infinite scroll */}
