@@ -155,7 +155,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] text-white uppercase leading-none mb-4 drop-shadow-md"
+              className="text-4xl md:text-8xl font-black font-[var(--font-bebas)] text-white uppercase leading-none mb-4 drop-shadow-md"
             >
               {review.title}
             </motion.h1>
@@ -193,7 +193,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           {/* Total Score */}
           <div className="glass p-6 flex flex-col items-center justify-center text-center rounded-lg border border-border-subtle relative">
             <p className="absolute top-6 left-6 text-sm font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted">Total Score</p>
-            <span className="text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#FE494A] mt-6">
+            <span className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#FE494A] mt-6">
               {total.toFixed(1)}
             </span>
             <p className="text-sm font-bold font-[var(--font-bebas)] text-text-dim mt-2">/ 10.0</p>
@@ -340,12 +340,15 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         <div className="max-w-5xl mx-auto flex flex-col items-center justify-center space-y-12 text-center">
           {/* Decorative Section Header */}
           <div className="space-y-4">
-            <h2 
-              className="text-3xl md:text-6xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none"
-              style={{ whiteSpace: 'pre-line' }}
-            >
-              {t('footerTitle')}
-            </h2>
+            <div className="space-y-1">
+              <h2 className="text-5xl md:text-6xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none">
+                <span className="md:hidden">CINE<br/>ROOMS</span>
+                <span className="hidden md:inline">CINEROOMS</span>
+              </h2>
+              <p className="text-base md:text-2xl font-bold font-[var(--font-bebas)] text-[#CCFF00]/80 tracking-wider">
+                {t('footerSubtitle')}
+              </p>
+            </div>
             <div className="w-16 h-1 bg-[#CCFF00] mx-auto rounded-full" />
             <p 
               className="max-w-xl mx-auto text-xs md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)] text-white px-2 md:px-0"

@@ -5,8 +5,9 @@ const LanguageContext = createContext();
 export const translations = {
   en: {
     // Brand Statement
-    footerTitle: "CINEROOM is my creative movie journal 🎬",
-    footerDesc: "CINEROOM is a multidisciplinary journal of cinematic ratings, deep-dive reviews, and raw visual thoughts curated by me. I explore, play, and make movie logs fizzzzz with life and personality. I strongly believe that reviewing movies is about more than just giving stars— it's about capturing the soul of storytelling in my signature aesthetic! 🎬✨🍿",
+    footerTitle: "CINEROOMS is my creative movie journal 🎬",
+    footerSubtitle: "is my creative movie journal 🎬",
+    footerDesc: "CINEROOMS is a multidisciplinary journal of cinematic ratings, deep-dive reviews, and raw visual thoughts curated by me. I explore, play, and make movie logs fizzzzz with life and personality. I strongly believe that reviewing movies is about more than just giving stars— it's about capturing the soul of storytelling in my signature aesthetic! 🎬✨🍿",
     followIg: "Follow on Instagram",
     curatedBy: "Curated by kaiser_liao. Crafted with passion for movie enthusiasts.",
     disclaimer: "Disclaimer: All reviews, scores, and media are for educational and critique purposes.",
@@ -53,8 +54,9 @@ export const translations = {
   },
   zh: {
     // Brand Statement
-    footerTitle: "CINEROOM\n是我的創意影評日誌 🎬",
-    footerDesc: "身為一個視覺動物，CINEROOM 是一個由我一手策劃且製作的影評日誌，融合了電影評分、深度分析與記錄我個人想法。我在此探索、玩樂，並為每一篇觀影紀錄注入滿滿的生命力與獨特個性。我深信，撰寫影評不僅僅是打星評分 —— 更重要的是，我希望能完美捕捉電影故事背後的靈魂與本質，傳播並分享觀影的樂趣🎬✨🍿",
+    footerTitle: "CINEROOMS\n是我的創意影評日誌 🎬",
+    footerSubtitle: "是我的創意影評日誌 🎬",
+    footerDesc: "身為一個視覺動物，CINEROOMS 是一個由我一手策劃且製作的影評日誌，融合了電影評分、深度分析與記錄我個人想法。我在此探索、玩樂，並為每一篇觀影紀錄注入滿滿的生命力與獨特個性。我深信，撰寫影評不僅僅是打星評分 —— 更重要的是，我希望能完美捕捉電影故事背後的靈魂與本質，傳播並分享觀影的樂趣🎬✨🍿",
     followIg: "追蹤我的 Instagram",
     curatedBy: "由 kaiser_liao 策劃。為熱愛電影的你傾心打造。",
     disclaimer: "免責聲明：本站所有影評、評分與相關媒體資源僅限於教育與學術評論用途。",

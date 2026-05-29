@@ -35,7 +35,7 @@ export default function ShareCard({ review, className }) {
     canvas.toBlob(async (blob) => {
       if (!blob) return;
 
-      const file = new File([blob], `cineroom-${review.title || 'review'}.png`, {
+      const file = new File([blob], `cinerooms-${review.title || 'review'}.png`, {
         type: 'image/png',
       });
 
@@ -43,7 +43,7 @@ export default function ShareCard({ review, className }) {
         try {
           await navigator.share({
             files: [file],
-            title: `CineRoom: ${review.title}`,
+            title: `CineRooms: ${review.title}`,
             text: `Check out my review of ${review.title}!`,
           });
         } catch {
@@ -108,7 +108,7 @@ export default function ShareCard({ review, className }) {
             }}
           >
             <div style={{ fontSize: '32px', fontWeight: 900, color: '#CCFF00', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '8px' }}>
-              CINEROOM is my creative movie journal 🎬
+              CINEROOMS is my creative movie journal 🎬
             </div>
             <div 
               style={{ 
@@ -121,7 +121,7 @@ export default function ShareCard({ review, className }) {
                 textJustify: 'inter-word'
               }}
             >
-              CINEROOM is a multidisciplinary journal of cinematic ratings, deep-dive reviews, and raw visual thoughts curated by me. I explore, play, and make movie logs fizzzzz with life and personality. I strongly believe that reviewing movies is about more than just giving stars— it's about capturing the soul of storytelling in my signature aesthetic! 🎬✨🍿
+              CINEROOMS is a multidisciplinary journal of cinematic ratings, deep-dive reviews, and raw visual thoughts curated by me. I explore, play, and make movie logs fizzzzz with life and personality. I strongly believe that reviewing movies is about more than just giving stars— it's about capturing the soul of storytelling in my signature aesthetic! 🎬✨🍿
             </div>
           </div>
 

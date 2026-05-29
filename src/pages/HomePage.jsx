@@ -37,9 +37,10 @@ export default function HomePage() {
       <div className="relative pt-24 pb-12 px-5 flex flex-col items-center justify-center min-h-[40vh]">
         <motion.h1
           style={{ y: titleY, skewX: titleSkew, opacity: titleOpacity }}
-          className="text-8xl md:text-[12rem] lg:text-[15rem] font-black font-[var(--font-bebas)] tracking-tighter text-[#1A1A1A] uppercase leading-none z-0"
+          className="text-6xl md:text-[12rem] lg:text-[15rem] font-black font-[var(--font-bebas)] tracking-tighter text-[#1A1A1A] uppercase leading-none z-0"
         >
-          CINEROOM
+          <span className="md:hidden">CINE<br/>ROOMS</span>
+          <span className="hidden md:inline">CINEROOMS</span>
         </motion.h1>
         
         <div className="absolute top-6 right-6 z-[60] flex items-center gap-3" data-cursor="FILTER">
@@ -110,12 +111,15 @@ export default function HomePage() {
       {/* Vibrant Blue Neo-brutalist Footer */}
       <div className="w-full bg-[#0000FF] text-white py-16 md:py-24 px-5 relative z-10">
         <div className="max-w-5xl mx-auto flex flex-col items-center justify-center text-center space-y-6 md:space-y-8">
-          <h2 
-            className="text-3xl md:text-6xl lg:text-7xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {t('footerTitle')}
-          </h2>
+          <div className="space-y-1">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none">
+              <span className="md:hidden">CINE<br/>ROOMS</span>
+              <span className="hidden md:inline">CINEROOMS</span>
+            </h2>
+            <p className="text-base md:text-2xl font-bold font-[var(--font-bebas)] text-[#CCFF00]/80 tracking-wider">
+              {t('footerSubtitle')}
+            </p>
+          </div>
           <div className="w-16 h-1 bg-[#CCFF00] mx-auto rounded-full" />
           <p 
             className="max-w-2xl mx-auto text-xs md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)] text-white px-2 md:px-0"
@@ -137,7 +141,7 @@ export default function HomePage() {
           </a>
 
           <div className="text-[10px] md:text-xs font-bold font-[var(--font-jetbrains)] text-white/50 border-t border-white/10 pt-8 w-full space-y-1">
-            <p>© {new Date().getFullYear()} CINEROOM. {t('curatedBy')}</p>
+            <p>© {new Date().getFullYear()} CINEROOMS. {t('curatedBy')}</p>
             <p className="text-white/40">{t('disclaimer')}</p>
           </div>
         </div>
