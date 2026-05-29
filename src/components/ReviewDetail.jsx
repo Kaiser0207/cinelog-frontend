@@ -154,14 +154,14 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="flex flex-wrap items-center gap-3 text-sm text-white/50"
+              className="flex flex-wrap items-center gap-3 text-base font-bold text-white/90 drop-shadow-md"
             >
               {review.release_date && (
                 <span>{new Date(review.release_date).getFullYear()}</span>
               )}
               {review.runtime && <span>· {review.runtime} min</span>}
               {isEdited && (
-                <span className="bg-accent-gold/20 text-accent-gold text-xs px-2 py-0.5 rounded-md">
+                <span className="bg-accent-gold/20 text-accent-gold text-xs px-2 py-0.5 rounded-md drop-shadow-none">
                   Edited
                 </span>
               )}
@@ -179,6 +179,15 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           transition={{ delay: 0.4 }}
           className="grid md:grid-cols-3 gap-6"
         >
+          {/* Total Score */}
+          <div className="glass p-6 flex flex-col items-center justify-center text-center rounded-lg border border-border-subtle relative">
+            <p className="absolute top-6 left-6 text-sm font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted">Total Score</p>
+            <span className="text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#FE494A] mt-6">
+              {total.toFixed(1)}
+            </span>
+            <p className="text-sm font-bold font-[var(--font-bebas)] text-text-dim mt-2">/ 10.0</p>
+          </div>
+
           {/* Entertainment */}
           <div className="glass p-6 space-y-4 rounded-lg border border-border-subtle">
             <div className="flex items-center justify-between">
@@ -204,15 +213,6 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               cinematography={review.cinematography || 0}
               soundtrack={review.soundtrack || 0}
             />
-          </div>
-
-          {/* Total Score */}
-          <div className="glass p-6 flex flex-col items-center justify-center text-center rounded-lg border border-border-subtle relative">
-            <p className="absolute top-6 left-6 text-sm font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted">Total Score</p>
-            <span className="text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#FE494A] mt-6">
-              {total.toFixed(1)}
-            </span>
-            <p className="text-sm font-bold font-[var(--font-bebas)] text-text-dim mt-2">/ 10.0</p>
           </div>
         </motion.div>
 
