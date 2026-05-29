@@ -4,6 +4,7 @@ import { FONTS, FONT_MAP } from '../utils/constants';
 
 export default function FontSelector({ value, onChange }) {
   const [open, setOpen] = useState(false);
+  const [hoveredFont, setHoveredFont] = useState(null);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -44,26 +45,37 @@ export default function FontSelector({ value, onChange }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 top-full mt-1 w-full glass overflow-hidden"
+            className="absolute z-50 top-full mt-1 w-full glass overflow-hidden py-1"
           >
-            {FONTS.map((font) => (
-              <button
-                key={font.name}
-                type="button"
-                onClick={() => { onChange(font.name); setOpen(false); }}
-                className={`w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors ${
-                  value === font.name ? 'bg-accent-red/10 border-l-2 border-accent-red' : ''
-                }`}
-              >
-                <span
-                  className="text-text-primary"
-                  style={{ fontFamily: FONT_MAP[font.name] }}
+            {FONTS.map((font) => {
+              const isHighlighted = hoveredFont === font.name || (hoveredFont === null && value === font.name);
+              return (
+                <button
+                  key={font.name}
+                  type="button"
+                  onClick={() => { onChange(font.name); setOpen(false); }}
+                  onMouseEnter={() => setHoveredFont(font.name)}
+                  onMouseLeave={() => setHoveredFont(null)}
+                  className="relative w-full flex items-center justify-between px-4 py-3"
                 >
-                  {font.label}
-                </span>
-                <span className="text-xs text-text-muted">{font.category}</span>
-              </button>
-            ))}
+                  {isHighlighted && (
+                    <motion.div
+                      layoutId="font-selector-highlight"
+                      className="absolute inset-0 bg-[#FFB6C1]/30 border-l-4 border-[#FFB6C1]"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <span
+                    className="relative z-10 text-text-primary"
+                    style={{ fontFamily: FONT_MAP[font.name] }}
+                  >
+                    {font.label}
+                  </span>
+                  <span className="relative z-10 text-xs text-text-muted">{font.category}</span>
+                </button>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
