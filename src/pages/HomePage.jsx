@@ -95,7 +95,7 @@ export default function HomePage() {
       </main>
 
       {/* Vibrant Blue Neo-brutalist Footer */}
-      <div className="w-full bg-[#0000FF] text-white py-24 px-5 border-t-8 border-black relative z-10">
+      <div className="w-full bg-[#0000FF] text-white py-24 px-5 relative z-10">
         <div className="max-w-5xl mx-auto flex flex-col items-center justify-center text-center space-y-8">
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none">
             CINEROOM is my (kaiser_liao) creative movie journal 🎬

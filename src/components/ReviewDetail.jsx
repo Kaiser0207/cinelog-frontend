@@ -325,7 +325,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       </div>
 
       {/* Vibrant Blue Neo-brutalist Footer */}
-      <div className="w-full bg-[#0000FF] text-white py-20 px-5 border-t-8 border-black">
+      <div className="w-full bg-[#0000FF] text-white py-20 px-5">
         <div className="max-w-5xl mx-auto flex flex-col items-center justify-center space-y-12 text-center">
           {/* Decorative Section Header */}
           <div className="space-y-4">
