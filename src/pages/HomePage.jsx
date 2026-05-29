@@ -155,7 +155,7 @@ export default function HomePage() {
 
       {/* Vibrant Blue Neo-brutalist Footer */}
       <div className="w-full bg-[#0000FF] text-white py-16 md:py-24 px-5 relative z-10">
-        <div className="max-w-5xl mx-auto flex flex-col items-center justify-center text-center space-y-6 md:space-y-8">
+        <div className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center text-left md:text-center space-y-6 md:space-y-8">
           <div className="space-y-1">
             <h2 className="text-5xl md:text-6xl lg:text-7xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none">
               <span className="md:hidden">CINE<br/>ROOMS</span>

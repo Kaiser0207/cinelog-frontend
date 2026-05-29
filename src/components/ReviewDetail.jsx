@@ -337,7 +337,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
 
       {/* Vibrant Blue Neo-brutalist Footer */}
       <div className="w-full bg-[#0000FF] text-white py-16 md:py-20 px-5">
-        <div className="max-w-5xl mx-auto flex flex-col items-center justify-center space-y-12 text-center">
+        <div className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center space-y-12 text-left md:text-center">
           {/* Decorative Section Header */}
           <div className="space-y-4">
             <div className="space-y-1">
@@ -349,7 +349,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 {t('footerSubtitle')}
               </p>
             </div>
-            <div className="w-16 h-1 bg-[#CCFF00] mx-auto rounded-full" />
+            <div className="w-16 h-1 bg-[#CCFF00] md:mx-auto rounded-full" />
             <p 
               className="max-w-xl mx-auto text-xs md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)] text-white px-2 md:px-0"
               style={{ textAlign: 'justify', textJustify: 'inter-word' }}
