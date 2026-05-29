@@ -108,6 +108,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       cinematography: scores.cinematography ?? prev.cinematography,
       soundtrack: scores.soundtrack ?? prev.soundtrack,
       ai_recommendation: scores.recommendation ?? prev.ai_recommendation,
+      ai_related_movies: scores.related_movies ?? prev.ai_related_movies,
     }));
     setTimeout(() => setAnimated(false), 800);
   };
