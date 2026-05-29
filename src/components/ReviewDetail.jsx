@@ -348,8 +348,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 {watchDates.map((date, i) => (
                   <motion.div
                     key={i}
-                    whileHover={{ scale: 1.05, rotate: i % 2 === 0 ? 1 : -1 }}
-                    className="flex items-center gap-3 bg-white text-black px-6 py-3 rounded-2xl border-4 border-black shadow-[4px_4px_0px_#000]"
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-3 bg-white/10 text-white px-6 py-2.5 rounded-2xl border border-white/20 shadow-sm backdrop-blur-sm"
                   >
                     <span className="text-xs font-black uppercase text-[#FF1493] font-[var(--font-jetbrains)] bg-[#FF1493]/15 px-2 py-0.5 rounded">
                       {['1st', '2nd', '3rd'][i] || `${i + 1}th`}
@@ -365,9 +365,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           <div className="flex flex-wrap items-center justify-center gap-6 pt-4 w-full">
             <button
               onClick={onEdit}
-              className="group flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] text-black font-extrabold border-4 border-black shadow-[4px_4px_0px_#000] hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_#000] transition-all cursor-pointer"
+              className="group flex items-center gap-2 px-8 py-3 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"
             >
-              <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-115">
+              <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
                 ✏️ Edit Review
               </span>
             </button>
@@ -376,9 +376,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
 
             <button
               onClick={handleDelete}
-              className="group flex items-center gap-2 px-8 py-3.5 rounded-full bg-red-600 hover:bg-red-500 text-white font-extrabold border-4 border-black shadow-[4px_4px_0px_#000] hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_#000] transition-all cursor-pointer"
+              className="group flex items-center gap-2 px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"
             >
-              <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-115">
+              <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
                 🗑️ Delete Review
               </span>
             </button>

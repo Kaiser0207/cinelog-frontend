@@ -98,19 +98,21 @@ export default function HomePage() {
       <div className="w-full bg-[#0000FF] text-white py-24 px-5 border-t-8 border-black relative z-10">
         <div className="max-w-5xl mx-auto flex flex-col items-center justify-center text-center space-y-8">
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none">
-            CINEROOM is your creative movie journal 🎬
+            CINEROOM is my (kaiser_liao) creative movie journal 🎬
           </h2>
           <div className="w-16 h-1 bg-[#CCFF00] mx-auto rounded-full" />
-          <p className="max-w-2xl mx-auto text-sm md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)] text-white">
-            A multidisciplinary journal of cinematic ratings, deep-dive reviews, and raw visual thoughts.
-            We explore, play, and make movie logs fizzzzz with life and personality. We strongly believe that reviewing movies is about more than just giving stars—it's about capturing the soul of storytelling! 🎬✨🍿
+          <p 
+            className="max-w-2xl mx-auto text-sm md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)] text-white"
+            style={{ textAlign: 'justify', textJustify: 'inter-word' }}
+          >
+            CINEROOM is a multidisciplinary journal of cinematic ratings, deep-dive reviews, and raw visual thoughts curated by kaiser_liao. I explore, play, and make movie logs fizzzzz with life and personality. As kaiser_liao, I strongly believe that reviewing movies is about more than just giving stars—it's about capturing the soul of storytelling in kaiser_liao's signature aesthetic! 🎬✨🍿
           </p>
 
           <a
-            href="https://instagram.com"
+            href="https://www.instagram.com/kaiser_liao/"
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] text-black font-extrabold border-4 border-black shadow-[4px_4px_0px_#000] hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_#000] transition-all cursor-pointer mb-6"
+            className="group inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer mb-6 border-none shadow-sm"
           >
             <span className="text-xl">📸</span>
             <span className="font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
@@ -119,7 +121,7 @@ export default function HomePage() {
           </a>
 
           <div className="text-xs font-bold font-[var(--font-jetbrains)] text-white/50 border-t border-white/10 pt-8 w-full">
-            <p>© {new Date().getFullYear()} CINEROOM. Crafted with passion for movie enthusiasts.</p>
+            <p>© {new Date().getFullYear()} CINEROOM. Curated by kaiser_liao. Crafted with passion for movie enthusiasts.</p>
             <p className="mt-2 text-white/40">Disclaimer: All reviews, scores, and media are for educational and critique purposes.</p>
           </div>
         </div>
