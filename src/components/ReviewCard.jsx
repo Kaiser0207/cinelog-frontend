@@ -49,11 +49,11 @@ export default function ReviewCard({ review, index = 0 }) {
       <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
 
       {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6 pt-20">
-        {/* Score Badge */}
-        <div className="absolute top-4 right-4">
+      <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6">
+        {/* Top: Score Badge */}
+        <div className="flex justify-end">
           <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10"
+            className="w-14 h-14 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0"
             style={{
               background: `rgba(0,0,0,0.5)`,
               boxShadow: `0 0 20px ${getScoreColor(total)}30`,
@@ -71,51 +71,54 @@ export default function ReviewCard({ review, index = 0 }) {
           </div>
         </div>
 
-        {/* Genre Pills */}
-        {genres.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {genres.slice(0, 3).map((genre, i) => {
-              const genreName = typeof genre === 'string' ? genre : genre.name;
-              return (
-                <span
-                  key={i}
-                  className="text-[10px] uppercase tracking-wider font-semibold text-white/70 bg-white/10 backdrop-blur-sm px-2 py-0.5 rounded-md"
-                >
-                  {genreName}
+        {/* Bottom: Text Content */}
+        <div className="flex flex-col justify-end mt-auto overflow-hidden">
+          {/* Genre Pills */}
+          {genres.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {genres.slice(0, 3).map((genre, i) => {
+                const genreName = typeof genre === 'string' ? genre : genre.name;
+                return (
+                  <span
+                    key={i}
+                    className="text-[10px] uppercase tracking-wider font-semibold text-white/70 bg-white/10 backdrop-blur-sm px-2 py-0.5 rounded-md"
+                  >
+                    {genreName}
+                  </span>
+                );
+              })}
+              {review.runtime && (
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-accent-gold/80 bg-accent-gold/10 backdrop-blur-sm px-2 py-0.5 rounded-md">
+                  {review.runtime} min
                 </span>
-              );
-            })}
-            {review.runtime && (
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-accent-gold/80 bg-accent-gold/10 backdrop-blur-sm px-2 py-0.5 rounded-md">
-                {review.runtime} min
-              </span>
-            )}
+              )}
+            </div>
+          )}
+
+          {/* Title */}
+          <h3 className="text-xl md:text-2xl font-bold font-[var(--font-outfit)] text-white leading-tight mb-1 drop-shadow-lg truncate">
+            {review.title}
+          </h3>
+
+          {/* Release Year */}
+          {review.release_date && (
+            <p className="text-xs text-white/50 mb-2">
+              {new Date(review.release_date).getFullYear()}
+            </p>
+          )}
+
+          {/* Teaser */}
+          {teaser && (
+            <p className="text-sm text-white/60 line-clamp-2 mb-3 leading-relaxed">
+              {teaser}
+            </p>
+          )}
+
+          {/* CTA */}
+          <div className="flex items-center gap-2 text-accent-red text-xs font-semibold uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
+            <span>閱讀影評</span>
+            <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
           </div>
-        )}
-
-        {/* Title */}
-        <h3 className="text-xl md:text-2xl font-bold font-[var(--font-outfit)] text-white leading-tight mb-1 drop-shadow-lg">
-          {review.title}
-        </h3>
-
-        {/* Release Year */}
-        {review.release_date && (
-          <p className="text-xs text-white/50 mb-2">
-            {new Date(review.release_date).getFullYear()}
-          </p>
-        )}
-
-        {/* Teaser */}
-        {teaser && (
-          <p className="text-sm text-white/60 line-clamp-2 mb-3 leading-relaxed">
-            {teaser}
-          </p>
-        )}
-
-        {/* CTA */}
-        <div className="flex items-center gap-2 text-accent-red text-xs font-semibold uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
-          <span>閱讀影評</span>
-          <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
         </div>
       </div>
     </motion.article>
