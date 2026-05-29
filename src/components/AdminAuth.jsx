@@ -80,6 +80,7 @@ function AdminAuthModal({ onVerified, onClose }) {
           'Content-Type': 'application/json',
           'X-Admin-Password': pw,
         },
+        body: JSON.stringify({ password: pw })
       });
 
       if (res.ok) {
