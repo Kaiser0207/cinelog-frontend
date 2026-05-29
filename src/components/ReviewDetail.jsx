@@ -322,70 +322,77 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             <SpotifyEmbed trackId={review.spotify_track_id} />
           </motion.div>
         )}
+      </div>
 
-        {/* Watch History */}
-        {watchDates.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="glass p-6 rounded-lg border border-border-subtle"
-          >
-            <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-4">
-              Watch History
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              {watchDates.map((date, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 bg-bg-card px-3 py-2 rounded-lg border border-border-subtle"
-                >
-                  <span className="text-xs text-text-muted">
-                    {['1st', '2nd', '3rd'][i] || `${i + 1}th`}
-                  </span>
-                  <span className="text-sm text-text-primary">{formatDate(date)}</span>
-                </div>
-              ))}
+      {/* Vibrant Blue Neo-brutalist Footer */}
+      <div className="w-full bg-[#0000FF] text-white py-20 px-5 border-t-8 border-black">
+        <div className="max-w-5xl mx-auto flex flex-col items-center justify-center space-y-12 text-center">
+          {/* Decorative Section Header */}
+          <div className="space-y-4">
+            <h2 className="text-4xl md:text-6xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider">
+              CINEROOM JOURNAL 🍿
+            </h2>
+            <div className="w-16 h-1 bg-[#CCFF00] mx-auto rounded-full" />
+            <p className="max-w-xl mx-auto text-sm md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)]">
+              A private catalog of your cinematic journeys. Keep tracking your watches, scores, and reviews.
+            </p>
+          </div>
+
+          {/* Watch History */}
+          {watchDates.length > 0 && (
+            <div className="w-full max-w-2xl">
+              <h3 className="text-xl font-black font-[var(--font-bebas)] text-white tracking-widest mb-6">
+                🕒 WATCH HISTORY
+              </h3>
+              <div className="flex flex-wrap justify-center gap-4">
+                {watchDates.map((date, i) => (
+                  <motion.div
+                    key={i}
+                    whileHover={{ scale: 1.05, rotate: i % 2 === 0 ? 1 : -1 }}
+                    className="flex items-center gap-3 bg-white text-black px-6 py-3 rounded-2xl border-4 border-black shadow-[4px_4px_0px_#000]"
+                  >
+                    <span className="text-xs font-black uppercase text-[#FF1493] font-[var(--font-jetbrains)] bg-[#FF1493]/15 px-2 py-0.5 rounded">
+                      {['1st', '2nd', '3rd'][i] || `${i + 1}th`}
+                    </span>
+                    <span className="text-base font-bold font-[var(--font-jetbrains)]">{formatDate(date)}</span>
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </motion.div>
-        )}
-
-        {/* Action Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9 }}
-          className="flex flex-wrap items-center gap-4 pt-6 border-t border-border-subtle"
-        >
-          <button
-            onClick={onEdit}
-            className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] transition-all border-none shadow-sm cursor-pointer"
-          >
-            <span className="inline-block text-black font-bold text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
-              ✏️ Edit
-            </span>
-          </button>
-
-          <ShareCard review={review} />
-
-          <button
-            onClick={handleDelete}
-            className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-all cursor-pointer ml-auto"
-          >
-            <span className="inline-block text-red-600 font-bold text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
-              🗑️ Delete
-            </span>
-          </button>
-        </motion.div>
-
-        {/* Timestamps */}
-        <div className="text-xs text-text-dim flex flex-wrap gap-4 pb-8">
-          {review.created_at && (
-            <span>Created: {formatDate(review.created_at)}</span>
           )}
-          {isEdited && (
-            <span>Updated: {formatDate(review.updated_at)}</span>
-          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-6 pt-4 w-full">
+            <button
+              onClick={onEdit}
+              className="group flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] text-black font-extrabold border-4 border-black shadow-[4px_4px_0px_#000] hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_#000] transition-all cursor-pointer"
+            >
+              <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-115">
+                ✏️ Edit Review
+              </span>
+            </button>
+
+            <ShareCard review={review} />
+
+            <button
+              onClick={handleDelete}
+              className="group flex items-center gap-2 px-8 py-3.5 rounded-full bg-red-600 hover:bg-red-500 text-white font-extrabold border-4 border-black shadow-[4px_4px_0px_#000] hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_#000] transition-all cursor-pointer"
+            >
+              <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-115">
+                🗑️ Delete Review
+              </span>
+            </button>
+          </div>
+
+          {/* Timestamps */}
+          <div className="text-xs font-bold font-[var(--font-jetbrains)] text-white/60 flex flex-wrap justify-center gap-6 pt-8 border-t border-white/10 w-full">
+            {review.created_at && (
+              <span>Created: {formatDate(review.created_at)}</span>
+            )}
+            {isEdited && (
+              <span>Updated: {formatDate(review.updated_at)}</span>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

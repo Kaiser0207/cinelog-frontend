@@ -200,9 +200,9 @@ export default function ShareCard({ review }) {
 
       <button
         onClick={handleShare}
-        className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#CCFF00] hover:bg-[#D4FF00] transition-all border-none shadow-sm cursor-pointer"
+        className="group flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#CCFF00] hover:bg-[#D4FF00] text-black font-extrabold border-4 border-black shadow-[4px_4px_0px_#000] hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_#000] transition-all cursor-pointer"
       >
-        <span className="inline-block text-black font-bold text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
+        <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-115">
           📱 Share to Story
         </span>
       </button>
