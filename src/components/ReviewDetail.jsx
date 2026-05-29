@@ -340,7 +340,10 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         <div className="max-w-5xl mx-auto flex flex-col items-center justify-center space-y-12 text-center">
           {/* Decorative Section Header */}
           <div className="space-y-4">
-            <h2 className="text-3xl md:text-6xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none">
+            <h2 
+              className="text-3xl md:text-6xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none"
+              style={{ whiteSpace: 'pre-line' }}
+            >
               {t('footerTitle')}
             </h2>
             <div className="w-16 h-1 bg-[#CCFF00] mx-auto rounded-full" />

@@ -110,7 +110,10 @@ export default function HomePage() {
       {/* Vibrant Blue Neo-brutalist Footer */}
       <div className="w-full bg-[#0000FF] text-white py-16 md:py-24 px-5 relative z-10">
         <div className="max-w-5xl mx-auto flex flex-col items-center justify-center text-center space-y-6 md:space-y-8">
-          <h2 className="text-3xl md:text-6xl lg:text-7xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none">
+          <h2 
+            className="text-3xl md:text-6xl lg:text-7xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none"
+            style={{ whiteSpace: 'pre-line' }}
+          >
             {t('footerTitle')}
           </h2>
           <div className="w-16 h-1 bg-[#CCFF00] mx-auto rounded-full" />
