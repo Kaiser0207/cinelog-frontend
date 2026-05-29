@@ -161,7 +161,7 @@ function AdminAuthModal({ onVerified, onClose }) {
           <button
             type="submit"
             disabled={verifying || !pw.trim()}
-            className="w-full py-3 rounded-xl bg-accent-red hover:bg-red-700 text-white font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-3 rounded-full bg-[#FFB6C1] hover:bg-[#FBA3B5] text-black font-bold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed border-none shadow-sm cursor-pointer"
           >
             {verifying ? (
               <span className="flex items-center justify-center gap-2">

@@ -30,6 +30,15 @@
 }
 
 /* ── Base Styles ── */
+::selection {
+  background-color: #FE494A;
+  color: #FFFFFF;
+}
+::-moz-selection {
+  background-color: #FE494A;
+  color: #FFFFFF;
+}
+
 html {
   scroll-behavior: smooth;
 }

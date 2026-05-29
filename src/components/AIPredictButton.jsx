@@ -40,28 +40,22 @@ export default function AIPredictButton({ reviewText, onPredict, disabled = fals
       type="button"
       onClick={handlePredict}
       disabled={disabled || loading}
-      whileHover={!disabled && !loading ? { scale: 1.02 } : {}}
-      whileTap={!disabled && !loading ? { scale: 0.98 } : {}}
+      whileHover={!disabled && !loading ? { scale: 1.01 } : {}}
+      whileTap={!disabled && !loading ? { scale: 0.99 } : {}}
       className={`
-        relative w-full py-3 px-5 rounded-xl font-semibold text-sm
-        bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500
-        text-white shadow-lg
+        relative w-full py-3 px-5 rounded-full font-bold text-sm
+        bg-[#FFB6C1] hover:bg-[#FBA3B5] text-black shadow-sm
         transition-all duration-300
         disabled:opacity-40 disabled:cursor-not-allowed
-        overflow-hidden
+        overflow-hidden border-none cursor-pointer
         ${loading ? 'animate-pulse' : ''}
       `}
-      style={{
-        boxShadow: loading
-          ? '0 0 24px rgba(168, 85, 247, 0.4), 0 0 48px rgba(168, 85, 247, 0.15)'
-          : '0 0 12px rgba(168, 85, 247, 0.2)',
-      }}
     >
       {loading && (
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-          animate={{ x: ['-100%', '100%'] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
+          className="absolute inset-0 bg-white/20"
+          animate={{ opacity: [0.2, 0.5, 0.2] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
         />
       )}
       <span className="relative z-10 flex items-center justify-center gap-2">

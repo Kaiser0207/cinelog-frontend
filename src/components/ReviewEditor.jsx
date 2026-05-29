@@ -228,7 +228,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
             </h2>
             <button
               onClick={onClose}
-              className="w-9 h-9 rounded-lg bg-bg-card border border-border-subtle flex items-center justify-center text-text-muted hover:text-text-primary hover:border-border-active transition-colors"
+              className="w-10 h-10 rounded-full bg-[#E8E2D2] border border-border-subtle flex items-center justify-center text-[#1A1A1A] hover:bg-black/10 hover:border-black/30 hover:scale-105 active:scale-95 transition-all font-bold cursor-pointer"
             >
               ✕
             </button>
@@ -356,11 +356,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                   key={total}
                   initial={animated ? { scale: 1.3 } : false}
                   animate={{ scale: 1 }}
-                  className="text-5xl font-black font-[var(--font-outfit)] tabular-nums"
-                  style={{
-                    color: getScoreColor(total),
-                    textShadow: `0 0 30px ${getScoreColor(total)}50`,
-                  }}
+                  className="text-5xl font-black font-[var(--font-outfit)] tabular-nums text-[#1A1A1A]"
                 >
                   {total.toFixed(1)}
                 </motion.span>
@@ -370,7 +366,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               <div className="glass p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold text-text-primary">🎭 娛樂性</h4>
-                  <span className="text-sm font-bold text-accent-gold tabular-nums">
+                  <span className="text-sm font-bold text-[#1A1A1A] tabular-nums">
                     {entertainment.toFixed(1)}
                   </span>
                 </div>
@@ -392,7 +388,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               <div className="glass p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold text-text-primary">🎬 藝術性</h4>
-                  <span className="text-sm font-bold text-accent-gold tabular-nums">
+                  <span className="text-sm font-bold text-[#1A1A1A] tabular-nums">
                     {cinematicScore.toFixed(1)}
                   </span>
                 </div>
@@ -430,8 +426,8 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                 onClick={handleSave}
                 disabled={saving}
                 whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full py-4 rounded-xl bg-accent-red hover:bg-red-700 text-white font-bold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed glow-red"
+                whileTap={{ scale: 0.99 }}
+                className="w-full py-4 rounded-full bg-[#FFB6C1] hover:bg-[#FBA3B5] text-black font-bold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-none shadow-sm cursor-pointer"
               >
                 {saving ? (
                   <span className="flex items-center justify-center gap-2">

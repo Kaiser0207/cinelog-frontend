@@ -40,11 +40,11 @@ export default function HomePage() {
           CINELOG
         </motion.h1>
         
-        <div className="absolute top-6 right-6 flex items-center gap-4 z-50" data-cursor="FILTER">
+        <div className="absolute top-6 right-6 flex items-center gap-4 z-[60]" data-cursor="FILTER">
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            className="text-sm bg-bg-card border-2 border-border-subtle rounded-none px-4 py-2 font-bold uppercase tracking-wider focus:border-accent-red"
+            className="text-sm bg-[#E8E2D2] border border-border-subtle rounded-full px-5 py-2.5 font-bold uppercase tracking-wider focus:border-[#FFB6C1] outline-none text-[#1A1A1A] transition-all"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -65,10 +65,10 @@ export default function HomePage() {
                 key={g}
                 data-cursor={isActive ? '' : 'FILTER'}
                 onClick={() => setGenre(g === 'All' ? '' : g)}
-                className={`flex-shrink-0 px-6 py-2 text-sm font-black font-[var(--font-jetbrains)] uppercase transform transition-all duration-300 ${
+                className={`flex-shrink-0 px-6 py-2.5 text-sm font-bold font-[var(--font-jetbrains)] uppercase rounded-full transition-all duration-300 ${
                   isActive
-                    ? 'bg-accent-amber text-[#1A1A1A] -rotate-2 scale-110 shadow-[4px_4px_0px_#1a1a1a]'
-                    : 'bg-bg-card border-2 border-text-primary text-text-primary hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1a1a1a]'
+                    ? 'bg-[#FFB6C1] text-black shadow-none border-none scale-105'
+                    : 'bg-[#E8E2D2] border border-border-subtle text-[#1A1A1A]/70 hover:text-black hover:border-black/40 hover:-translate-y-0.5'
                 }`}
               >
                 {g}
@@ -88,10 +88,7 @@ export default function HomePage() {
         onClick={() => setShowEditor(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-6 right-6 z-40 w-16 h-16 rounded-full bg-accent-amber text-[#1A1A1A] text-4xl font-bold flex items-center justify-center border-4 border-[#1A1A1A]"
-        style={{
-          boxShadow: '4px 4px 0px #1a1a1a',
-        }}
+        className="fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-full bg-[#CCFF00] hover:bg-[#D4FF00] text-black text-3xl font-black flex items-center justify-center transition-all shadow-lg border-none"
       >
         +
       </motion.button>

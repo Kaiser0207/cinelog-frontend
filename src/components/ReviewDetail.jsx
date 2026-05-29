@@ -74,7 +74,16 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      className="relative"
     >
+      {/* Back Button - Fixed float to avoid being blocked by content */}
+      <button
+        onClick={() => navigate('/')}
+        className="fixed top-6 left-6 z-[100] px-5 py-2 bg-[#FFB6C1] hover:bg-[#FBA3B5] text-black font-bold font-[var(--font-jetbrains)] text-sm rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 border-none"
+      >
+        ← BACK
+      </button>
+
       {/* Hero */}
       <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
         {backdropUrl ? (
@@ -93,14 +102,6 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         {/* Hero Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/50 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-bg-deep/60 to-transparent" />
-
-        {/* Back Button */}
-        <button
-          onClick={() => navigate('/')}
-          className="absolute top-4 left-4 z-10 px-4 py-2 border-2 border-white bg-black font-bold font-[var(--font-bebas)] text-xl text-white hover:bg-accent-red hover:border-accent-red transition-colors"
-        >
-          ← BACK
-        </button>
 
         {/* Hero Content */}
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex items-end gap-6">
@@ -180,13 +181,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           {/* Total Score */}
           <div className="glass p-6 flex flex-col items-center justify-center text-center border-4 border-black shadow-[8px_8px_0_rgba(255,255,255,0.1)]">
             <p className="text-xl font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted mb-2">Total Score</p>
-            <span
-              className="text-8xl font-black font-[var(--font-bebas)] tabular-nums"
-              style={{
-                color: getScoreColor(total),
-                textShadow: `4px 4px 0 #000`,
-              }}
-            >
+            <span className="text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#1A1A1A]">
               {total.toFixed(1)}
             </span>
             <p className="text-sm font-bold font-[var(--font-bebas)] text-text-dim mt-2">/ 10.0</p>
@@ -196,7 +191,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           <div className="glass p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-text-primary">🎭 Entertainment</h3>
-              <span className="text-lg font-bold text-accent-gold tabular-nums">
+              <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
                 {entertainment.toFixed(1)}
               </span>
             </div>
@@ -208,7 +203,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           <div className="glass p-6 space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-text-primary">🎬 Cinematic</h3>
-              <span className="text-lg font-bold text-accent-gold tabular-nums">
+              <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
                 {cinematic.toFixed(1)}
               </span>
             </div>
@@ -363,11 +358,11 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9 }}
-          className="flex flex-wrap items-center gap-3 pt-4 border-t border-border-subtle"
+          className="flex flex-wrap items-center gap-4 pt-6 border-t border-border-subtle"
         >
           <button
             onClick={onEdit}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-bg-card border border-border-subtle text-text-primary hover:border-accent-gold/40 hover:text-accent-gold transition-colors text-sm font-medium"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#FFB6C1] hover:bg-[#FBA3B5] text-black font-bold hover:scale-105 active:scale-95 transition-all text-sm border-none shadow-sm cursor-pointer"
           >
             ✏️ Edit
           </button>
@@ -376,7 +371,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
 
           <button
             onClick={handleDelete}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-bg-card border border-border-subtle text-text-muted hover:border-red-500/40 hover:text-red-400 transition-colors text-sm font-medium ml-auto"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20 font-bold hover:scale-105 active:scale-95 transition-all text-sm cursor-pointer ml-auto"
           >
             🗑️ Delete
           </button>

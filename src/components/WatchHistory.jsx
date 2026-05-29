@@ -29,7 +29,7 @@ export default function WatchHistory({ dates = [], onChange }) {
             <button
               type="button"
               onClick={removeDate}
-              className="w-7 h-7 rounded-lg bg-bg-card border border-border-subtle text-text-muted hover:text-red-400 hover:border-red-400/30 transition-colors text-sm flex items-center justify-center"
+              className="w-7 h-7 rounded-full bg-bg-card border border-border-subtle text-text-muted hover:text-red-400 hover:border-red-400/30 transition-all text-sm flex items-center justify-center cursor-pointer"
             >
               −
             </button>
@@ -37,7 +37,7 @@ export default function WatchHistory({ dates = [], onChange }) {
           <button
             type="button"
             onClick={addDate}
-            className="w-7 h-7 rounded-lg bg-bg-card border border-border-subtle text-text-muted hover:text-accent-blue hover:border-green-400/30 transition-colors text-sm flex items-center justify-center"
+            className="w-7 h-7 rounded-full bg-bg-card border border-border-subtle text-text-muted hover:text-accent-blue hover:border-green-400/30 transition-all text-sm flex items-center justify-center cursor-pointer"
           >
             +
           </button>

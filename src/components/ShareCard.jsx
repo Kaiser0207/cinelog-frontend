@@ -206,7 +206,7 @@ export default function ShareCard({ review }) {
       {/* Share Button */}
       <button
         onClick={handleShare}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold text-sm hover:brightness-110 transition-all"
+        className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#CCFF00] hover:bg-[#D4FF00] text-black font-bold hover:scale-105 active:scale-95 transition-all text-sm border-none shadow-sm cursor-pointer"
       >
         📱 Share to Story
       </button>

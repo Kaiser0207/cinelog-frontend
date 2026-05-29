@@ -78,7 +78,7 @@ export default function ReviewPage() {
         </p>
         <button
           onClick={() => navigate('/')}
-          className="px-6 py-3 rounded-xl bg-accent-red text-white font-semibold hover:bg-red-700 transition-colors"
+          className="px-6 py-3 bg-[#FFB6C1] hover:bg-[#FBA3B5] text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-all border-none shadow-sm cursor-pointer"
         >
           ← Back to Feed
         </button>
