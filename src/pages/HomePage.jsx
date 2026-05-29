@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import ReviewFeed from '../components/ReviewFeed';
 import ReviewEditor from '../components/ReviewEditor';
@@ -11,6 +11,19 @@ export default function HomePage() {
   const [showEditor, setShowEditor] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const { lang, toggleLanguage, t } = useLanguage();
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortRef = useRef(null);
+
+  // Close sort dropdown on outside click
+  useEffect(() => {
+    function handleClick(e) {
+      if (sortRef.current && !sortRef.current.contains(e.target)) {
+        setSortOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const { scrollY } = useScroll();
   const titleY = useTransform(scrollY, [0, 500], [0, 150]);
@@ -34,7 +47,7 @@ export default function HomePage() {
       className="min-h-screen relative overflow-hidden"
     >
       {/* Massive Hero Section */}
-      <div className="relative pt-24 pb-12 px-5 flex flex-col items-center justify-center min-h-[40vh]">
+      <div className="relative pt-24 pb-12 px-5 flex flex-col items-start md:items-center justify-center min-h-[40vh]">
         <motion.h1
           style={{ y: titleY, skewX: titleSkew, opacity: titleOpacity }}
           className="text-8xl md:text-[12rem] lg:text-[15rem] font-black font-[var(--font-bebas)] tracking-tighter text-[#1A1A1A] uppercase leading-none z-0"
@@ -54,25 +67,57 @@ export default function HomePage() {
             <span>{lang === 'en' ? '繁' : 'EN'}</span>
           </button>
 
-          {/* Sort Dropdown */}
-          <div className="relative">
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="appearance-none text-xs md:text-sm bg-[#E8E2D2] border border-border-subtle rounded-full pl-4 md:pl-5 pr-10 md:pr-12 py-2.5 font-bold uppercase tracking-wider focus:border-[#FFB6C1] outline-none text-[#1A1A1A] transition-all cursor-pointer"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {t(opt.value)}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-3 md:right-4 flex items-center text-[#1A1A1A]">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
-              </svg>
+            {/* Sort Dropdown - Custom Animated */}
+            <div className="relative" ref={sortRef}>
+              <button
+                type="button"
+                onClick={() => setSortOpen(!sortOpen)}
+                className="appearance-none text-xs md:text-sm bg-[#E8E2D2] border border-border-subtle rounded-full pl-4 md:pl-5 pr-10 md:pr-12 py-2.5 font-bold uppercase tracking-wider focus:border-[#FFB6C1] outline-none text-[#1A1A1A] transition-all cursor-pointer flex items-center gap-2"
+              >
+                <span>{t(sort)}</span>
+                <svg className={`w-4 h-4 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <AnimatePresence>
+                {sortOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute z-50 top-full mt-1 right-0 min-w-[180px] glass overflow-hidden py-1 rounded-xl shadow-lg"
+                  >
+                    {SORT_OPTIONS.map((opt) => {
+                      const isActive = sort === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => { setSort(opt.value); setSortOpen(false); }}
+                          className="relative w-full flex items-center px-4 py-3 text-left transition-colors"
+                        >
+                          {isActive && (
+                            <motion.div
+                              layoutId="sort-selector-highlight"
+                              className="absolute inset-0 bg-[#FFB6C1]/30 border-l-4 border-[#FFB6C1]"
+                              initial={false}
+                              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                            />
+                          )}
+                          <span className={`relative z-10 text-sm font-bold uppercase tracking-wider ${
+                            isActive ? 'text-[#1A1A1A]' : 'text-[#1A1A1A]/60'
+                          }`}>
+                            {t(opt.value)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div>
         </div>
       </div>
 

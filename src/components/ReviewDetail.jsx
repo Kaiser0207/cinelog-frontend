@@ -301,8 +301,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             transition={{ delay: 0.68 }}
             className="mt-12"
           >
-            <h3 className="text-sm font-bold uppercase text-accent-blue/80 tracking-widest mb-4">
-              CAST
+            <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FFB6C1] uppercase tracking-wider mb-4 border-b-4 border-[#FFB6C1] pb-2">
+              {t('cast')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {review.cast_info.map((actor, idx) => (
@@ -399,7 +399,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
 
             <button
               onClick={handleDelete}
-              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95 sm:ml-auto"
+              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
             >
               <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
                 {t('deleteReview')}
