@@ -27,15 +27,14 @@ export default function HomePage() {
       className="min-h-screen"
     >
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-bg-deep/80 backdrop-blur-xl border-b border-border-subtle">
-        <div className="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-bg-deep border-b border-border-subtle">
+        <div className="max-w-7xl mx-auto px-5 py-6 flex items-center justify-between">
           <motion.h1
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-2xl md:text-3xl font-black font-[var(--font-outfit)] tracking-tight"
+            className="text-4xl md:text-5xl font-black font-[var(--font-bebas)] tracking-widest text-accent-red uppercase"
           >
-            <span className="score-gradient">Cine</span>
-            <span className="text-text-primary">Log</span>
+            CineLog
           </motion.h1>
 
           {/* Sort Dropdown */}
@@ -83,11 +82,11 @@ export default function HomePage() {
       {/* FAB */}
       <motion.button
         onClick={() => setShowEditor(true)}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-accent-red text-white text-2xl font-bold shadow-2xl flex items-center justify-center"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-6 right-6 z-40 w-16 h-16 bg-accent-red text-white text-3xl font-bold flex items-center justify-center border-2 border-white"
         style={{
-          boxShadow: '0 0 24px rgba(229, 9, 20, 0.4), 0 8px 32px rgba(0, 0, 0, 0.5)',
+          boxShadow: '8px 8px 0px rgba(255, 255, 255, 0.2)',
         }}
       >
         +

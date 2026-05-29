@@ -21,6 +21,9 @@ const EMPTY_STATE = {
   runtime: null,
   release_date: '',
   overview: '',
+  backdrops: [],
+  custom_backdrop_url: '',
+  ai_recommendation: '',
   // Review
   review_text: '',
   review_font: 'Outfit',
@@ -53,6 +56,9 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
         runtime: review.runtime,
         release_date: review.release_date || '',
         overview: review.overview || '',
+        custom_backdrop_url: review.custom_backdrop_url || '',
+        ai_recommendation: review.ai_recommendation || '',
+        backdrops: [],
         review_text: review.review_text || '',
         review_font: review.review_font || 'Outfit',
         emotion: review.emotion ?? 5,
@@ -88,6 +94,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       runtime: movie.runtime || null,
       release_date: movie.release_date || '',
       overview: movie.overview || '',
+      backdrops: movie.backdrops || [],
     }));
   };
 
@@ -100,6 +107,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       acting: scores.acting ?? prev.acting,
       cinematography: scores.cinematography ?? prev.cinematography,
       soundtrack: scores.soundtrack ?? prev.soundtrack,
+      ai_recommendation: scores.recommendation ?? prev.ai_recommendation,
     }));
     setTimeout(() => setAnimated(false), 800);
   };
@@ -140,6 +148,8 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               acting: form.acting,
               cinematography: form.cinematography,
               soundtrack: form.soundtrack,
+              custom_backdrop_url: form.custom_backdrop_url || null,
+              ai_recommendation: form.ai_recommendation || null,
             }
           : {
               tmdb_id: form.tmdb_id,
@@ -154,6 +164,8 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               cinematography: form.cinematography,
               soundtrack: form.soundtrack,
               watch_dates: form.watch_dates,
+              custom_backdrop_url: form.custom_backdrop_url || null,
+              ai_recommendation: form.ai_recommendation || null,
             };
 
         const res = await fetch(endpoint, {
@@ -257,6 +269,35 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                     )}
                   </div>
                 </motion.div>
+              )}
+
+              {/* Backdrop Selection */}
+              {form.title && (
+                <div className="space-y-3">
+                  <label className="block text-sm text-text-muted font-bold font-[var(--font-bebas)] tracking-wider">
+                    COVER IMAGE (TMDB OR CUSTOM URL)
+                  </label>
+                  {form.backdrops && form.backdrops.length > 0 && (
+                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                      {form.backdrops.slice(0, 10).map((path, idx) => (
+                        <img
+                          key={idx}
+                          src={`${TMDB_IMG_BASE}w300${path}`}
+                          alt="Backdrop"
+                          className={`w-32 h-20 object-cover cursor-pointer border-2 ${form.backdrop_path === path ? 'border-accent-red' : 'border-transparent'} hover:border-accent-red transition-all`}
+                          onClick={() => { update('backdrop_path', path); update('custom_backdrop_url', ''); }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <input
+                    type="text"
+                    value={form.custom_backdrop_url}
+                    onChange={(e) => update('custom_backdrop_url', e.target.value)}
+                    placeholder="Or paste a custom image URL..."
+                    className="w-full bg-black border-2 border-border-subtle p-3 font-[var(--font-jetbrains)] text-sm rounded-none focus:border-accent-red transition-colors"
+                  />
+                </div>
               )}
 
               {/* Font Selector */}

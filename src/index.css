@@ -3,20 +3,20 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-deep: #07070d;
-  --color-bg-surface: #111118;
-  --color-bg-glass: rgba(17, 17, 24, 0.7);
-  --color-bg-card: #16161f;
-  --color-bg-elevated: #1c1c28;
-  --color-accent-red: #e50914;
+  --color-bg-deep: #000000;
+  --color-bg-surface: #0a0a0a;
+  --color-bg-glass: rgba(10, 10, 10, 0.9);
+  --color-bg-card: #111111;
+  --color-bg-elevated: #1a1a1a;
+  --color-accent-red: #FE494A;
   --color-accent-gold: #f5c518;
-  --color-accent-blue: #1db954;
+  --color-accent-blue: #0800FF;
   --color-accent-amber: #ff6b35;
-  --color-text-primary: #e8e8ef;
-  --color-text-muted: #6b6b80;
-  --color-text-dim: #3a3a4a;
-  --color-border-subtle: rgba(255, 255, 255, 0.06);
-  --color-border-active: rgba(229, 9, 20, 0.4);
+  --color-text-primary: #ffffff;
+  --color-text-muted: #888888;
+  --color-text-dim: #333333;
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+  --color-border-active: #FE494A;
 
   --font-inter: 'Inter', system-ui, sans-serif;
   --font-outfit: 'Outfit', system-ui, sans-serif;
@@ -59,13 +59,11 @@ body {
   background: var(--color-text-muted);
 }
 
-/* ── Glassmorphism Panel ── */
+/* ── Pixel Brutalist Panel ── */
 .glass {
-  background: rgba(17, 17, 24, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 0;
 }
 
 /* ── Card Hover ── */
@@ -99,8 +97,8 @@ body {
   100% { background-position: 200% 0; }
 }
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(229, 9, 20, 0.3), 0 0 24px rgba(229, 9, 20, 0.1); }
-  50% { box-shadow: 0 0 16px rgba(229, 9, 20, 0.6), 0 0 48px rgba(229, 9, 20, 0.2); }
+  0%, 100% { box-shadow: 0 0 8px rgba(254, 73, 74, 0.3), 0 0 24px rgba(254, 73, 74, 0.1); }
+  50% { box-shadow: 0 0 16px rgba(254, 73, 74, 0.6), 0 0 48px rgba(254, 73, 74, 0.2); }
 }
 
 .fade-in {
@@ -120,7 +118,7 @@ body {
 
 /* ── Glow Effects ── */
 .glow-red {
-  box-shadow: 0 0 20px rgba(229, 9, 20, 0.3), 0 0 60px rgba(229, 9, 20, 0.1);
+  box-shadow: 0 0 20px rgba(254, 73, 74, 0.3), 0 0 60px rgba(254, 73, 74, 0.1);
 }
 .glow-gold {
   text-shadow: 0 0 20px rgba(245, 197, 24, 0.4), 0 0 60px rgba(245, 197, 24, 0.15);

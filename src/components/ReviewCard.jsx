@@ -29,7 +29,7 @@ export default function ReviewCard({ review, index = 0 }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
       onClick={() => navigate(`/review/${review.id}`)}
-      className="relative cursor-pointer card-hover group overflow-hidden rounded-2xl border border-border-subtle"
+      className="relative cursor-pointer card-hover group overflow-hidden rounded-none border-[3px] border-border-subtle hover:border-accent-red transition-colors"
       style={{ aspectRatio: '16/10' }}
     >
       {/* Background Image */}
@@ -53,14 +53,13 @@ export default function ReviewCard({ review, index = 0 }) {
         {/* Top: Score Badge - Absolute Positioned to top right */}
         <div className="absolute top-2 right-2 md:top-3 md:right-3">
           <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0 scale-90 md:scale-100"
+            className="w-16 h-16 rounded-none flex items-center justify-center border-4 border-accent-red bg-black shrink-0 scale-90 md:scale-100"
             style={{
-              background: `rgba(0,0,0,0.5)`,
-              boxShadow: `0 0 20px ${getScoreColor(total)}30`,
+              boxShadow: `4px 4px 0px ${getScoreColor(total)}`,
             }}
           >
             <span
-              className="text-2xl font-black font-[var(--font-outfit)]"
+              className="text-3xl font-black font-[var(--font-bebas)]"
               style={{
                 color: getScoreColor(total),
                 textShadow: `0 0 16px ${getScoreColor(total)}60`,
@@ -81,22 +80,22 @@ export default function ReviewCard({ review, index = 0 }) {
                 return (
                   <span
                     key={i}
-                    className="text-[10px] uppercase tracking-wider font-semibold text-white/70 bg-white/10 backdrop-blur-sm px-2 py-0.5 rounded-md"
+                    className="text-[11px] uppercase tracking-widest font-bold text-black bg-white px-2 py-1"
                   >
                     {genreName}
                   </span>
                 );
               })}
               {review.runtime && (
-                <span className="text-[10px] uppercase tracking-wider font-semibold text-accent-gold/80 bg-accent-gold/10 backdrop-blur-sm px-2 py-0.5 rounded-md">
-                  {review.runtime} min
+                <span className="text-[11px] uppercase tracking-widest font-bold text-white bg-accent-red px-2 py-1">
+                  {review.runtime} MIN
                 </span>
               )}
             </div>
           )}
 
           {/* Title */}
-          <h3 className="text-xl md:text-2xl font-bold font-[var(--font-outfit)] text-white leading-tight mb-1 drop-shadow-lg truncate">
+          <h3 className="text-3xl md:text-5xl font-black font-[var(--font-bebas)] text-white uppercase leading-none mb-2 drop-shadow-lg truncate tracking-wider">
             {review.title}
           </h3>
 
@@ -128,15 +127,15 @@ export default function ReviewCard({ review, index = 0 }) {
 export function ReviewCardSkeleton() {
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-border-subtle"
+      className="relative overflow-hidden rounded-none border-[3px] border-border-subtle bg-bg-card"
       style={{ aspectRatio: '16/10' }}
     >
-      <div className="skeleton absolute inset-0" />
+      <div className="skeleton absolute inset-0 opacity-50" />
       <div className="absolute inset-0 flex flex-col justify-end p-5">
-        <div className="skeleton h-4 w-24 mb-3 rounded" />
-        <div className="skeleton h-7 w-3/4 mb-2 rounded" />
-        <div className="skeleton h-3 w-full mb-1 rounded" />
-        <div className="skeleton h-3 w-2/3 rounded" />
+        <div className="skeleton h-4 w-24 mb-3 rounded-none opacity-80" />
+        <div className="skeleton h-8 w-3/4 mb-2 rounded-none opacity-80" />
+        <div className="skeleton h-3 w-full mb-1 rounded-none opacity-80" />
+        <div className="skeleton h-3 w-2/3 rounded-none opacity-80" />
       </div>
     </div>
   );

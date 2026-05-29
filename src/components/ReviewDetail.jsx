@@ -35,9 +35,11 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const watchDates = review.watch_dates || [];
   const fontFamily = FONT_MAP[review.review_font] || FONT_MAP['Outfit'];
 
-  const backdropUrl = review.backdrop_path
-    ? `${TMDB_IMG_BASE}original${review.backdrop_path}`
-    : null;
+  const backdropUrl = review.custom_backdrop_url
+    ? review.custom_backdrop_url
+    : review.backdrop_path
+      ? `${TMDB_IMG_BASE}original${review.backdrop_path}`
+      : null;
 
   const posterUrl = review.poster_path
     ? `${TMDB_IMG_BASE}w342${review.poster_path}`
@@ -95,9 +97,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         {/* Back Button */}
         <button
           onClick={() => navigate('/')}
-          className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full glass flex items-center justify-center text-text-primary hover:text-accent-red transition-colors"
+          className="absolute top-4 left-4 z-10 px-4 py-2 border-2 border-white bg-black font-bold font-[var(--font-bebas)] text-xl text-white hover:bg-accent-red hover:border-accent-red transition-colors"
         >
-          ←
+          ← BACK
         </button>
 
         {/* Hero Content */}
@@ -140,7 +142,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-3xl md:text-5xl font-black font-[var(--font-outfit)] text-white leading-tight mb-2"
+              className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] text-white uppercase leading-none mb-4 drop-shadow-[4px_4px_0_rgba(254,73,74,1)]"
             >
               {review.title}
             </motion.h1>
@@ -176,18 +178,18 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           className="grid md:grid-cols-3 gap-6"
         >
           {/* Total Score */}
-          <div className="glass p-6 flex flex-col items-center justify-center text-center">
-            <p className="text-xs uppercase tracking-widest text-text-muted mb-2">Total Score</p>
+          <div className="glass p-6 flex flex-col items-center justify-center text-center border-4 border-black shadow-[8px_8px_0_rgba(255,255,255,0.1)]">
+            <p className="text-xl font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted mb-2">Total Score</p>
             <span
-              className="text-6xl font-black font-[var(--font-outfit)] tabular-nums"
+              className="text-8xl font-black font-[var(--font-bebas)] tabular-nums"
               style={{
                 color: getScoreColor(total),
-                textShadow: `0 0 40px ${getScoreColor(total)}50`,
+                textShadow: `4px 4px 0 #000`,
               }}
             >
               {total.toFixed(1)}
             </span>
-            <p className="text-xs text-text-dim mt-2">/ 10.0</p>
+            <p className="text-sm font-bold font-[var(--font-bebas)] text-text-dim mt-2">/ 10.0</p>
           </div>
 
           {/* Entertainment */}
@@ -239,7 +241,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-4">
+          <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-accent-red uppercase tracking-wider mb-4 border-b-4 border-accent-red pb-2">
             Review
           </h3>
           <div
@@ -251,6 +253,51 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             </ReactMarkdown>
           </div>
         </motion.div>
+
+        {/* AI Recommendation */}
+        {review.ai_recommendation && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65 }}
+            className="border-4 border-accent-blue bg-black p-6 my-8 shadow-[8px_8px_0_var(--color-accent-blue)]"
+          >
+            <h3 className="text-3xl font-black font-[var(--font-bebas)] uppercase text-accent-blue mb-4">
+              🤖 AI Director's Cut
+            </h3>
+            <p className="text-text-primary text-lg font-medium leading-relaxed font-[var(--font-inter)]">
+              {review.ai_recommendation}
+            </p>
+          </motion.div>
+        )}
+
+        {/* Cast */}
+        {review.cast_info && review.cast_info.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.68 }}
+          >
+            <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-white uppercase tracking-wider mb-4 border-b-4 border-white pb-2">
+              Cast
+            </h3>
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+              {review.cast_info.map(actor => (
+                <div key={actor.id} className="group cursor-pointer" onClick={() => window.open(`https://www.themoviedb.org/person/${actor.id}`, '_blank')}>
+                  <div className="aspect-[2/3] overflow-hidden border-2 border-border-subtle group-hover:border-accent-red mb-2 bg-bg-card transition-colors">
+                    {actor.profile_path ? (
+                      <img src={`${TMDB_IMG_BASE}w185${actor.profile_path}`} className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-300" alt={actor.name} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl bg-bg-deep text-text-muted">👤</div>
+                    )}
+                  </div>
+                  <p className="text-[11px] font-bold uppercase truncate text-white leading-tight">{actor.name}</p>
+                  <p className="text-[10px] text-accent-red uppercase truncate font-bold">{actor.character}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Spotify */}
         {review.spotify_track_id && (
