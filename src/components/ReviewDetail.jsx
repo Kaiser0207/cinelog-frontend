@@ -105,14 +105,6 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         <div className="absolute inset-0 bg-gradient-to-t from-bg-deep/90 via-bg-deep/30 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-bg-deep/10 to-transparent" />
 
-        {/* Score Badge floating top right */}
-        <div className="absolute top-6 right-6 z-50">
-          <div className="w-16 h-16 rounded-lg flex flex-col items-center justify-center backdrop-blur-md border border-white/20 shadow-lg bg-black/60">
-             <span className="text-2xl font-black font-[var(--font-outfit)] text-[#FE494A]">{total.toFixed(1)}</span>
-             <span className="text-[10px] font-bold text-white/70 uppercase">Score</span>
-          </div>
-        </div>
-
         {/* Hero Content */}
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex items-end gap-6">
           {posterUrl && (
@@ -185,7 +177,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="grid md:grid-cols-2 gap-6"
+          className="grid md:grid-cols-3 gap-6"
         >
           {/* Entertainment */}
           <div className="glass p-6 space-y-4 rounded-lg border border-border-subtle">
@@ -212,6 +204,15 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               cinematography={review.cinematography || 0}
               soundtrack={review.soundtrack || 0}
             />
+          </div>
+
+          {/* Total Score */}
+          <div className="glass p-6 flex flex-col items-center justify-center text-center rounded-lg border border-border-subtle relative">
+            <p className="absolute top-6 left-6 text-sm font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted">Total Score</p>
+            <span className="text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#FE494A] mt-6">
+              {total.toFixed(1)}
+            </span>
+            <p className="text-sm font-bold font-[var(--font-bebas)] text-text-dim mt-2">/ 10.0</p>
           </div>
         </motion.div>
 

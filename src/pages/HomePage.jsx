@@ -37,7 +37,7 @@ export default function HomePage() {
           style={{ y: titleY, skewX: titleSkew, opacity: titleOpacity }}
           className="text-8xl md:text-[12rem] lg:text-[15rem] font-black font-[var(--font-bebas)] tracking-tighter text-[#1A1A1A] uppercase leading-none z-0"
         >
-          CINELOG
+          CINEROOM
         </motion.h1>
         
         <div className="absolute top-6 right-6 z-[60]" data-cursor="FILTER">

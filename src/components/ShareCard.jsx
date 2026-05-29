@@ -35,7 +35,7 @@ export default function ShareCard({ review }) {
     canvas.toBlob(async (blob) => {
       if (!blob) return;
 
-      const file = new File([blob], `cinelog-${review.title || 'review'}.png`, {
+      const file = new File([blob], `cineroom-${review.title || 'review'}.png`, {
         type: 'image/png',
       });
 
@@ -43,8 +43,8 @@ export default function ShareCard({ review }) {
         try {
           await navigator.share({
             files: [file],
-            title: `CineLog: ${review.title}`,
-            text: `My review of ${review.title} — ${total.toFixed(1)}/10`,
+            title: `CineRoom: ${review.title}`,
+            text: `Check out my review of ${review.title}!`,
           });
         } catch {
           downloadBlob(blob, file.name);
@@ -53,7 +53,7 @@ export default function ShareCard({ review }) {
         downloadBlob(blob, file.name);
       }
     }, 'image/png');
-  }, [review, total]);
+  }, [review]);
 
   return (
     <div>
@@ -94,6 +94,14 @@ export default function ShareCard({ review }) {
               background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.95) 100%)',
             }}
           />
+
+          {/* Brand/Watermark */}
+          <div className="absolute top-8 left-8 flex items-center gap-3 opacity-90">
+            <div className="w-8 h-8 bg-[#FE494A] rounded-full" />
+            <span className="text-xl font-black font-[var(--font-bebas)] text-white tracking-widest uppercase">
+              CineRoom
+            </span>
+          </div>
 
           {/* Content */}
           <div
@@ -186,19 +194,6 @@ export default function ShareCard({ review }) {
                 🎵 {review.spotify_track_name}
               </div>
             )}
-
-            {/* Watermark */}
-            <div
-              style={{
-                fontSize: '28px',
-                color: 'rgba(255,255,255,0.25)',
-                fontWeight: 600,
-                letterSpacing: '4px',
-                textTransform: 'uppercase',
-              }}
-            >
-              CineLog
-            </div>
           </div>
         </div>
       </div>
