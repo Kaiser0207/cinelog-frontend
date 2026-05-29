@@ -59,13 +59,13 @@ export default function MovieSearch({ onSelect, disabled = false }) {
 
   return (
     <div className="relative" ref={containerRef}>
-      <label className="block text-sm text-text-muted mb-1.5 font-medium">Search Movie</label>
+      <label className="block text-sm text-text-muted mb-1.5 font-medium">搜尋電影 (TMDB)</label>
       <div className="relative">
         <input
           type="text"
           value={query}
           onChange={handleInputChange}
-          placeholder="Type a movie title..."
+          placeholder="輸入電影名稱..."
           disabled={disabled}
           className={`w-full pl-10 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
@@ -91,7 +91,7 @@ export default function MovieSearch({ onSelect, disabled = false }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 top-full mt-1 w-full glass max-h-80 overflow-y-auto"
+            className="absolute z-50 top-full mt-1 w-full bg-bg-elevated border border-border-subtle shadow-2xl rounded-xl max-h-80 overflow-y-auto"
           >
             {results.slice(0, 8).map((movie) => (
               <button

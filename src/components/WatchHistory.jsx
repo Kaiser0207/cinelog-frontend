@@ -23,7 +23,7 @@ export default function WatchHistory({ dates = [], onChange }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-sm text-text-muted font-medium">Watch History</label>
+        <label className="text-sm text-text-muted font-medium">觀影紀錄</label>
         <div className="flex items-center gap-2">
           {dates.length > 0 && (
             <button
@@ -46,7 +46,7 @@ export default function WatchHistory({ dates = [], onChange }) {
 
       <div className="space-y-2">
         {dates.length === 0 && (
-          <p className="text-text-dim text-xs italic">No watch dates added yet</p>
+          <p className="text-text-dim text-xs italic">尚未新增觀影日期</p>
         )}
         {dates.map((date, i) => (
           <motion.div
@@ -57,7 +57,7 @@ export default function WatchHistory({ dates = [], onChange }) {
             className="flex items-center gap-3"
           >
             <span className="text-xs text-text-muted w-16 flex-shrink-0">
-              {ordinals[i] || `${i + 1}th`} Watch
+              第 {i + 1} 次
             </span>
             <input
               type="date"

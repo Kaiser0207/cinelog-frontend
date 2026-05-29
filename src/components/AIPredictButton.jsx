@@ -9,7 +9,7 @@ export default function AIPredictButton({ reviewText, onPredict, disabled = fals
 
   const handlePredict = async () => {
     if (!reviewText || reviewText.trim().length < 10) {
-      addToast('Write at least a few sentences before predicting scores.', 'info');
+      addToast('請輸入至少幾句話再讓 AI 預測評分。', 'info');
       return;
     }
 
@@ -24,12 +24,12 @@ export default function AIPredictButton({ reviewText, onPredict, disabled = fals
       if (res.ok) {
         const scores = await res.json();
         onPredict(scores);
-        addToast('AI scores predicted! Adjust as needed.', 'success');
+        addToast('AI 預測成功！你可以再手動微調。', 'success');
       } else {
         throw new Error('API error');
       }
     } catch {
-      addToast('AI prediction unavailable. Please set manually.', 'error');
+      addToast('AI 預測目前無法使用，請手動評分。', 'error');
     } finally {
       setLoading(false);
     }
@@ -74,11 +74,11 @@ export default function AIPredictButton({ reviewText, onPredict, disabled = fals
             >
               🎬
             </motion.span>
-            Analyzing Review...
+            分析影評中...
           </>
         ) : (
           <>
-            ✨ AI Predict Scores
+            ✨ 讓 AI 幫我評分
           </>
         )}
       </span>

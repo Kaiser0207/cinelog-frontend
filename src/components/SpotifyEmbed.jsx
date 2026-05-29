@@ -4,7 +4,7 @@ export default function SpotifyEmbed({ trackId }) {
   return (
     <div className="rounded-xl overflow-hidden border border-border-subtle">
       <iframe
-        src={`https://open.spotify.com/embed/track/${trackId}?theme=0`}
+        src={`https://open.spotify.com/embed/track/${trackId}?theme=0&autoplay=1`}
         width="100%"
         height="80"
         frameBorder="0"

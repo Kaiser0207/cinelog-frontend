@@ -60,14 +60,14 @@ export default function SpotifySearch({ onSelect }) {
   return (
     <div className="relative" ref={containerRef}>
       <label className="block text-sm text-text-muted mb-1.5 font-medium">
-        🎵 Spotify Soundtrack
+        🎵 搜尋配樂 (Spotify)
       </label>
       <div className="relative">
         <input
           type="text"
           value={query}
           onChange={handleInputChange}
-          placeholder="Search for a track..."
+          placeholder="搜尋歌曲..."
           className="w-full pl-10"
         />
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
@@ -92,7 +92,7 @@ export default function SpotifySearch({ onSelect }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 top-full mt-1 w-full glass max-h-64 overflow-y-auto"
+            className="absolute z-50 top-full mt-1 w-full bg-bg-elevated border border-border-subtle shadow-2xl rounded-xl max-h-64 overflow-y-auto"
           >
             {results.slice(0, 8).map((track, i) => {
               const albumArt = track.album_art_url || track.album_art || track.album?.images?.[2]?.url || track.image;

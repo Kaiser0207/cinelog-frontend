@@ -49,7 +49,7 @@ export default function ReviewCard({ review, index = 0 }) {
       <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
 
       {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6">
+      <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6 pt-20">
         {/* Score Badge */}
         <div className="absolute top-4 right-4">
           <div
@@ -114,7 +114,7 @@ export default function ReviewCard({ review, index = 0 }) {
 
         {/* CTA */}
         <div className="flex items-center gap-2 text-accent-red text-xs font-semibold uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
-          <span>Read Review</span>
+          <span>閱讀影評</span>
           <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
         </div>
       </div>

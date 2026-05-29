@@ -210,7 +210,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
           {/* Header */}
           <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-bg-surface/90 backdrop-blur-xl border-b border-border-subtle">
             <h2 className="text-lg font-bold font-[var(--font-outfit)]">
-              {isEdit ? '✏️ Edit Review' : '🎬 New Review'}
+              {isEdit ? '✏️ 編輯影評' : '🎬 新增影評'}
             </h2>
             <button
               onClick={onClose}
@@ -265,12 +265,12 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               {/* Review Text */}
               <div>
                 <label className="block text-sm text-text-muted mb-1.5 font-medium">
-                  Review (Markdown supported)
+                  影評內容 (支援 Markdown)
                 </label>
                 <textarea
                   value={form.review_text}
                   onChange={(e) => update('review_text', e.target.value)}
-                  placeholder="Write your cinematic thoughts..."
+                  placeholder="寫下你的觀影心得..."
                   rows={10}
                   className="w-full resize-y min-h-[200px]"
                   style={{ fontFamily: FONT_MAP[form.review_font] }}
@@ -308,7 +308,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
 
               {/* Total Score Display */}
               <div className="text-center py-4">
-                <p className="text-xs uppercase tracking-widest text-text-muted mb-1">Total Score</p>
+                <p className="text-xs uppercase tracking-widest text-text-muted mb-1">總分</p>
                 <motion.span
                   key={total}
                   initial={animated ? { scale: 1.3 } : false}
@@ -326,19 +326,19 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               {/* Entertainment Scores */}
               <div className="glass p-5 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-text-primary">🎭 Entertainment</h4>
+                  <h4 className="text-sm font-semibold text-text-primary">🎭 娛樂性</h4>
                   <span className="text-sm font-bold text-accent-gold tabular-nums">
                     {entertainment.toFixed(1)}
                   </span>
                 </div>
                 <ScoreSlider
-                  label="Emotion"
+                  label="情感渲染"
                   value={form.emotion}
                   onChange={(v) => update('emotion', v)}
                   animated={animated}
                 />
                 <ScoreSlider
-                  label="Pacing"
+                  label="節奏流暢"
                   value={form.pacing}
                   onChange={(v) => update('pacing', v)}
                   animated={animated}
@@ -348,7 +348,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               {/* Cinematic Scores */}
               <div className="glass p-5 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-text-primary">🎬 Cinematic Score</h4>
+                  <h4 className="text-sm font-semibold text-text-primary">🎬 藝術性</h4>
                   <span className="text-sm font-bold text-accent-gold tabular-nums">
                     {cinematicScore.toFixed(1)}
                   </span>
@@ -362,19 +362,19 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                 />
 
                 <ScoreSlider
-                  label="Acting"
+                  label="演員表現"
                   value={form.acting}
                   onChange={(v) => update('acting', v)}
                   animated={animated}
                 />
                 <ScoreSlider
-                  label="Cinematography"
+                  label="攝影畫面"
                   value={form.cinematography}
                   onChange={(v) => update('cinematography', v)}
                   animated={animated}
                 />
                 <ScoreSlider
-                  label="Soundtrack"
+                  label="配樂音效"
                   value={form.soundtrack}
                   onChange={(v) => update('soundtrack', v)}
                   animated={animated}
@@ -399,10 +399,10 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                     >
                       ⟳
                     </motion.span>
-                    Saving...
+                    儲存中...
                   </span>
                 ) : (
-                  isEdit ? '💾 Update Review' : '🚀 Publish Review'
+                  isEdit ? '💾 更新影評' : '🚀 發布影評'
                 )}
               </motion.button>
             </div>
