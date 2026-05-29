@@ -8,6 +8,7 @@ import SpotifyEmbed from './SpotifyEmbed';
 import ShareCard from './ShareCard';
 import { useAdmin } from './AdminAuth';
 import { useToast } from './Toast';
+import { useLanguage } from './LanguageContext';
 import {
   TMDB_IMG_BASE,
   FONT_MAP,
@@ -23,6 +24,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const navigate = useNavigate();
   const { requireAuth } = useAdmin();
   const { addToast } = useToast();
+  const { lang, toggleLanguage, t } = useLanguage();
 
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
@@ -48,7 +50,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const isEdited = review.updated_at && review.created_at && review.updated_at !== review.created_at;
 
   const handleDelete = () => {
-    if (!window.confirm('Delete this review permanently?')) return;
+    if (!window.confirm(t('confirmDelete'))) return;
 
     requireAuth(async (password) => {
       try {
@@ -57,7 +59,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           headers: { 'X-Admin-Password': password },
         });
         if (res.ok || res.status === 204) {
-          addToast('Review deleted.', 'success');
+          addToast(t('deleteSuccess'), 'success');
           onDeleted?.();
           navigate('/');
         } else {
@@ -79,11 +81,20 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Back Button - Fixed float to avoid being blocked by content */}
       <button
         onClick={() => navigate('/')}
-        className="group fixed top-6 left-6 z-[100] px-5 py-2 bg-[#FFB6C1] hover:bg-[#D4FF00] rounded-full shadow-lg transition-all flex items-center gap-2 border-none"
+        className="group fixed top-6 left-6 z-[100] px-5 py-2 bg-[#FFB6C1] hover:bg-[#D4FF00] rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
       >
         <span className="inline-block text-black font-bold font-[var(--font-jetbrains)] text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
-          ← BACK
+          {t('back')}
         </span>
+      </button>
+
+      {/* Language Toggle Button */}
+      <button
+        onClick={toggleLanguage}
+        className="fixed top-6 right-6 z-[100] px-4 py-2 bg-[#FFB6C1] hover:bg-[#D4FF00] rounded-full shadow-lg transition-all border-none font-[var(--font-jetbrains)] font-bold text-xs cursor-pointer text-black flex items-center gap-1 active:scale-95"
+      >
+        <span>🌐</span>
+        <span>{lang === 'en' ? '繁' : 'EN'}</span>
       </button>
 
       {/* Hero */}
@@ -325,24 +336,27 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       </div>
 
       {/* Vibrant Blue Neo-brutalist Footer */}
-      <div className="w-full bg-[#0000FF] text-white py-20 px-5">
+      <div className="w-full bg-[#0000FF] text-white py-16 md:py-20 px-5">
         <div className="max-w-5xl mx-auto flex flex-col items-center justify-center space-y-12 text-center">
           {/* Decorative Section Header */}
           <div className="space-y-4">
-            <h2 className="text-4xl md:text-6xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider">
-              CINEROOM JOURNAL 🍿
+            <h2 className="text-3xl md:text-6xl font-black font-[var(--font-bebas)] text-[#CCFF00] tracking-wider leading-none">
+              {t('footerTitle')}
             </h2>
             <div className="w-16 h-1 bg-[#CCFF00] mx-auto rounded-full" />
-            <p className="max-w-xl mx-auto text-sm md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)]">
-              A private catalog of your cinematic journeys. Keep tracking your watches, scores, and reviews.
+            <p 
+              className="max-w-xl mx-auto text-xs md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)] text-white px-2 md:px-0"
+              style={{ textAlign: 'justify', textJustify: 'inter-word' }}
+            >
+              {t('footerDesc')}
             </p>
           </div>
 
           {/* Watch History */}
           {watchDates.length > 0 && (
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-2xl px-2">
               <h3 className="text-xl font-black font-[var(--font-bebas)] text-white tracking-widest mb-6">
-                🕒 WATCH HISTORY
+                {t('watchHistoryUpper')}
               </h3>
               <div className="flex flex-wrap justify-center gap-4">
                 {watchDates.map((date, i) => (
@@ -362,35 +376,38 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-4 w-full">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-4 w-full px-4 sm:px-0">
             <button
               onClick={onEdit}
-              className="group flex items-center gap-2 px-8 py-3 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"
+              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
             >
-              <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
-                ✏️ Edit Review
+              <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
+                {t('editReview')}
               </span>
             </button>
 
-            <ShareCard review={review} />
+            <ShareCard 
+              review={review} 
+              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#CCFF00] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95" 
+            />
 
             <button
               onClick={handleDelete}
-              className="group flex items-center gap-2 px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"
+              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95 sm:ml-auto"
             >
-              <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
-                🗑️ Delete Review
+              <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
+                {t('deleteReview')}
               </span>
             </button>
           </div>
 
           {/* Timestamps */}
-          <div className="text-xs font-bold font-[var(--font-jetbrains)] text-white/60 flex flex-wrap justify-center gap-6 pt-8 border-t border-white/10 w-full">
+          <div className="text-[10px] md:text-xs font-bold font-[var(--font-jetbrains)] text-white/50 flex flex-wrap justify-center gap-6 pt-8 border-t border-white/10 w-full">
             {review.created_at && (
-              <span>Created: {formatDate(review.created_at)}</span>
+              <span>{t('created')} {formatDate(review.created_at)}</span>
             )}
             {isEdited && (
-              <span>Updated: {formatDate(review.updated_at)}</span>
+              <span>{t('updated')} {formatDate(review.updated_at)}</span>
             )}
           </div>
         </div>

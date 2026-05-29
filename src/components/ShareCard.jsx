@@ -1,7 +1,7 @@
 import { useRef, useCallback } from 'react';
 import { TMDB_IMG_BASE, FONT_MAP, computeEntertainment, computeCinematic, computeTotal, getScoreColor } from '../utils/constants';
 
-export default function ShareCard({ review }) {
+export default function ShareCard({ review, className }) {
   const cardRef = useRef(null);
 
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
@@ -95,12 +95,39 @@ export default function ShareCard({ review }) {
             }}
           />
 
-          {/* Brand/Watermark */}
-          <div className="absolute top-8 left-8 flex items-center gap-3 opacity-90">
+          {/* Right Aligned Watermark & Curated Description */}
+          <div 
+            style={{
+              position: 'absolute',
+              top: '80px',
+              right: '80px',
+              textAlign: 'right',
+              maxWidth: '650px',
+              opacity: 0.95,
+              zIndex: 50,
+            }}
+          >
+            <div style={{ fontSize: '32px', fontWeight: 900, color: '#CCFF00', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '8px' }}>
+              CINEROOM is my creative movie journal 🎬
+            </div>
+            <div 
+              style={{ 
+                fontSize: '18px', 
+                color: '#ffffff', 
+                opacity: 0.8, 
+                lineHeight: 1.5, 
+                fontFamily: "'Inter', sans-serif",
+                textAlign: 'justify',
+                textJustify: 'inter-word'
+              }}
+            >
+              CINEROOM is a multidisciplinary journal of cinematic ratings, deep-dive reviews, and raw visual thoughts curated by me. I explore, play, and make movie logs fizzzzz with life and personality. I strongly believe that reviewing movies is about more than just giving stars— it's about capturing the soul of storytelling in my signature aesthetic! 🎬✨🍿
+            </div>
+          </div>
+
+          {/* Left indicator circle to add premium visual pop */}
+          <div className="absolute top-20 left-20 flex items-center gap-3 opacity-90">
             <div className="w-8 h-8 bg-[#FE494A] rounded-full" />
-            <span className="text-xl font-black font-[var(--font-bebas)] text-white tracking-widest uppercase">
-              CineRoom
-            </span>
           </div>
 
           {/* Content */}
@@ -200,7 +227,7 @@ export default function ShareCard({ review }) {
 
       <button
         onClick={handleShare}
-        className="group flex items-center gap-2 px-8 py-3 rounded-full bg-[#CCFF00] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"
+        className={className || "group flex items-center gap-2 px-8 py-3 rounded-full bg-[#CCFF00] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"}
       >
         <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
           📱 Share to Story
