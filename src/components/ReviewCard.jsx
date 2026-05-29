@@ -71,7 +71,7 @@ export default function ReviewCard({ review, index = 0 }) {
         <div className="flex flex-col justify-end mt-auto overflow-hidden">
           {/* Genre Pills */}
           {genres.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-2">
+            <div className="flex flex-wrap gap-1.5 mb-2 pr-14">
               {genres.slice(0, 3).map((genre, i) => {
                 const genreName = typeof genre === 'string' ? genre : genre.name;
                 return (
@@ -83,11 +83,6 @@ export default function ReviewCard({ review, index = 0 }) {
                   </span>
                 );
               })}
-              {review.runtime && (
-                <span className="text-[10px] uppercase tracking-wider font-bold text-white bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-md">
-                  {review.runtime} min
-                </span>
-              )}
             </div>
           )}
 
@@ -96,10 +91,18 @@ export default function ReviewCard({ review, index = 0 }) {
             {review.title}
           </h3>
 
-          {/* Release Year */}
-          {review.release_date && (
-            <p className="text-xs font-semibold text-white/90 mb-2">
-              {new Date(review.release_date).getFullYear()}
+          {/* Release Year + Runtime */}
+          {(review.release_date || review.runtime) && (
+            <p className="text-xs font-semibold text-white/90 mb-2 flex items-center gap-1.5">
+              {review.release_date && (
+                <span>{new Date(review.release_date).getFullYear()}</span>
+              )}
+              {review.release_date && review.runtime && (
+                <span className="text-white/50">·</span>
+              )}
+              {review.runtime && (
+                <span>{review.runtime} min</span>
+              )}
             </p>
           )}
 
