@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, getScoreColor } from '../utils/constants';
+import { useLanguage } from './LanguageContext';
 
 export default function ReviewCard({ review, index = 0 }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
@@ -115,7 +117,7 @@ export default function ReviewCard({ review, index = 0 }) {
 
           {/* CTA */}
           <div className="flex items-center gap-2 text-[#FFB6C1] text-xs font-bold uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
-            <span>閱讀影評</span>
+            <span>{t('readReview')}</span>
             <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
           </div>
         </div>

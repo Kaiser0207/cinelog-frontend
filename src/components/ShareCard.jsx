@@ -17,11 +17,13 @@ export default function ShareCard({ review, className }) {
     : '';
 
   const fontFamily = FONT_MAP[review.review_font] || FONT_MAP['Outfit'];
-  const bgImage = review.poster_path
-    ? `${TMDB_IMG_BASE}w780${review.poster_path}`
-    : review.backdrop_path
-      ? `${TMDB_IMG_BASE}w780${review.backdrop_path}`
-      : null;
+  const bgImage = review.custom_backdrop_url
+    ? review.custom_backdrop_url
+    : review.poster_path
+      ? `${TMDB_IMG_BASE}w780${review.poster_path}`
+      : review.backdrop_path
+        ? `${TMDB_IMG_BASE}w780${review.backdrop_path}`
+        : null;
 
   const handleShare = useCallback(async () => {
     const html2canvas = (await import('html2canvas')).default;

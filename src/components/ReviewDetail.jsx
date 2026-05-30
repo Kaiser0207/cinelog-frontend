@@ -192,7 +192,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         >
           {/* Total Score */}
           <div className="glass p-6 flex flex-col items-center justify-center text-center rounded-lg border border-border-subtle relative">
-            <p className="absolute top-6 left-6 text-sm font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted">Total Score</p>
+            <p className="absolute top-6 left-6 text-sm font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted">{t('totalScore')}</p>
             <span className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#FE494A] mt-6">
               {total.toFixed(1)}
             </span>
@@ -202,26 +202,26 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           {/* Entertainment */}
           <div className="glass p-6 space-y-4 rounded-lg border border-border-subtle">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-text-primary">🎭 Entertainment</h3>
+              <h3 className="text-sm font-semibold text-text-primary">🎭 {t('entertainment')}</h3>
               <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
                 {entertainment.toFixed(1)}
               </span>
             </div>
-            <ScoreSlider label="Emotion" value={review.emotion || 0} readOnly />
-            <ScoreSlider label="Pacing" value={review.pacing || 0} readOnly />
+            <ScoreSlider label={t('emotion')} value={review.emotion || 0} readOnly />
+            <ScoreSlider label={t('pacing')} value={review.pacing || 0} readOnly />
           </div>
 
           {/* Cinematic */}
           <div className="glass p-6 space-y-4 rounded-lg border border-border-subtle">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-text-primary">🎬 Cinematic</h3>
+              <h3 className="text-sm font-semibold text-text-primary">🎬 {t('cinematic')}</h3>
               <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
                 {cinematic.toFixed(1)}
               </span>
             </div>
-            <ScoreSlider label="Acting" value={review.acting || 0} readOnly />
-            <ScoreSlider label="Cinematography" value={review.cinematography || 0} readOnly />
-            <ScoreSlider label="Soundtrack" value={review.soundtrack || 0} readOnly />
+            <ScoreSlider label={t('acting')} value={review.acting || 0} readOnly />
+            <ScoreSlider label={t('cinematography')} value={review.cinematography || 0} readOnly />
+            <ScoreSlider label={t('soundtrack')} value={review.soundtrack || 0} readOnly />
           </div>
         </motion.div>
 
@@ -234,7 +234,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             className="glass p-6 rounded-lg border border-border-subtle"
           >
             <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
-              Synopsis
+              {t('synopsis')}
             </h3>
             <p className="text-text-primary leading-relaxed text-sm">{review.overview}</p>
           </motion.div>
@@ -247,7 +247,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           transition={{ delay: 0.6 }}
         >
           <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FFB6C1] uppercase tracking-wider mb-4 border-b-4 border-[#FFB6C1] pb-2">
-            Review
+            {t('review')}
           </h3>
           <div
             className="prose-cinelog"
@@ -268,7 +268,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             className="border border-accent-blue/30 rounded-lg bg-[#1A1A1A] p-6 my-8"
           >
             <h3 className="text-3xl font-black font-[var(--font-bebas)] uppercase text-accent-blue mb-4">
-              🤖 AI Director's Cut
+              🤖 {t('aiDirectorsCut')}
             </h3>
             {review.ai_recommendation && (
               <p className="text-white text-lg font-medium leading-relaxed font-[var(--font-inter)] mb-6">
@@ -279,7 +279,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             {review.ai_related_movies && review.ai_related_movies.length > 0 && (
               <div className="border-t-2 border-accent-blue/30 pt-4">
                 <h4 className="text-sm font-bold uppercase text-accent-blue/80 tracking-widest mb-3">
-                  Also Watch
+                  {t('alsoWatch')}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {review.ai_related_movies.map((movieTitle, i) => (

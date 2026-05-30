@@ -78,6 +78,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
 
   const [animated, setAnimated] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -120,6 +121,38 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
     update('spotify_track_id', track.track_id || track.id || '');
     update('spotify_track_name', track.name || '');
     update('spotify_artist_name', track.artist || '');
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const res = await fetch(`${API_URL}/api/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Construct full URL if needed, assuming API_URL is the base
+        const fullUrl = data.url.startsWith('http') ? data.url : `${API_URL}${data.url}`;
+        update('custom_backdrop_url', fullUrl);
+        update('backdrop_path', ''); // Clear TMDB backdrop
+        addToast('圖片上傳成功！', 'success');
+      } else {
+        throw new Error('Upload failed');
+      }
+    } catch (err) {
+      addToast('圖片上傳失敗', 'error');
+    } finally {
+      setUploadingImage(false);
+      // Reset input value to allow uploading the same file again if needed
+      e.target.value = '';
+    }
   };
 
   const handleSave = () => {
@@ -297,13 +330,29 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                       ))}
                     </div>
                   )}
-                  <input
-                    type="text"
-                    value={form.custom_backdrop_url}
-                    onChange={(e) => update('custom_backdrop_url', e.target.value)}
-                    placeholder="Or paste a custom image URL..."
-                    className="w-full bg-[#E8E2D2] border border-border-subtle p-3 text-sm rounded-lg focus:outline-none focus:border-black/50 transition-colors text-black placeholder-black/40"
-                  />
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={form.custom_backdrop_url}
+                      onChange={(e) => update('custom_backdrop_url', e.target.value)}
+                      placeholder="Or paste a custom image URL..."
+                      className="flex-1 bg-[#E8E2D2] border border-border-subtle p-3 text-sm rounded-lg focus:outline-none focus:border-black/50 transition-colors text-black placeholder-black/40"
+                    />
+                    <label className="cursor-pointer bg-[#CCFF00] hover:bg-[#D4FF00] text-black font-bold px-4 py-3 rounded-lg text-sm whitespace-nowrap transition-colors flex items-center justify-center min-w-[100px]">
+                      {uploadingImage ? (
+                        <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>⟳</motion.span>
+                      ) : (
+                        '📁 上傳檔案'
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleFileUpload}
+                        disabled={uploadingImage}
+                      />
+                    </label>
+                  </div>
                 </div>
               )}
 
