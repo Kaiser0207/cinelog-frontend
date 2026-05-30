@@ -34,8 +34,8 @@ export const translations = {
     // DetailPage
     back: "← BACK",
     totalScore: "Total Score",
-    entertainment: "🎭 Entertainment",
-    cinematic: "🎬 Cinematic",
+    entertainment: "Entertainment",
+    cinematic: "Cinematic",
     synopsis: "Synopsis",
     review: "Review",
     aiDirectorsCut: "AI Director's Cut",
@@ -89,8 +89,8 @@ export const translations = {
     // DetailPage
     back: "← 返回",
     totalScore: "總體評分",
-    entertainment: "🎭 娛樂指標",
-    cinematic: "🎬 藝術指標",
+    entertainment: "娛樂指標",
+    cinematic: "藝術指標",
     synopsis: "劇情簡介",
     review: "深度影評",
     aiDirectorsCut: "AI 導演剪輯版",
