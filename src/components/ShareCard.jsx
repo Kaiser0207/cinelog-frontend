@@ -7,9 +7,15 @@ export default function ShareCard({ review, className }) {
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
   const total = computeTotal(entertainment, cinematic);
+  
+  const getScoreColor = (score) => {
+    if (score >= 9) return '#1db954'; // Green
+    if (score >= 7) return '#f5c518'; // Yellow
+    if (score >= 5) return '#e50914'; // Red
+    return '#6b6b80'; // Gray
+  };
 
   const fontFamily = FONT_MAP[review.review_font] || FONT_MAP['Outfit'];
-  // Remove CSS variables from fontFamily string if present, fallback to sans-serif
   const cleanFontFamily = fontFamily.replace(/var\(--font-\w+\)/, '').replace(/['"]/g, '').trim() || 'sans-serif';
 
   const handleShare = useCallback(async () => {
@@ -56,21 +62,49 @@ export default function ShareCard({ review, className }) {
             boxSizing: 'border-box',
             fontFamily: "'Inter', sans-serif",
             color: '#ffffff',
-            // No background color, it will be transparent
+            backgroundColor: 'transparent', // Explicitly transparent
           }}
         >
-          {/* Header: 《Title》Score/10 */}
-          <div
+          {/* CINEROOMS Watermark */}
+          <div 
             style={{
-              fontSize: '64px',
-              fontWeight: 500,
-              fontFamily: 'monospace',
-              letterSpacing: '-1px',
-              marginBottom: '40px',
-              textShadow: '0 2px 10px rgba(0,0,0,0.5)'
+              textAlign: 'right',
+              marginBottom: '60px',
+              opacity: 0.95,
             }}
           >
-            《{review.title}》{total.toFixed(1)}/10
+            <div style={{ fontSize: '32px', fontWeight: 900, color: '#CCFF00', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '2px', textTransform: 'uppercase' }}>
+              CINEROOMS is my creative movie journal 🎬
+            </div>
+          </div>
+
+          {/* Neo-brutalist Score & Title */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '50px' }}>
+            <div
+              style={{
+                fontSize: '180px',
+                fontWeight: 900,
+                fontFamily: "'Outfit', sans-serif",
+                color: getScoreColor(total),
+                textShadow: `0 0 40px ${getScoreColor(total)}80, 0 4px 10px rgba(0,0,0,0.8)`,
+                lineHeight: 1,
+              }}
+            >
+              {total.toFixed(1)}
+            </div>
+            
+            <div
+              style={{
+                fontSize: '72px',
+                fontWeight: 800,
+                fontFamily: cleanFontFamily || "'Outfit', sans-serif",
+                color: '#ffffff',
+                lineHeight: 1.1,
+                textShadow: '0 4px 15px rgba(0,0,0,0.9)',
+              }}
+            >
+              {review.title}
+            </div>
           </div>
 
           {/* Full Review Text */}
