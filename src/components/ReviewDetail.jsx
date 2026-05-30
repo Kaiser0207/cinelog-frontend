@@ -503,8 +503,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
           >
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: getScoreColor(total) }} />
-              <span className="text-3xl font-black font-[var(--font-bebas)] tabular-nums tracking-wide" style={{ color: getScoreColor(total) }}>
+              <span className="w-3 h-3 rounded-full bg-[#FE494A]" />
+              <span className="text-3xl font-black font-[var(--font-bebas)] tabular-nums tracking-wide text-[#FE494A]">
                 {total.toFixed(1)}
               </span>
               <span className="text-xs text-text-dim font-bold mt-1">/10</span>
