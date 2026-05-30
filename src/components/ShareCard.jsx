@@ -1,5 +1,5 @@
 import { useRef, useCallback } from 'react';
-import { TMDB_IMG_BASE, FONT_MAP, computeEntertainment, computeCinematic, computeTotal, getScoreColor } from '../utils/constants';
+import { FONT_MAP, computeEntertainment, computeCinematic, computeTotal } from '../utils/constants';
 
 export default function ShareCard({ review, className }) {
   const cardRef = useRef(null);
@@ -8,29 +8,16 @@ export default function ShareCard({ review, className }) {
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
   const total = computeTotal(entertainment, cinematic);
 
-  const genres = review.genres
-    ? (typeof review.genres === 'string' ? JSON.parse(review.genres) : review.genres)
-    : [];
-
-  const teaser = review.review_text
-    ? review.review_text.replace(/[#*_~`>]/g, '').slice(0, 160) + (review.review_text.length > 160 ? '...' : '')
-    : '';
-
   const fontFamily = FONT_MAP[review.review_font] || FONT_MAP['Outfit'];
-  const bgImage = review.custom_backdrop_url
-    ? review.custom_backdrop_url
-    : review.poster_path
-      ? `${TMDB_IMG_BASE}w780${review.poster_path}`
-      : review.backdrop_path
-        ? `${TMDB_IMG_BASE}w780${review.backdrop_path}`
-        : null;
+  // Remove CSS variables from fontFamily string if present, fallback to sans-serif
+  const cleanFontFamily = fontFamily.replace(/var\(--font-\w+\)/, '').replace(/['"]/g, '').trim() || 'sans-serif';
 
   const handleShare = useCallback(async () => {
     const html2canvas = (await import('html2canvas')).default;
     const canvas = await html2canvas(cardRef.current, {
       scale: 2,
       useCORS: true,
-      backgroundColor: '#07070d',
+      backgroundColor: null, // Transparent background
       logging: false,
     });
 
@@ -64,166 +51,42 @@ export default function ShareCard({ review, className }) {
         <div
           ref={cardRef}
           style={{
-            width: '1080px',
-            height: '1920px',
-            position: 'relative',
-            overflow: 'hidden',
-            backgroundColor: '#07070d',
+            width: '1000px', // Fixed width for Instagram sticker
+            padding: '40px',
+            boxSizing: 'border-box',
             fontFamily: "'Inter', sans-serif",
+            color: '#ffffff',
+            // No background color, it will be transparent
           }}
         >
-          {/* Background Image */}
-          {bgImage && (
-            <img
-              src={bgImage}
-              alt=""
-              crossOrigin="anonymous"
+          {/* Header: 《Title》Score/10 */}
+          <div
+            style={{
+              fontSize: '64px',
+              fontWeight: 500,
+              fontFamily: 'monospace',
+              letterSpacing: '-1px',
+              marginBottom: '40px',
+              textShadow: '0 2px 10px rgba(0,0,0,0.5)'
+            }}
+          >
+            《{review.title}》{total.toFixed(1)}/10
+          </div>
+
+          {/* Full Review Text */}
+          {review.review_text && (
+            <div
               style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
+                fontSize: '42px',
+                lineHeight: 1.6,
+                fontFamily: cleanFontFamily,
+                whiteSpace: 'pre-wrap',
+                textShadow: '0 2px 10px rgba(0,0,0,0.5)'
               }}
-            />
+            >
+              {review.review_text.replace(/[#*_~`>]/g, '')}
+            </div>
           )}
-
-          {/* Dark Overlay */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.95) 100%)',
-            }}
-          />
-
-          {/* Right Aligned Watermark & Curated Description */}
-          <div 
-            style={{
-              position: 'absolute',
-              top: '80px',
-              right: '80px',
-              textAlign: 'right',
-              maxWidth: '650px',
-              opacity: 0.95,
-              zIndex: 50,
-            }}
-          >
-            <div style={{ fontSize: '32px', fontWeight: 900, color: '#CCFF00', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '8px' }}>
-              CINEROOMS is my creative movie journal 🎬
-            </div>
-            <div 
-              style={{ 
-                fontSize: '18px', 
-                color: '#ffffff', 
-                opacity: 0.8, 
-                lineHeight: 1.5, 
-                fontFamily: "'Inter', sans-serif",
-                textAlign: 'justify',
-                textJustify: 'inter-word'
-              }}
-            >
-              CINEROOMS is a multidisciplinary journal of cinematic ratings, deep-dive reviews, and raw visual thoughts curated by me. I explore, play, and make movie logs fizzzzz with life and personality. I strongly believe that reviewing movies is about more than just giving stars— it's about capturing the soul of storytelling in my signature aesthetic! 🎬✨🍿
-            </div>
-          </div>
-
-          {/* Left indicator circle to add premium visual pop */}
-          <div className="absolute top-20 left-20 flex items-center gap-3 opacity-90">
-            <div className="w-8 h-8 bg-[#FE494A] rounded-full" />
-          </div>
-
-          {/* Content */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              padding: '80px',
-            }}
-          >
-            {/* Score */}
-            <div
-              style={{
-                fontSize: '180px',
-                fontWeight: 900,
-                fontFamily: "'Outfit', sans-serif",
-                color: getScoreColor(total),
-                textShadow: `0 0 60px ${getScoreColor(total)}80`,
-                lineHeight: 1,
-                marginBottom: '20px',
-              }}
-            >
-              {total.toFixed(1)}
-            </div>
-
-            {/* Title */}
-            <div
-              style={{
-                fontSize: '72px',
-                fontWeight: 800,
-                fontFamily: fontFamily.replace(/var\(--font-\w+\)/, '').replace(/['"]/g, '') || "'Outfit', sans-serif",
-                color: '#ffffff',
-                lineHeight: 1.1,
-                marginBottom: '20px',
-              }}
-            >
-              {review.title}
-            </div>
-
-            {/* Year + Genres */}
-            <div
-              style={{
-                fontSize: '28px',
-                color: 'rgba(255,255,255,0.5)',
-                marginBottom: '30px',
-                display: 'flex',
-                gap: '20px',
-                flexWrap: 'wrap',
-              }}
-            >
-              {review.release_date && (
-                <span>{new Date(review.release_date).getFullYear()}</span>
-              )}
-              {genres.slice(0, 3).map((g, i) => (
-                <span key={i}>{typeof g === 'string' ? g : g.name}</span>
-              ))}
-            </div>
-
-            {/* Review Teaser */}
-            {teaser && (
-              <div
-                style={{
-                  fontSize: '32px',
-                  color: 'rgba(255,255,255,0.65)',
-                  lineHeight: 1.6,
-                  marginBottom: '40px',
-                  maxHeight: '200px',
-                  overflow: 'hidden',
-                  fontFamily: fontFamily.replace(/var\(--font-\w+\)/, '').replace(/['"]/g, '') || "'Inter', sans-serif",
-                }}
-              >
-                {teaser}
-              </div>
-            )}
-
-            {/* Spotify Track */}
-            {review.spotify_track_name && (
-              <div
-                style={{
-                  fontSize: '24px',
-                  color: '#1db954',
-                  marginBottom: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
-                🎵 {review.spotify_track_name}
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
