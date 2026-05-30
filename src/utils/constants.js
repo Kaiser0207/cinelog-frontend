@@ -75,6 +75,7 @@ export function flattenReview(review) {
   const { movie, ...rest } = review;
   return {
     ...rest,
+    tmdb_id: movie.tmdb_id,
     title: movie.title,
     poster_path: movie.poster_path,
     backdrop_path: movie.backdrop_path,
