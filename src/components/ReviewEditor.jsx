@@ -188,6 +188,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               custom_backdrop_url: form.custom_backdrop_url || null,
               ai_recommendation: form.ai_recommendation || null,
               ai_related_movies: form.ai_related_movies || [],
+              watch_dates: form.watch_dates,
             }
           : {
               tmdb_id: form.tmdb_id,
