@@ -499,27 +499,27 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             animate={{ y: 0 }}
             transition={{ delay: 0.5, type: 'spring', damping: 20 }}
             onClick={() => setMobileScoreOpen(true)}
-            className="w-full flex items-center justify-around px-6 py-3 bg-bg-deep/85 backdrop-blur-2xl border-t border-white/10 cursor-pointer border-x-0 border-b-0"
-            style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
+            className="w-full flex items-center justify-around px-6 py-4 bg-bg-deep/85 backdrop-blur-2xl border-t border-white/10 cursor-pointer border-x-0 border-b-0"
+            style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
           >
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getScoreColor(total) }} />
-              <span className="text-xl font-black font-[var(--font-bebas)] tabular-nums" style={{ color: getScoreColor(total) }}>
+              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: getScoreColor(total) }} />
+              <span className="text-3xl font-black font-[var(--font-bebas)] tabular-nums tracking-wide" style={{ color: getScoreColor(total) }}>
                 {total.toFixed(1)}
               </span>
-              <span className="text-[10px] text-text-dim font-bold">/10</span>
+              <span className="text-xs text-text-dim font-bold mt-1">/10</span>
             </div>
-            <div className="w-px h-5 bg-white/10" />
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-text-muted">🎭</span>
-              <span className="text-sm font-bold text-text-primary tabular-nums">{entertainment.toFixed(1)}</span>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="flex items-center gap-2">
+              <span className="text-base text-text-muted">🎭</span>
+              <span className="text-lg font-bold text-text-primary tabular-nums">{entertainment.toFixed(1)}</span>
             </div>
-            <div className="w-px h-5 bg-white/10" />
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-text-muted">🎬</span>
-              <span className="text-sm font-bold text-text-primary tabular-nums">{cinematic.toFixed(1)}</span>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="flex items-center gap-2">
+              <span className="text-base text-text-muted">🎬</span>
+              <span className="text-lg font-bold text-text-primary tabular-nums">{cinematic.toFixed(1)}</span>
             </div>
-            <span className="text-text-dim text-xs ml-1">▲</span>
+            <span className="text-text-dim text-sm ml-2 animate-bounce">▲</span>
           </motion.button>
         )}
       </div>
