@@ -79,7 +79,7 @@ export default function ShareCard({ review, className }) {
           </div>
 
           {/* Neo-brutalist Score & Title */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '50px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', marginBottom: '50px' }}>
             <div
               style={{
                 fontSize: '180px',
