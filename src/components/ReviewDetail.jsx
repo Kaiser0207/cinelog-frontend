@@ -94,7 +94,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Total Score */}
       <div className="glass p-6 flex flex-col items-center justify-center text-center rounded-lg border border-border-subtle relative">
         <p className="absolute top-6 left-6 text-sm font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted">{t('totalScore')}</p>
-        <span className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#FE494A] mt-6">
+        <span className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#69E147] mt-6">
           {total.toFixed(1)}
         </span>
         <p className="text-sm font-bold font-[var(--font-bebas)] text-text-dim mt-2">/ 10.0</p>
@@ -503,8 +503,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
           >
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#FE494A]" />
-              <span className="text-3xl font-black font-[var(--font-bebas)] tabular-nums tracking-wide text-[#FE494A]">
+              <span className="w-3 h-3 rounded-full bg-[#69E147]" />
+              <span className="text-3xl font-black font-[var(--font-bebas)] tabular-nums tracking-wide text-[#69E147]">
                 {total.toFixed(1)}
               </span>
               <span className="text-xs text-text-dim font-bold mt-1">/10</span>
@@ -560,7 +560,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                     whileHover={{ scale: 1.05 }}
                     className="flex items-center gap-3 bg-white/10 text-white px-6 py-2.5 rounded-2xl border border-white/20 shadow-sm backdrop-blur-sm"
                   >
-                    <span className="text-xs font-black uppercase text-[#FF1493] font-[var(--font-jetbrains)] bg-[#FF1493]/15 px-2 py-0.5 rounded">
+                    <span className="text-xs font-black uppercase text-[#69E147] font-[var(--font-jetbrains)] bg-[#69E147]/15 px-2 py-0.5 rounded">
                       {['1st', '2nd', '3rd'][i] || `${i + 1}th`}
                     </span>
                     <span className="text-base font-bold font-[var(--font-jetbrains)]">{formatDate(date)}</span>
@@ -575,7 +575,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             {isAdmin && (
               <button
                 onClick={onEdit}
-                className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
+                className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#69E147] hover:bg-[#CCFF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
               >
                 <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
                   {t('editReview')}

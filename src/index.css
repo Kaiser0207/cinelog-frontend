@@ -8,7 +8,7 @@
   --color-bg-glass: rgba(240, 234, 214, 0.9);
   --color-bg-card: #E8E2D2;
   --color-bg-elevated: #F5EFE1;
-  --color-accent-red: #FF1493; /* Bright Pink */
+  --color-accent-red: #69E147; /* Neon Green */
   --color-accent-gold: #CCFF00; /* Neon Lime Green */
   --color-accent-blue: #00FFCC; /* Cyan / Lime */
   --color-accent-amber: #CCFF00; /* Neon Lime Green */
@@ -16,7 +16,7 @@
   --color-text-muted: #5A5A5A;
   --color-text-dim: #8A8A8A;
   --color-border-subtle: rgba(26, 26, 26, 0.15);
-  --color-border-active: #FE494A;
+  --color-border-active: #69E147;
 
   --font-inter: 'Inter', system-ui, sans-serif;
   --font-outfit: 'Outfit', system-ui, sans-serif;
@@ -31,12 +31,12 @@
 
 /* ── Base Styles ── */
 ::selection {
-  background-color: #FE494A;
-  color: #FFFFFF;
+  background-color: #69E147;
+  color: #1A1A1A;
 }
 ::-moz-selection {
-  background-color: #FE494A;
-  color: #FFFFFF;
+  background-color: #69E147;
+  color: #1A1A1A;
 }
 
 html {
@@ -112,8 +112,8 @@ body {
   100% { background-position: 200% 0; }
 }
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(254, 73, 74, 0.3), 0 0 24px rgba(254, 73, 74, 0.1); }
-  50% { box-shadow: 0 0 16px rgba(254, 73, 74, 0.6), 0 0 48px rgba(254, 73, 74, 0.2); }
+  0%, 100% { box-shadow: 0 0 8px rgba(105, 225, 71, 0.3), 0 0 24px rgba(105, 225, 71, 0.1); }
+  50% { box-shadow: 0 0 16px rgba(105, 225, 71, 0.6), 0 0 48px rgba(105, 225, 71, 0.2); }
 }
 
 .fade-in {
@@ -132,8 +132,8 @@ body {
 }
 
 /* ── Glow Effects ── */
-.glow-red {
-  box-shadow: 0 0 20px rgba(254, 73, 74, 0.3), 0 0 60px rgba(254, 73, 74, 0.1);
+.glow-red, .glow-green {
+  box-shadow: 0 0 20px rgba(105, 225, 71, 0.3), 0 0 60px rgba(105, 225, 71, 0.1);
 }
 .glow-gold {
   text-shadow: 0 0 20px rgba(245, 197, 24, 0.4), 0 0 60px rgba(245, 197, 24, 0.15);

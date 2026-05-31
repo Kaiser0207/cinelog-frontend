@@ -62,7 +62,7 @@ export default function ReviewCard({ review, index = 0 }) {
             }}
           >
             <span
-              className="text-xl font-black font-[var(--font-outfit)] text-[#FE494A]"
+              className="text-xl font-black font-[var(--font-outfit)] text-[#69E147]"
             >
               {total.toFixed(1)}
             </span>
