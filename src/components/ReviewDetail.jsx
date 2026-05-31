@@ -348,7 +348,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 style={{ fontFamily }}
               >
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {review.review_text || ''}
+                  {(review.review_text || '').replace(/\n/g, '  \n')}
                 </ReactMarkdown>
               </div>
             </motion.div>
