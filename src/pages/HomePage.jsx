@@ -12,9 +12,31 @@ export default function HomePage() {
   const [showEditor, setShowEditor] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const { lang, toggleLanguage, t } = useLanguage();
-  const { isAdmin, requireAuth } = useAdmin();
+  const { isAdmin, requireAuth, openDeviceManager } = useAdmin();
   const [sortOpen, setSortOpen] = useState(false);
   const sortRef = useRef(null);
+  
+  const clickCount = useRef(0);
+  const clickTimer = useRef(null);
+
+  const handleAdminTrigger = () => {
+    clickCount.current += 1;
+    
+    if (clickTimer.current) clearTimeout(clickTimer.current);
+    
+    if (clickCount.current >= 5) {
+      clickCount.current = 0;
+      if (isAdmin) {
+        openDeviceManager();
+      } else {
+        requireAuth(() => {});
+      }
+    } else {
+      clickTimer.current = setTimeout(() => {
+        clickCount.current = 0;
+      }, 2000);
+    }
+  };
 
   // Close sort dropdown on outside click
   useEffect(() => {
@@ -189,8 +211,8 @@ export default function HomePage() {
 
           <div className="text-[10px] md:text-xs font-bold font-[var(--font-jetbrains)] text-white/50 border-t border-white/10 pt-8 w-full space-y-1">
             <p 
-              onClick={() => !isAdmin && requireAuth(() => {})} 
-              className={!isAdmin ? "cursor-default" : ""}
+              onClick={handleAdminTrigger} 
+              className="select-none cursor-pointer"
             >
               © {new Date().getFullYear()} CINEROOMS. {t('curatedBy')}
             </p>
