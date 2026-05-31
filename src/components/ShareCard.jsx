@@ -120,7 +120,7 @@ export default function ShareCard({ review, className }) {
               }}>
                  <div style={{
                    display: 'inline-block',
-                   padding: '5px 30px',
+                   padding: '2px 30px 15px 30px', // Asymmetric padding to visually center the font
                    background: 'rgba(0,0,0,0.85)',
                    borderRadius: '20px',
                    fontSize: '70px',
@@ -155,7 +155,7 @@ export default function ShareCard({ review, className }) {
                       <div key={i} style={{
                         display: 'inline-block',
                         background: 'rgba(255,255,255,0.2)',
-                        padding: '6px 20px',
+                        padding: '4px 20px 10px 20px', // Asymmetric padding
                         borderRadius: '12px',
                         fontSize: '22px',
                         fontWeight: 'bold',
