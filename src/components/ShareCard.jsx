@@ -73,13 +73,13 @@ export default function ShareCard({ review, className }) {
           style={{
             position: 'relative',
             width: '1080px',
-            aspectRatio: '4/5',
+            aspectRatio: '16/9',
             borderRadius: '40px',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
-            padding: '60px',
+            padding: '50px 60px',
             boxSizing: 'border-box',
             fontFamily: "'Inter', sans-serif",
             color: '#ffffff',
@@ -116,7 +116,7 @@ export default function ShareCard({ review, className }) {
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: '20px',
-                marginBottom: '20px' 
+                marginBottom: '15px' 
               }}>
                  <div style={{
                    display: 'inline-block',
@@ -148,7 +148,7 @@ export default function ShareCard({ review, className }) {
               <h1 style={{
                 fontSize: review.title.length > 25 ? '60px' : review.title.length > 15 ? '75px' : '85px',
                 fontWeight: 900,
-                margin: '0 0 40px 0',
+                margin: '0 0 15px 0',
                 lineHeight: 1.1,
                 fontFamily: cleanFontFamily,
                 textShadow: '0 4px 20px rgba(0,0,0,0.8)'
@@ -158,7 +158,7 @@ export default function ShareCard({ review, className }) {
 
               {/* Genres */}
               {genres.length > 0 && (
-                <div style={{ display: 'flex', gap: '15px', marginBottom: '40px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center' }}>
                    {genres.slice(0, 3).map((g, i) => (
                       <div key={i} style={{
                         display: 'inline-block',
@@ -186,18 +186,18 @@ export default function ShareCard({ review, className }) {
               {/* Short text snippet (Teaser) */}
               {review.review_text && (
                 <p style={{
-                  fontSize: '34px',
+                  fontSize: '30px',
                   color: 'rgba(255,255,255,0.9)',
                   lineHeight: 1.5,
                   display: '-webkit-box',
-                  WebkitLineClamp: 3,
+                  WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
-                  margin: '0 0 50px 0',
+                  margin: '0 0 25px 0',
                   fontFamily: cleanFontFamily,
                   textShadow: '0 2px 10px rgba(0,0,0,0.5)'
                 }}>
-                  {review.review_text.replace(/[#*_~`>]/g, '').slice(0, 150)}...
+                  {review.review_text.replace(/[#*_~`>]/g, '').slice(0, 100)}...
                 </p>
               )}
 
@@ -206,13 +206,13 @@ export default function ShareCard({ review, className }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingTop: '30px',
+                paddingTop: '20px',
                 borderTop: '2px solid rgba(255,255,255,0.2)'
               }}>
-                <div style={{ fontSize: '30px', color: '#CCFF00', fontWeight: 900 }}>
+                <div style={{ fontSize: '24px', color: '#CCFF00', fontWeight: 900 }}>
                   🔗 點擊連結閱讀完整影評
                 </div>
-                <div style={{ fontSize: '30px', fontWeight: 900, color: '#ffffff', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '2px' }}>
+                <div style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '2px' }}>
                   CINEROOMS
                 </div>
               </div>
