@@ -137,7 +137,7 @@ export default function HomePage() {
                 className={`ml-1 md:ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-all shrink-0 mr-0.5 md:mr-1 ${
                   searchMode === 'ai' 
                     ? 'bg-[#9D174D] text-[#E8E2D2] hover:bg-[#83113E] shadow-sm' 
-                    : 'bg-white shadow-sm text-[#9D174D] hover:bg-[#F3F0E6]'
+                    : 'bg-[#E8E2D2] shadow-sm text-[#9D174D] hover:bg-[#FFB6C1]'
                 }`}
               >
                 {searchMode === 'ai' ? '✦ AI' : '一般'}
