@@ -155,14 +155,14 @@ export default function HomePage() {
                 key={g}
                 data-cursor={isActive ? '' : 'FILTER'}
                 onClick={() => setGenre(g === 'All' ? '' : g)}
-                className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#9D174D] hover:border-[#9D174D] ${
+                className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#69E147] hover:border-[#69E147] ${
                   isActive
-                    ? 'bg-[#69E147] shadow-none border-transparent'
+                    ? 'bg-[#9D174D] shadow-none border-transparent'
                     : 'bg-[#E8E2D2] border border-border-subtle'
                 }`}
               >
-                <span className={`inline-block text-sm font-bold font-[var(--font-jetbrains)] uppercase transition-all duration-300 group-hover:text-white group-hover:scale-110 group-hover:font-black ${
-                  isActive ? 'text-black' : 'text-[#1A1A1A]/70'
+                <span className={`inline-block text-sm font-bold font-[var(--font-jetbrains)] uppercase transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
+                  isActive ? 'text-white' : 'text-[#1A1A1A]/70'
                 }`}>
                   {t(g)}
                 </span>

@@ -189,7 +189,7 @@ export default function ShareCard({ review, className }) {
                 paddingTop: '20px',
                 borderTop: '2px solid rgba(255,255,255,0.2)'
               }}>
-                <div style={{ fontSize: '24px', color: '#69E147', fontWeight: 900 }}>
+                <div style={{ fontSize: '24px', color: '#9D174D', fontWeight: 900 }}>
                   🔗 點擊連結閱讀完整影評
                 </div>
                 <div style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '2px' }}>

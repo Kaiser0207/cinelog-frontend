@@ -267,7 +267,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               >
                 {directors.length > 0 && (
                   <div>
-                    <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FFB6C1] uppercase tracking-wider mb-3 border-b-4 border-[#FFB6C1] pb-2">
+                    <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#9D174D] uppercase tracking-wider mb-3 border-b-4 border-[#9D174D] pb-2">
                       {t('directors')}
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -287,7 +287,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 )}
                 {writers.length > 0 && (
                   <div>
-                    <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FFB6C1] uppercase tracking-wider mb-3 border-b-4 border-[#FFB6C1] pb-2">
+                    <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#9D174D] uppercase tracking-wider mb-3 border-b-4 border-[#9D174D] pb-2">
                       {t('writers')}
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -315,7 +315,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FFB6C1] uppercase tracking-wider mb-4 border-b-4 border-[#FFB6C1] pb-2">
+                <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#9D174D] uppercase tracking-wider mb-4 border-b-4 border-[#9D174D] pb-2">
                   {t('cast')}
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -340,7 +340,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.65 }}
             >
-              <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FFB6C1] uppercase tracking-wider mb-4 border-b-4 border-[#FFB6C1] pb-2">
+              <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#9D174D] uppercase tracking-wider mb-4 border-b-4 border-[#9D174D] pb-2">
                 {t('review')}
               </h3>
               <div
@@ -575,7 +575,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             {isAdmin && (
               <button
                 onClick={onEdit}
-                className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#69E147] hover:bg-[#9D174D] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
+                className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#9D174D] hover:bg-[#69E147] hover:text-black text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
               >
                 <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
                   {t('editReview')}
@@ -585,7 +585,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
 
             <ShareCard 
               review={review} 
-              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#69E147] hover:bg-[#9D174D] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95" 
+              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#9D174D] hover:bg-[#69E147] hover:text-black text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95" 
             />
 
             {isAdmin && (
