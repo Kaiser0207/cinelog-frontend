@@ -137,7 +137,7 @@ export default function HomePage() {
                 className={`ml-1 md:ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-all shrink-0 mr-0.5 md:mr-1 ${
                   searchMode === 'ai' 
                     ? 'bg-[#9D174D] text-[#E8E2D2] hover:bg-[#83113E] shadow-sm' 
-                    : 'bg-transparent text-[#9D174D] hover:bg-[#1A1A1A]/5'
+                    : 'bg-white shadow-sm text-[#9D174D] hover:bg-[#F3F0E6]'
                 }`}
               >
                 {searchMode === 'ai' ? '✦ AI' : '一般'}
@@ -155,12 +155,46 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* Sort Dropdown - Next line on mobile */}
+
+        </div>
+      </div>
+
+      {/* Genre Filter - Floating overlapping the title */}
+      <div className="relative z-10 w-full px-5 -mt-12 mb-16 overflow-hidden">
+        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none items-center justify-start md:justify-center px-4 w-full">
+          {GENRE_PILLS.map((g) => {
+            const isActive = (g === 'All' && genre === '') || genre === g;
+            return (
+              <button
+                key={g}
+                data-cursor={isActive ? '' : 'FILTER'}
+                onClick={() => setGenre(g === 'All' ? '' : g)}
+                className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#69E147] hover:border-[#69E147] ${
+                  isActive
+                    ? 'bg-[#9D174D] shadow-none border-transparent'
+                    : 'bg-[#E8E2D2] border border-border-subtle'
+                }`}
+              >
+                <span className={`inline-block text-sm font-bold font-[var(--font-jetbrains)] uppercase transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
+                  isActive ? 'text-white' : 'text-[#1A1A1A]/70'
+                }`}>
+                  {t(g)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Feed */}
+      <main className="max-w-7xl mx-auto px-5 pb-24" key={refreshKey}>
+        {/* Sort Dropdown aligned to the right */}
+        <div className="flex justify-end mb-6">
           <div className="relative" ref={sortRef}>
             <button
               type="button"
               onClick={() => setSortOpen(!sortOpen)}
-              className="appearance-none text-xs md:text-sm bg-[#E8E2D2] border border-border-subtle rounded-full pl-4 md:pl-5 pr-10 md:pr-12 py-2 md:py-2.5 h-11 md:h-12 font-bold uppercase tracking-wider focus:border-[#FFB6C1] outline-none text-[#1A1A1A] transition-all cursor-pointer flex items-center gap-2 shadow-sm"
+              className="appearance-none text-xs md:text-sm bg-[#E8E2D2] border border-border-subtle rounded-full pl-4 md:pl-5 pr-10 md:pr-12 py-2 md:py-2.5 h-10 md:h-11 font-bold uppercase tracking-wider focus:border-[#FFB6C1] outline-none text-[#1A1A1A] transition-all cursor-pointer flex items-center gap-2 shadow-sm"
             >
               <span>{t(sort)}</span>
               <svg className={`w-4 h-4 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,37 +241,7 @@ export default function HomePage() {
             </AnimatePresence>
           </div>
         </div>
-      </div>
 
-      {/* Genre Filter - Floating overlapping the title */}
-      <div className="relative z-10 w-full px-5 -mt-12 mb-16 overflow-hidden">
-        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none items-center justify-start md:justify-center px-4 w-full">
-          {GENRE_PILLS.map((g) => {
-            const isActive = (g === 'All' && genre === '') || genre === g;
-            return (
-              <button
-                key={g}
-                data-cursor={isActive ? '' : 'FILTER'}
-                onClick={() => setGenre(g === 'All' ? '' : g)}
-                className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#69E147] hover:border-[#69E147] ${
-                  isActive
-                    ? 'bg-[#9D174D] shadow-none border-transparent'
-                    : 'bg-[#E8E2D2] border border-border-subtle'
-                }`}
-              >
-                <span className={`inline-block text-sm font-bold font-[var(--font-jetbrains)] uppercase transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
-                  isActive ? 'text-white' : 'text-[#1A1A1A]/70'
-                }`}>
-                  {t(g)}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Feed */}
-      <main className="max-w-7xl mx-auto px-5 pb-24" key={refreshKey}>
         <ReviewFeed sort={sort} genre={genre} searchQuery={searchQuery} searchMode={searchMode} />
       </main>
 
