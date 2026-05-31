@@ -20,17 +20,26 @@ export default function HomePage() {
   const clickTimer = useRef(null);
   
   const footerRef = useRef(null);
-  const [isOverFooter, setIsOverFooter] = useState(false);
+  const greenBtnRef = useRef(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsOverFooter(entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
-    if (footerRef.current) observer.observe(footerRef.current);
-    return () => observer.disconnect();
+    const handleScroll = () => {
+      if (!footerRef.current || !greenBtnRef.current) return;
+      const footerRect = footerRef.current.getBoundingClientRect();
+      const buttonTop = window.innerHeight - 24 - 56; // bottom-6 (24px) + h-14 (56px)
+      let clip = footerRect.top - buttonTop;
+      clip = Math.max(0, Math.min(56, clip));
+      greenBtnRef.current.style.clipPath = `inset(${clip}px 0 0 0)`;
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    handleScroll(); // Initial check
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
 
   const handleAdminTrigger = () => {
@@ -237,18 +246,25 @@ export default function HomePage() {
 
       {/* FAB */}
       {isAdmin && (
-        <motion.button
-          onClick={() => setShowEditor(true)}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className={`fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg text-3xl font-black flex items-center justify-center transition-all duration-300 shadow-lg border-none cursor-pointer ${
-            isOverFooter
-              ? 'bg-[#69E147] hover:bg-[#9D174D] hover:text-white text-black'
-              : 'bg-[#9D174D] hover:bg-[#69E147] hover:text-black text-white'
-          }`}
-        >
-          +
-        </motion.button>
+          <motion.div
+            onClick={() => setShowEditor(true)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="group fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg cursor-pointer shadow-lg overflow-hidden"
+          >
+            {/* Bottom Layer: Beige background -> Dark Pink */}
+            <div className="absolute inset-0 flex items-center justify-center text-3xl font-black bg-[#9D174D] group-hover:bg-[#69E147] group-hover:text-black text-white transition-all duration-300 pointer-events-none">
+              +
+            </div>
+            {/* Top Layer: Blue background -> Neon Green (Clipped) */}
+            <div 
+              ref={greenBtnRef}
+              style={{ clipPath: 'inset(56px 0 0 0)' }}
+              className="absolute inset-0 flex items-center justify-center text-3xl font-black bg-[#69E147] group-hover:bg-[#9D174D] group-hover:text-white text-black transition-all duration-300 pointer-events-none"
+            >
+              +
+            </div>
+          </motion.div>
       )}
 
       {/* Editor Modal */}
