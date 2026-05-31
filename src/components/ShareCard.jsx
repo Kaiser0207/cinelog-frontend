@@ -140,8 +140,8 @@ export default function ShareCard({ review, className }) {
               <h1 style={{
                 fontSize: '85px',
                 fontWeight: 900,
-                margin: '0 0 20px 0',
-                lineHeight: 1.1,
+                margin: '0 0 40px 0',
+                lineHeight: 1,
                 fontFamily: cleanFontFamily,
                 textShadow: '0 4px 20px rgba(0,0,0,0.8)'
               }}>
@@ -150,15 +150,16 @@ export default function ShareCard({ review, className }) {
 
               {/* Genres */}
               {genres.length > 0 && (
-                <div style={{ display: 'flex', gap: '15px', marginBottom: '40px' }}>
+                <div style={{ display: 'flex', gap: '15px', marginBottom: '40px', alignItems: 'center' }}>
                    {genres.slice(0, 3).map((g, i) => (
                       <span key={i} style={{
+                        display: 'inline-block',
                         background: 'rgba(255,255,255,0.2)',
-                        backdropFilter: 'blur(5px)',
                         padding: '10px 20px',
                         borderRadius: '12px',
                         fontSize: '24px',
                         fontWeight: 'bold',
+                        lineHeight: 1,
                         textTransform: 'uppercase'
                       }}>
                         {typeof g === 'string' ? g : g.name}
