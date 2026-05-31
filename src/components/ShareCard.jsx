@@ -152,7 +152,7 @@ export default function ShareCard({ review, className }) {
                       <div key={i} style={{
                         fontSize: '26px',
                         fontWeight: 'bold',
-                        color: '#CCFF00', // Bright cinematic color for tags
+                        color: '#69E147', // Bright cinematic color for tags
                         textTransform: 'uppercase',
                         textShadow: '0 2px 10px rgba(0,0,0,0.8)',
                         letterSpacing: '1px'
@@ -189,7 +189,7 @@ export default function ShareCard({ review, className }) {
                 paddingTop: '20px',
                 borderTop: '2px solid rgba(255,255,255,0.2)'
               }}>
-                <div style={{ fontSize: '24px', color: '#CCFF00', fontWeight: 900 }}>
+                <div style={{ fontSize: '24px', color: '#69E147', fontWeight: 900 }}>
                   🔗 點擊連結閱讀完整影評
                 </div>
                 <div style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '2px' }}>
@@ -202,7 +202,7 @@ export default function ShareCard({ review, className }) {
 
       <button
         onClick={handleShare}
-        className={className || "group flex items-center gap-2 px-8 py-3 rounded-full bg-[#69E147] hover:bg-[#D81B60] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"}
+        className={className || "group flex items-center gap-2 px-8 py-3 rounded-full bg-[#69E147] hover:bg-[#9D174D] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"}
       >
         <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
           📱 Share to Story
