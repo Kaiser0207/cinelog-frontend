@@ -121,19 +121,21 @@ export default function HomePage() {
         
         <div className="absolute top-6 right-6 z-[60] flex items-center gap-3" data-cursor="FILTER">
           {/* Dual-Mode Search Bar */}
-          <div className="relative flex items-center bg-[#E8E2D2] border border-border-subtle rounded-full overflow-hidden shadow-sm h-10 md:h-auto">
-            <span className="pl-3 md:pl-4 pr-1 text-[#1A1A1A]/50 text-sm">🔍</span>
+          <div className="relative flex items-center bg-[#E8E2D2] border border-[#1A1A1A]/10 rounded-full p-1 shadow-sm h-12 transition-all focus-within:ring-2 focus-within:ring-[#9D174D]/20 focus-within:border-[#9D174D]/30">
+            <span className="pl-4 pr-3 text-[#1A1A1A]/50 text-sm">🔍</span>
             <input
               type="text"
               value={searchInput}
               onChange={handleSearchChange}
               placeholder={searchMode === 'ai' ? '描述你想看的感覺...' : '搜尋電影...'}
-              className="bg-transparent border-none outline-none text-xs md:text-sm font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-32 md:w-48 py-2.5 transition-all focus:w-40 md:focus:w-64"
+              className="bg-transparent border-none outline-none text-sm md:text-base font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-32 md:w-48 py-2.5"
             />
             <button
               onClick={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
-              className={`h-full px-3 md:px-4 text-xs md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-colors ${
-                searchMode === 'ai' ? 'bg-[#9D174D] text-white' : 'bg-[#1A1A1A]/10 text-[#1A1A1A] hover:bg-[#1A1A1A]/20'
+              className={`ml-2 px-4 py-2 rounded-full text-xs md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-all shadow-sm shrink-0 mr-1 ${
+                searchMode === 'ai' 
+                  ? 'bg-[#9D174D] text-[#69E147] hover:bg-[#83113E]' 
+                  : 'bg-white text-[#9D174D] hover:bg-[#1A1A1A]/5'
               }`}
             >
               {searchMode === 'ai' ? '✦ AI' : '一般'}
