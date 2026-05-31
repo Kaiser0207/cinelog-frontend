@@ -119,90 +119,93 @@ export default function HomePage() {
           <span className="hidden md:inline">CINEROOMS</span>
         </motion.h1>
         
-        <div className="absolute top-6 right-6 z-[60] flex items-center gap-3" data-cursor="FILTER">
-          {/* Dual-Mode Search Bar */}
-          <div className="relative flex items-center bg-[#E8E2D2] border border-[#1A1A1A]/10 rounded-full p-1 shadow-sm h-12 transition-all focus-within:ring-2 focus-within:ring-[#9D174D]/20 focus-within:border-[#9D174D]/30">
-            <span className="pl-4 pr-3 text-[#1A1A1A]/50 text-sm">🔍</span>
-            <input
-              type="text"
-              value={searchInput}
-              onChange={handleSearchChange}
-              placeholder={searchMode === 'ai' ? '描述你想看的感覺...' : '搜尋電影...'}
-              className="bg-transparent border-none outline-none text-sm md:text-base font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-32 md:w-48 py-2.5"
-            />
+        <div className="absolute top-6 right-5 md:right-6 z-[60] flex flex-col md:flex-row items-end md:items-center gap-3" data-cursor="FILTER">
+          {/* Mobile Top Row: Search + Language */}
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* Dual-Mode Search Bar */}
+            <div className="relative flex items-center bg-[#E8E2D2] border border-[#1A1A1A]/10 rounded-full p-1 shadow-sm h-11 md:h-12 transition-all focus-within:ring-2 focus-within:ring-[#9D174D]/20 focus-within:border-[#9D174D]/30">
+              <span className="pl-3 md:pl-4 pr-2 md:pr-3 text-[#1A1A1A]/50 text-xs md:text-sm">🔍</span>
+              <input
+                type="text"
+                value={searchInput}
+                onChange={handleSearchChange}
+                placeholder={searchMode === 'ai' ? '描述你想看的感覺...' : '搜尋電影...'}
+                className="bg-transparent border-none outline-none text-xs md:text-base font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-28 sm:w-32 md:w-48 py-2 md:py-2.5"
+              />
+              <button
+                onClick={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
+                className={`ml-1 md:ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-all shadow-sm shrink-0 mr-0.5 md:mr-1 ${
+                  searchMode === 'ai' 
+                    ? 'bg-[#9D174D] text-[#69E147] hover:bg-[#83113E]' 
+                    : 'bg-white text-[#9D174D] hover:bg-[#1A1A1A]/5'
+                }`}
+              >
+                {searchMode === 'ai' ? '✦ AI' : '一般'}
+              </button>
+            </div>
+
+            {/* Language Toggle Button */}
             <button
-              onClick={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
-              className={`ml-2 px-4 py-2 rounded-full text-xs md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-all shadow-sm shrink-0 mr-1 ${
-                searchMode === 'ai' 
-                  ? 'bg-[#9D174D] text-[#69E147] hover:bg-[#83113E]' 
-                  : 'bg-white text-[#9D174D] hover:bg-[#1A1A1A]/5'
-              }`}
+              onClick={toggleLanguage}
+              className="flex items-center justify-center h-11 md:h-12 px-3 md:px-4 md:py-2.5 bg-[#E8E2D2] border-none rounded-full font-bold text-[10px] md:text-xs uppercase tracking-wider text-[#1A1A1A] hover:bg-[#FFB6C1] transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
+              title={lang === 'en' ? '切換成中文' : 'Switch to English'}
             >
-              {searchMode === 'ai' ? '✦ AI' : '一般'}
+              <span className="md:inline hidden mr-1">🌐</span>
+              <span>{lang === 'en' ? '繁' : 'EN'}</span>
             </button>
           </div>
 
-          {/* Language Toggle Button */}
-          <button
-            onClick={toggleLanguage}
-            className="flex items-center justify-center w-10 h-10 md:w-auto md:px-4 md:py-2.5 bg-[#E8E2D2] border border-border-subtle rounded-full font-bold text-xs uppercase tracking-wider text-[#1A1A1A] hover:bg-[#FFB6C1] transition-all cursor-pointer shadow-sm active:scale-95 border-none"
-            title={lang === 'en' ? '切換成中文' : 'Switch to English'}
-          >
-            <span className="md:inline hidden mr-1">🌐</span>
-            <span>{lang === 'en' ? '繁' : 'EN'}</span>
-          </button>
+          {/* Sort Dropdown - Next line on mobile */}
+          <div className="relative" ref={sortRef}>
+            <button
+              type="button"
+              onClick={() => setSortOpen(!sortOpen)}
+              className="appearance-none text-xs md:text-sm bg-[#E8E2D2] border border-border-subtle rounded-full pl-4 md:pl-5 pr-10 md:pr-12 py-2 md:py-2.5 h-11 md:h-12 font-bold uppercase tracking-wider focus:border-[#FFB6C1] outline-none text-[#1A1A1A] transition-all cursor-pointer flex items-center gap-2 shadow-sm"
+            >
+              <span>{t(sort)}</span>
+              <svg className={`w-4 h-4 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
 
-            {/* Sort Dropdown - Custom Animated */}
-            <div className="relative" ref={sortRef}>
-              <button
-                type="button"
-                onClick={() => setSortOpen(!sortOpen)}
-                className="appearance-none text-xs md:text-sm bg-[#E8E2D2] border border-border-subtle rounded-full pl-4 md:pl-5 pr-10 md:pr-12 py-2.5 font-bold uppercase tracking-wider focus:border-[#FFB6C1] outline-none text-[#1A1A1A] transition-all cursor-pointer flex items-center gap-2"
-              >
-                <span>{t(sort)}</span>
-                <svg className={`w-4 h-4 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              <AnimatePresence>
-                {sortOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute z-50 top-full mt-1 right-0 min-w-[180px] glass overflow-hidden py-1 rounded-xl shadow-lg"
-                  >
-                    {SORT_OPTIONS.map((opt) => {
-                      const isActive = sort === opt.value;
-                      return (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => { setSort(opt.value); setSortOpen(false); }}
-                          className="relative w-full flex items-center px-4 py-3 text-left transition-colors"
-                        >
-                          {isActive && (
-                            <motion.div
-                              layoutId="sort-selector-highlight"
-                              className="absolute inset-0 bg-[#FFB6C1]/30 border-l-4 border-[#FFB6C1]"
-                              initial={false}
-                              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                            />
-                          )}
-                          <span className={`relative z-10 text-sm font-bold uppercase tracking-wider ${
-                            isActive ? 'text-[#1A1A1A]' : 'text-[#1A1A1A]/60'
-                          }`}>
-                            {t(opt.value)}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <AnimatePresence>
+              {sortOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute z-50 top-full mt-1 right-0 min-w-[180px] glass overflow-hidden py-1 rounded-xl shadow-lg"
+                >
+                  {SORT_OPTIONS.map((opt) => {
+                    const isActive = sort === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => { setSort(opt.value); setSortOpen(false); }}
+                        className="relative w-full flex items-center px-4 py-3 text-left transition-colors"
+                      >
+                        {isActive && (
+                          <motion.div
+                            layoutId="sort-selector-highlight"
+                            className="absolute inset-0 bg-[#FFB6C1]/30 border-l-4 border-[#FFB6C1]"
+                            initial={false}
+                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                          />
+                        )}
+                        <span className={`relative z-10 text-sm font-bold uppercase tracking-wider ${
+                          isActive ? 'text-[#1A1A1A]' : 'text-[#1A1A1A]/60'
+                        }`}>
+                          {t(opt.value)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
