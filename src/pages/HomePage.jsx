@@ -130,14 +130,14 @@ export default function HomePage() {
                 value={searchInput}
                 onChange={handleSearchChange}
                 placeholder={searchMode === 'ai' ? '描述你想看的感覺...' : '搜尋電影...'}
-                className="bg-transparent border-none outline-none text-xs md:text-base font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-28 sm:w-32 md:w-48 py-2 md:py-2.5"
+                className="bg-transparent border-none outline-none focus:ring-0 focus:outline-none text-xs md:text-base font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-28 sm:w-32 md:w-48 py-2 md:py-2.5"
               />
               <button
                 onClick={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
-                className={`ml-1 md:ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-all shadow-sm shrink-0 mr-0.5 md:mr-1 ${
+                className={`ml-1 md:ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-all shrink-0 mr-0.5 md:mr-1 ${
                   searchMode === 'ai' 
-                    ? 'bg-[#9D174D] text-[#69E147] hover:bg-[#83113E]' 
-                    : 'bg-white text-[#9D174D] hover:bg-[#1A1A1A]/5'
+                    ? 'bg-[#9D174D] text-[#E8E2D2] hover:bg-[#83113E] shadow-sm' 
+                    : 'bg-transparent text-[#9D174D] hover:bg-[#1A1A1A]/5'
                 }`}
               >
                 {searchMode === 'ai' ? '✦ AI' : '一般'}
