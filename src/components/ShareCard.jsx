@@ -89,14 +89,15 @@ export default function ShareCard({ review, className }) {
         >
           {/* Background Image */}
           {(backdropUrl || posterUrl) && (
-            <img 
-              src={backdropUrl || posterUrl} 
-              crossOrigin="anonymous"
-              alt="Backdrop"
+            <div
               style={{
                 position: 'absolute',
-                top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0
-              }} 
+                top: 0, left: 0, width: '100%', height: '100%',
+                backgroundImage: `url(${backdropUrl || posterUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                zIndex: 0
+              }}
             />
           )}
 
@@ -118,12 +119,16 @@ export default function ShareCard({ review, className }) {
                 marginBottom: '20px' 
               }}>
                  <div style={{
-                   background: 'rgba(0,0,0,0.6)',
-                   backdropFilter: 'blur(10px)',
-                   padding: '20px 30px',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   height: '100px',
+                   padding: '0 30px',
+                   background: 'rgba(0,0,0,0.85)',
                    borderRadius: '20px',
                    fontSize: '70px',
                    fontWeight: 900,
+                   lineHeight: 1,
                    color: getScoreColor(total),
                    fontFamily: "'Outfit', sans-serif",
                    border: '2px solid rgba(255,255,255,0.1)'
