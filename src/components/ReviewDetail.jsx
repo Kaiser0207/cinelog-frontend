@@ -25,42 +25,37 @@ function ColorStrip({ palette }) {
   if (!palette || palette.length === 0) return null;
 
   return (
-    <div className="w-full h-3 flex mb-6 shadow-sm">
-      {palette.map((hex, i) => {
-        const isFirst = i === 0;
-        const isLast = i === palette.length - 1;
-        const roundedClass = isFirst ? 'rounded-l-full' : isLast ? 'rounded-r-full' : '';
-        return (
-          <ColorBlock key={i} hex={hex} roundedClass={roundedClass} />
-        );
-      })}
+    <div className="w-full h-12 md:h-16 flex mb-10 shadow-sm">
+      {palette.map((hex, i) => (
+        <ColorBlock key={i} hex={hex} />
+      ))}
     </div>
   );
 }
 
-function ColorBlock({ hex, roundedClass = '' }) {
+function ColorBlock({ hex }) {
   const [hovered, setHovered] = useState(false);
 
   return (
     <motion.div
-      className={`flex-1 relative cursor-pointer ${roundedClass}`}
+      className="relative cursor-pointer flex items-center justify-center overflow-hidden"
       style={{ backgroundColor: hex }}
-      whileHover={{ y: -2 }}
+      initial={{ flex: 1 }}
+      whileHover={{ flex: 1.5 }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
     >
       <AnimatePresence>
         {hovered && (
           <motion.div
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1
-                       px-2 py-1 rounded bg-black/80 text-xs font-mono
-                       text-white whitespace-nowrap pointer-events-none z-10"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
+            className="text-white font-black text-xs md:text-sm font-[var(--font-jetbrains)] tracking-wider drop-shadow-md whitespace-nowrap"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.15 }}
           >
-            {hex}
+            HEX {hex.toUpperCase()}
           </motion.div>
         )}
       </AnimatePresence>
