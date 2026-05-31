@@ -6,7 +6,7 @@ import { API_URL, flattenReview } from '../utils/constants';
 
 const LIMIT = 12;
 
-export default function ReviewFeed({ sort = 'newest', genre = '' }) {
+export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = '', searchMode = 'standard' }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -17,17 +17,28 @@ export default function ReviewFeed({ sort = 'newest', genre = '' }) {
     setLoading(true);
 
     try {
-      const params = new URLSearchParams({
-        offset: offset.toString(),
-        limit: LIMIT.toString(),
-        sort,
-      });
-      if (genre) params.append('genre', genre);
+      let url = `${API_URL}/api/reviews`;
+      const params = new URLSearchParams();
 
-      const res = await fetch(`${API_URL}/api/reviews?${params}`);
+      if (searchQuery) {
+        url = `${API_URL}/api/reviews/search`;
+        params.append('q', searchQuery);
+        params.append('mode', searchMode);
+        params.append('limit', '50'); // Fetch up to 50 results for search
+      } else {
+        params.append('offset', offset.toString());
+        params.append('limit', LIMIT.toString());
+        params.append('sort', sort);
+        if (genre) params.append('genre', genre);
+      }
+
+      const res = await fetch(`${url}?${params}`);
       if (res.ok) {
         const data = await res.json();
-        const items = (data.reviews || data || []).map(flattenReview);
+        
+        // Handle different response formats (search vs regular)
+        const rawItems = searchQuery ? (data.results || []) : (data.reviews || data || []);
+        const items = rawItems.map(flattenReview);
 
         if (reset) {
           setReviews(items);
@@ -35,7 +46,12 @@ export default function ReviewFeed({ sort = 'newest', genre = '' }) {
           setReviews((prev) => [...prev, ...items]);
         }
 
-        setHasMore(items.length >= LIMIT);
+        // Disable infinite scroll for search
+        if (searchQuery) {
+          setHasMore(false);
+        } else {
+          setHasMore(items.length >= LIMIT);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch reviews:', err);
@@ -45,13 +61,13 @@ export default function ReviewFeed({ sort = 'newest', genre = '' }) {
     }
   }, [sort, genre, loading]);
 
-  // Reset on sort/genre change
+  // Reset on sort/genre/search change
   useEffect(() => {
     setReviews([]);
     setHasMore(true);
     setInitialLoad(true);
     fetchReviews(0, true);
-  }, [sort, genre]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sort, genre, searchQuery, searchMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {

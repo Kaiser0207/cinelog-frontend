@@ -21,6 +21,48 @@ import {
   API_URL,
 } from '../utils/constants';
 
+function ColorStrip({ palette }) {
+  if (!palette || palette.length === 0) return null;
+
+  return (
+    <div className="w-full h-3 flex">
+      {palette.map((hex, i) => (
+        <ColorBlock key={i} hex={hex} />
+      ))}
+    </div>
+  );
+}
+
+function ColorBlock({ hex }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <motion.div
+      className="flex-1 relative cursor-pointer"
+      style={{ backgroundColor: hex }}
+      whileHover={{ y: -2 }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+    >
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1
+                       px-2 py-1 rounded bg-black/80 text-xs font-mono
+                       text-white whitespace-nowrap pointer-events-none z-10"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.15 }}
+          >
+            {hex}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
 export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const navigate = useNavigate();
   const { requireAuth, isAdmin } = useAdmin();
@@ -236,6 +278,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           </div>
         </div>
       </div>
+
+      {/* ===== COLOR STRIP (Position A) ===== */}
+      <ColorStrip palette={review.movie?.color_palette} />
 
       {/* ===== TWO-COLUMN LAYOUT (Desktop) / SINGLE COLUMN (Mobile) ===== */}
       <div className="max-w-7xl mx-auto px-5 md:px-10 py-8">

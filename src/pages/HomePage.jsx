@@ -11,6 +11,13 @@ export default function HomePage() {
   const [genre, setGenre] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Search State
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchMode, setSearchMode] = useState('standard');
+  const searchTimeoutRef = useRef(null);
+
   const { lang, toggleLanguage, t } = useLanguage();
   const { isAdmin, requireAuth, openDeviceManager } = useAdmin();
   const [sortOpen, setSortOpen] = useState(false);
@@ -61,6 +68,15 @@ export default function HomePage() {
     }
   };
 
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchInput(val);
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearchQuery(val);
+    }, 500);
+  };
+
   // Close sort dropdown on outside click
   useEffect(() => {
     function handleClick(e) {
@@ -104,6 +120,26 @@ export default function HomePage() {
         </motion.h1>
         
         <div className="absolute top-6 right-6 z-[60] flex items-center gap-3" data-cursor="FILTER">
+          {/* Dual-Mode Search Bar */}
+          <div className="relative flex items-center bg-[#E8E2D2] border border-border-subtle rounded-full overflow-hidden shadow-sm h-10 md:h-auto">
+            <span className="pl-3 md:pl-4 pr-1 text-[#1A1A1A]/50 text-sm">🔍</span>
+            <input
+              type="text"
+              value={searchInput}
+              onChange={handleSearchChange}
+              placeholder={searchMode === 'ai' ? '描述你想看的感覺...' : '搜尋電影...'}
+              className="bg-transparent border-none outline-none text-xs md:text-sm font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-32 md:w-48 py-2.5 transition-all focus:w-40 md:focus:w-64"
+            />
+            <button
+              onClick={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
+              className={`h-full px-3 md:px-4 text-xs md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-colors ${
+                searchMode === 'ai' ? 'bg-[#9D174D] text-white' : 'bg-[#1A1A1A]/10 text-[#1A1A1A] hover:bg-[#1A1A1A]/20'
+              }`}
+            >
+              {searchMode === 'ai' ? '✦ AI' : '一般'}
+            </button>
+          </div>
+
           {/* Language Toggle Button */}
           <button
             onClick={toggleLanguage}
@@ -197,7 +233,7 @@ export default function HomePage() {
 
       {/* Feed */}
       <main className="max-w-7xl mx-auto px-5 pb-24" key={refreshKey}>
-        <ReviewFeed sort={sort} genre={genre} />
+        <ReviewFeed sort={sort} genre={genre} searchQuery={searchQuery} searchMode={searchMode} />
       </main>
 
       {/* Vibrant Blue Neo-brutalist Footer */}
