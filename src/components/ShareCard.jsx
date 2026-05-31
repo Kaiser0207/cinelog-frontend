@@ -138,10 +138,10 @@ export default function ShareCard({ review, className }) {
 
               {/* Title */}
               <h1 style={{
-                fontSize: '85px',
+                fontSize: review.title.length > 25 ? '60px' : review.title.length > 15 ? '75px' : '85px',
                 fontWeight: 900,
                 margin: '0 0 40px 0',
-                lineHeight: 1,
+                lineHeight: 1.1,
                 fontFamily: cleanFontFamily,
                 textShadow: '0 4px 20px rgba(0,0,0,0.8)'
               }}>
