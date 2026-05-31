@@ -120,14 +120,11 @@ export default function ShareCard({ review, className }) {
               }}>
                  <div style={{
                    display: 'inline-block',
-                   height: '80px',
-                   padding: '0 30px',
+                   padding: '5px 30px',
                    background: 'rgba(0,0,0,0.85)',
                    borderRadius: '20px',
                    fontSize: '70px',
                    fontWeight: 900,
-                   lineHeight: '80px',
-                   textAlign: 'center',
                    color: getScoreColor(total),
                    fontFamily: "'Outfit', sans-serif",
                    border: '2px solid rgba(255,255,255,0.1)'
@@ -157,14 +154,11 @@ export default function ShareCard({ review, className }) {
                    {genres.slice(0, 3).map((g, i) => (
                       <div key={i} style={{
                         display: 'inline-block',
-                        height: '40px',
                         background: 'rgba(255,255,255,0.2)',
-                        padding: '0 20px',
+                        padding: '6px 20px',
                         borderRadius: '12px',
                         fontSize: '22px',
                         fontWeight: 'bold',
-                        lineHeight: '40px',
-                        textAlign: 'center',
                         textTransform: 'uppercase'
                       }}>
                         {typeof g === 'string' ? g : g.name}
