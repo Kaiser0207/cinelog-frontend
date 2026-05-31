@@ -60,7 +60,7 @@ export default function CustomCursor() {
       }}
     >
       {isHovering && (
-        <span className="text-black font-black font-[var(--font-bebas)] text-base tracking-widest">
+        <span className="text-white font-black font-[var(--font-bebas)] text-base tracking-widest">
           {hoverText}
         </span>
       )}
