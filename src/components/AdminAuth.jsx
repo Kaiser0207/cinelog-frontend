@@ -279,7 +279,8 @@ function DeviceManagerModal({ password, onClose }) {
         setNewDeviceName('');
         fetchDevices();
       } else {
-        alert('Verification failed');
+        const errData = await verifyRes.json();
+        alert('Verification failed: ' + errData.detail);
       }
     } catch (err) {
       console.error(err);
