@@ -119,16 +119,12 @@ export default function ShareCard({ review, className }) {
                 marginBottom: '20px' 
               }}>
                  <div style={{
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   height: '100px',
-                   padding: '0 30px',
+                   display: 'inline-block',
+                   padding: '15px 30px',
                    background: 'rgba(0,0,0,0.85)',
                    borderRadius: '20px',
                    fontSize: '70px',
                    fontWeight: 900,
-                   lineHeight: 1,
                    color: getScoreColor(total),
                    fontFamily: "'Outfit', sans-serif",
                    border: '2px solid rgba(255,255,255,0.1)'
