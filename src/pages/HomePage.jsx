@@ -224,6 +224,7 @@ export default function HomePage() {
             href="https://www.instagram.com/kaiser_liao/"
             target="_blank"
             rel="noopener noreferrer"
+            data-cursor="INSTAGRAM"
             className="group inline-flex items-center gap-3 px-6 md:px-8 py-3 rounded-full bg-[#69E147] hover:bg-[#9D174D] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer mb-6 border-none shadow-sm active:scale-95 text-xs md:text-sm"
           >
             <span className="text-lg md:text-xl">📸</span>
