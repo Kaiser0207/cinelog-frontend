@@ -23,7 +23,7 @@ import {
 
 export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const navigate = useNavigate();
-  const { requireAuth } = useAdmin();
+  const { requireAuth, isAdmin } = useAdmin();
   const { addToast } = useToast();
   const { lang, toggleLanguage, t } = useLanguage();
   const [mobileScoreOpen, setMobileScoreOpen] = useState(false);
@@ -572,28 +572,32 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-4 w-full px-4 sm:px-0">
-            <button
-              onClick={onEdit}
-              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
-            >
-              <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
-                {t('editReview')}
-              </span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={onEdit}
+                className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#FFB6C1] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
+              >
+                <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
+                  {t('editReview')}
+                </span>
+              </button>
+            )}
 
             <ShareCard 
               review={review} 
               className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#CCFF00] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95" 
             />
 
-            <button
-              onClick={handleDelete}
-              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
-            >
-              <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
-                {t('deleteReview')}
-              </span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleDelete}
+                className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-red-600 hover:bg-red-500 text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
+              >
+                <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
+                  {t('deleteReview')}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Timestamps */}

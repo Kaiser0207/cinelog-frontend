@@ -4,6 +4,7 @@ import ReviewFeed from '../components/ReviewFeed';
 import ReviewEditor from '../components/ReviewEditor';
 import { SORT_OPTIONS } from '../utils/constants';
 import { useLanguage } from '../components/LanguageContext';
+import { useAdmin } from '../components/AdminAuth';
 
 export default function HomePage() {
   const [sort, setSort] = useState('newest');
@@ -11,6 +12,7 @@ export default function HomePage() {
   const [showEditor, setShowEditor] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const { lang, toggleLanguage, t } = useLanguage();
+  const { isAdmin, requireAuth } = useAdmin();
   const [sortOpen, setSortOpen] = useState(false);
   const sortRef = useRef(null);
 
@@ -186,21 +188,28 @@ export default function HomePage() {
           </a>
 
           <div className="text-[10px] md:text-xs font-bold font-[var(--font-jetbrains)] text-white/50 border-t border-white/10 pt-8 w-full space-y-1">
-            <p>© {new Date().getFullYear()} CINEROOMS. {t('curatedBy')}</p>
+            <p 
+              onClick={() => !isAdmin && requireAuth(() => {})} 
+              className={!isAdmin ? "cursor-default" : ""}
+            >
+              © {new Date().getFullYear()} CINEROOMS. {t('curatedBy')}
+            </p>
             <p className="text-white/40">{t('disclaimer')}</p>
           </div>
         </div>
       </div>
 
       {/* FAB */}
-      <motion.button
-        onClick={() => setShowEditor(true)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg bg-[#FE494A] hover:bg-[#ff6b6c] text-white text-3xl font-black flex items-center justify-center transition-all shadow-lg border-none cursor-pointer"
-      >
-        +
-      </motion.button>
+      {isAdmin && (
+        <motion.button
+          onClick={() => setShowEditor(true)}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg bg-[#FE494A] hover:bg-[#ff6b6c] text-white text-3xl font-black flex items-center justify-center transition-all shadow-lg border-none cursor-pointer"
+        >
+          +
+        </motion.button>
+      )}
 
       {/* Editor Modal */}
       <AnimatePresence>
