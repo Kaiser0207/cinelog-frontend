@@ -119,20 +119,20 @@ export default function ShareCard({ review, className }) {
                 marginBottom: '20px' 
               }}>
                  <div style={{
-                   display: 'inline-flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
+                   display: 'inline-block',
                    height: '80px',
                    padding: '0 30px',
                    background: 'rgba(0,0,0,0.85)',
                    borderRadius: '20px',
                    fontSize: '70px',
                    fontWeight: 900,
+                   lineHeight: '80px',
+                   textAlign: 'center',
                    color: getScoreColor(total),
                    fontFamily: "'Outfit', sans-serif",
                    border: '2px solid rgba(255,255,255,0.1)'
                  }}>
-                   <span style={{ transform: 'translateY(-2px)' }}>{total.toFixed(1)}</span>
+                   {total.toFixed(1)}
                  </div>
                  <div style={{ fontSize: '32px', color: 'rgba(255,255,255,0.8)', fontWeight: 'bold' }}>
                    CineRooms Score
@@ -156,20 +156,18 @@ export default function ShareCard({ review, className }) {
                 <div style={{ display: 'flex', gap: '15px', marginBottom: '40px', alignItems: 'center' }}>
                    {genres.slice(0, 3).map((g, i) => (
                       <div key={i} style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        display: 'inline-block',
                         height: '40px',
                         background: 'rgba(255,255,255,0.2)',
                         padding: '0 20px',
                         borderRadius: '12px',
                         fontSize: '22px',
                         fontWeight: 'bold',
+                        lineHeight: '40px',
+                        textAlign: 'center',
                         textTransform: 'uppercase'
                       }}>
-                        <span style={{ transform: 'translateY(-1px)' }}>
-                          {typeof g === 'string' ? g : g.name}
-                        </span>
+                        {typeof g === 'string' ? g : g.name}
                       </div>
                    ))}
                 </div>
