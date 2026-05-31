@@ -119,8 +119,11 @@ export default function ShareCard({ review, className }) {
                 marginBottom: '20px' 
               }}>
                  <div style={{
-                   display: 'inline-block',
-                   padding: '15px 30px',
+                   display: 'inline-flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   height: '80px',
+                   padding: '0 30px',
                    background: 'rgba(0,0,0,0.85)',
                    borderRadius: '20px',
                    fontSize: '70px',
@@ -129,7 +132,7 @@ export default function ShareCard({ review, className }) {
                    fontFamily: "'Outfit', sans-serif",
                    border: '2px solid rgba(255,255,255,0.1)'
                  }}>
-                   {total.toFixed(1)}
+                   <span style={{ transform: 'translateY(-2px)' }}>{total.toFixed(1)}</span>
                  </div>
                  <div style={{ fontSize: '32px', color: 'rgba(255,255,255,0.8)', fontWeight: 'bold' }}>
                    CineRooms Score
@@ -152,18 +155,22 @@ export default function ShareCard({ review, className }) {
               {genres.length > 0 && (
                 <div style={{ display: 'flex', gap: '15px', marginBottom: '40px', alignItems: 'center' }}>
                    {genres.slice(0, 3).map((g, i) => (
-                      <span key={i} style={{
-                        display: 'inline-block',
+                      <div key={i} style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '40px',
                         background: 'rgba(255,255,255,0.2)',
-                        padding: '10px 20px',
+                        padding: '0 20px',
                         borderRadius: '12px',
-                        fontSize: '24px',
+                        fontSize: '22px',
                         fontWeight: 'bold',
-                        lineHeight: 1,
                         textTransform: 'uppercase'
                       }}>
-                        {typeof g === 'string' ? g : g.name}
-                      </span>
+                        <span style={{ transform: 'translateY(-1px)' }}>
+                          {typeof g === 'string' ? g : g.name}
+                        </span>
+                      </div>
                    ))}
                 </div>
               )}
