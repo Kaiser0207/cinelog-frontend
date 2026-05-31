@@ -18,6 +18,20 @@ export default function HomePage() {
   
   const clickCount = useRef(0);
   const clickTimer = useRef(null);
+  
+  const footerRef = useRef(null);
+  const [isOverFooter, setIsOverFooter] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsOverFooter(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+    if (footerRef.current) observer.observe(footerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleAdminTrigger = () => {
     clickCount.current += 1;
@@ -178,7 +192,7 @@ export default function HomePage() {
       </main>
 
       {/* Vibrant Blue Neo-brutalist Footer */}
-      <div className="w-full bg-[#0000FF] text-white py-16 md:py-24 px-5 relative z-10">
+      <div ref={footerRef} className="w-full bg-[#0000FF] text-white py-16 md:py-24 px-5 relative z-10">
         <div className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center text-left md:text-center space-y-6 md:space-y-8">
           <div className="space-y-1">
             <h2 className="text-5xl md:text-6xl lg:text-7xl font-black font-[var(--font-bebas)] text-[#69E147] tracking-wider leading-none">
@@ -227,7 +241,11 @@ export default function HomePage() {
           onClick={() => setShowEditor(true)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg bg-[#69E147] hover:bg-[#9D174D] hover:text-white text-black text-3xl font-black flex items-center justify-center transition-all shadow-lg border-none cursor-pointer"
+          className={`fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg text-3xl font-black flex items-center justify-center transition-all duration-300 shadow-lg border-none cursor-pointer ${
+            isOverFooter
+              ? 'bg-[#69E147] hover:bg-[#9D174D] hover:text-white text-black'
+              : 'bg-[#9D174D] hover:bg-[#69E147] hover:text-black text-white'
+          }`}
         >
           +
         </motion.button>

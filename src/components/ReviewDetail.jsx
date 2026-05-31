@@ -94,7 +94,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Total Score */}
       <div className="glass p-6 flex flex-col items-center justify-center text-center rounded-lg border border-border-subtle relative">
         <p className="absolute top-6 left-6 text-sm font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted">{t('totalScore')}</p>
-        <span className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#69E147] mt-6">
+        <span className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#9D174D] mt-6">
           {total.toFixed(1)}
         </span>
         <p className="text-sm font-bold font-[var(--font-bebas)] text-text-dim mt-2">/ 10.0</p>
@@ -137,9 +137,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Back Button */}
       <button
         onClick={() => navigate('/')}
-        className="group fixed top-6 left-6 z-[100] px-5 py-2 bg-[#FFB6C1] hover:bg-[#D4FF00] rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
+        className="group fixed top-6 left-6 z-[100] px-5 py-2 bg-[#9D174D] hover:bg-[#69E147] hover:text-black text-white rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
       >
-        <span className="inline-block text-black font-bold font-[var(--font-jetbrains)] text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
+        <span className="inline-block font-bold font-[var(--font-jetbrains)] text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
           {t('back')}
         </span>
       </button>
@@ -147,7 +147,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Language Toggle Button */}
       <button
         onClick={toggleLanguage}
-        className="fixed top-6 right-6 z-[100] px-4 py-2 bg-[#FFB6C1] hover:bg-[#D4FF00] rounded-full shadow-lg transition-all border-none font-[var(--font-jetbrains)] font-bold text-xs cursor-pointer text-black flex items-center gap-1 active:scale-95"
+        className="fixed top-6 right-6 z-[100] px-4 py-2 bg-[#9D174D] hover:bg-[#69E147] hover:text-black text-white rounded-full shadow-lg transition-all border-none font-[var(--font-jetbrains)] font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
       >
         <span>🌐</span>
         <span>{lang === 'en' ? '繁' : 'EN'}</span>
@@ -394,8 +394,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.75 }}
               >
-                <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FFB6C1] uppercase tracking-wider mb-4 border-b-4 border-[#FFB6C1] pb-2">
-                  🎬 {t('recommendations')}
+                <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#9D174D] uppercase tracking-wider mb-4 border-b-4 border-[#9D174D] pb-2">
+                  ✨ {t('recommendations')}
                 </h3>
                 <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                   {recommendations.map((movie) => (
@@ -417,7 +417,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                           No Poster
                         </div>
                       )}
-                      <p className="mt-2 text-xs font-semibold text-text-primary truncate group-hover:text-[#FFB6C1] transition-colors">
+                      <p className="mt-2 text-xs font-semibold text-text-primary truncate group-hover:text-[#9D174D] transition-colors">
                         {movie.title}
                       </p>
                       {movie.release_date && (
@@ -503,8 +503,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
           >
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#69E147]" />
-              <span className="text-3xl font-black font-[var(--font-bebas)] tabular-nums tracking-wide text-[#69E147]">
+              <span className="w-3 h-3 rounded-full bg-[#9D174D]" />
+              <span className="text-3xl font-black font-[var(--font-bebas)] tabular-nums tracking-wide text-[#9D174D]">
                 {total.toFixed(1)}
               </span>
               <span className="text-xs text-text-dim font-bold mt-1">/10</span>

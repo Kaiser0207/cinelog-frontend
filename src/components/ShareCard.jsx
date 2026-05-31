@@ -122,9 +122,9 @@ export default function ShareCard({ review, className }) {
                    fontSize: '110px',
                    fontWeight: 900,
                    lineHeight: 1,
-                   color: getScoreColor(total),
+                   color: '#9D174D',
                    fontFamily: "'Outfit', sans-serif",
-                   textShadow: `0 0 30px ${getScoreColor(total)}80, 0 4px 20px rgba(0,0,0,0.8)`
+                   textShadow: `0 0 30px #9D174D80, 0 4px 20px rgba(0,0,0,0.8)`
                  }}>
                    {total.toFixed(1)}
                  </div>
