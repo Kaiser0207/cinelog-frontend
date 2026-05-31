@@ -280,7 +280,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       </div>
 
       {/* ===== COLOR STRIP (Position A) ===== */}
-      <ColorStrip palette={review.movie?.color_palette} />
+      <ColorStrip palette={review.color_palette} />
 
       {/* ===== TWO-COLUMN LAYOUT (Desktop) / SINGLE COLUMN (Mobile) ===== */}
       <div className="max-w-7xl mx-auto px-5 md:px-10 py-8">

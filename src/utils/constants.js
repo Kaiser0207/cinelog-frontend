@@ -83,5 +83,6 @@ export function flattenReview(review) {
     release_date: movie.release_date,
     overview: movie.overview,
     genres: movie.genres || [],
+    color_palette: movie.color_palette || [],
   };
 }
