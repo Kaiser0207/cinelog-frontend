@@ -120,16 +120,24 @@ export default function ShareCard({ review, className }) {
               }}>
                  <div style={{
                    display: 'inline-block',
-                   padding: '2px 30px 15px 30px', // Asymmetric padding to visually center the font
+                   height: '80px',
+                   padding: '0 30px',
                    background: 'rgba(0,0,0,0.85)',
                    borderRadius: '20px',
-                   fontSize: '70px',
-                   fontWeight: 900,
-                   color: getScoreColor(total),
-                   fontFamily: "'Outfit', sans-serif",
-                   border: '2px solid rgba(255,255,255,0.1)'
+                   border: '2px solid rgba(255,255,255,0.1)',
+                   textAlign: 'center'
                  }}>
-                   {total.toFixed(1)}
+                   <div style={{
+                     position: 'relative',
+                     top: '-6px', // Nudge text up perfectly
+                     fontSize: '70px',
+                     fontWeight: 900,
+                     lineHeight: '80px',
+                     color: getScoreColor(total),
+                     fontFamily: "'Outfit', sans-serif",
+                   }}>
+                     {total.toFixed(1)}
+                   </div>
                  </div>
                  <div style={{ fontSize: '32px', color: 'rgba(255,255,255,0.8)', fontWeight: 'bold' }}>
                    CineRooms Score
@@ -154,14 +162,22 @@ export default function ShareCard({ review, className }) {
                    {genres.slice(0, 3).map((g, i) => (
                       <div key={i} style={{
                         display: 'inline-block',
+                        height: '40px',
+                        padding: '0 20px',
                         background: 'rgba(255,255,255,0.2)',
-                        padding: '4px 20px 10px 20px', // Asymmetric padding
                         borderRadius: '12px',
-                        fontSize: '22px',
-                        fontWeight: 'bold',
-                        textTransform: 'uppercase'
+                        textAlign: 'center'
                       }}>
-                        {typeof g === 'string' ? g : g.name}
+                        <div style={{
+                          position: 'relative',
+                          top: '-4px', // Nudge text up
+                          fontSize: '22px',
+                          fontWeight: 'bold',
+                          lineHeight: '40px',
+                          textTransform: 'uppercase'
+                        }}>
+                          {typeof g === 'string' ? g : g.name}
+                        </div>
                       </div>
                    ))}
                 </div>
