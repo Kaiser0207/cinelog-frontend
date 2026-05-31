@@ -114,32 +114,21 @@ export default function ShareCard({ review, className }) {
               {/* Score */}
               <div style={{ 
                 display: 'flex', 
-                alignItems: 'center', 
+                alignItems: 'baseline', 
                 gap: '20px',
-                marginBottom: '15px' 
+                marginBottom: '10px' 
               }}>
                  <div style={{
-                   display: 'inline-block',
-                   height: '80px',
-                   padding: '0 30px',
-                   background: 'rgba(0,0,0,0.85)',
-                   borderRadius: '20px',
-                   border: '2px solid rgba(255,255,255,0.1)',
-                   textAlign: 'center'
+                   fontSize: '110px',
+                   fontWeight: 900,
+                   lineHeight: 1,
+                   color: getScoreColor(total),
+                   fontFamily: "'Outfit', sans-serif",
+                   textShadow: `0 0 30px ${getScoreColor(total)}80, 0 4px 20px rgba(0,0,0,0.8)`
                  }}>
-                   <div style={{
-                     position: 'relative',
-                     top: '-6px', // Nudge text up perfectly
-                     fontSize: '70px',
-                     fontWeight: 900,
-                     lineHeight: '80px',
-                     color: getScoreColor(total),
-                     fontFamily: "'Outfit', sans-serif",
-                   }}>
-                     {total.toFixed(1)}
-                   </div>
+                   {total.toFixed(1)}
                  </div>
-                 <div style={{ fontSize: '32px', color: 'rgba(255,255,255,0.8)', fontWeight: 'bold' }}>
+                 <div style={{ fontSize: '32px', color: 'rgba(255,255,255,0.8)', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
                    CineRooms Score
                  </div>
               </div>
@@ -151,33 +140,24 @@ export default function ShareCard({ review, className }) {
                 margin: '0 0 15px 0',
                 lineHeight: 1.1,
                 fontFamily: cleanFontFamily,
-                textShadow: '0 4px 20px rgba(0,0,0,0.8)'
+                textShadow: '0 4px 20px rgba(0,0,0,0.9)'
               }}>
                 {review.title}
               </h1>
 
               {/* Genres */}
               {genres.length > 0 && (
-                <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '20px', marginBottom: '25px', alignItems: 'center' }}>
                    {genres.slice(0, 3).map((g, i) => (
                       <div key={i} style={{
-                        display: 'inline-block',
-                        height: '40px',
-                        padding: '0 20px',
-                        background: 'rgba(255,255,255,0.2)',
-                        borderRadius: '12px',
-                        textAlign: 'center'
+                        fontSize: '26px',
+                        fontWeight: 'bold',
+                        color: '#CCFF00', // Bright cinematic color for tags
+                        textTransform: 'uppercase',
+                        textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+                        letterSpacing: '1px'
                       }}>
-                        <div style={{
-                          position: 'relative',
-                          top: '-4px', // Nudge text up
-                          fontSize: '22px',
-                          fontWeight: 'bold',
-                          lineHeight: '40px',
-                          textTransform: 'uppercase'
-                        }}>
-                          {typeof g === 'string' ? g : g.name}
-                        </div>
+                        #{typeof g === 'string' ? g : g.name}
                       </div>
                    ))}
                 </div>
