@@ -25,20 +25,25 @@ function ColorStrip({ palette }) {
   if (!palette || palette.length === 0) return null;
 
   return (
-    <div className="w-full h-3 flex">
-      {palette.map((hex, i) => (
-        <ColorBlock key={i} hex={hex} />
-      ))}
+    <div className="w-full h-3 flex mb-6 shadow-sm">
+      {palette.map((hex, i) => {
+        const isFirst = i === 0;
+        const isLast = i === palette.length - 1;
+        const roundedClass = isFirst ? 'rounded-l-full' : isLast ? 'rounded-r-full' : '';
+        return (
+          <ColorBlock key={i} hex={hex} roundedClass={roundedClass} />
+        );
+      })}
     </div>
   );
 }
 
-function ColorBlock({ hex }) {
+function ColorBlock({ hex, roundedClass = '' }) {
   const [hovered, setHovered] = useState(false);
 
   return (
     <motion.div
-      className="flex-1 relative cursor-pointer"
+      className={`flex-1 relative cursor-pointer ${roundedClass}`}
       style={{ backgroundColor: hex }}
       whileHover={{ y: -2 }}
       onHoverStart={() => setHovered(true)}
@@ -279,11 +284,11 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         </div>
       </div>
 
-      {/* ===== COLOR STRIP (Position A) ===== */}
-      <ColorStrip palette={review.color_palette} />
-
       {/* ===== TWO-COLUMN LAYOUT (Desktop) / SINGLE COLUMN (Mobile) ===== */}
-      <div className="max-w-7xl mx-auto px-5 md:px-10 py-8">
+      <div className="max-w-7xl mx-auto px-5 md:px-10 pt-6 pb-8">
+        {/* ===== COLOR STRIP (Position A) ===== */}
+        <ColorStrip palette={review.color_palette} />
+
         <div className="flex flex-col lg:flex-row gap-8">
           {/* ===== LEFT COLUMN: Content ===== */}
           <div className="flex-1 min-w-0 space-y-10">
