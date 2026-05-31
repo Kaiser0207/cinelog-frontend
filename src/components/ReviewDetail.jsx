@@ -25,7 +25,7 @@ function ColorStrip({ palette }) {
   if (!palette || palette.length === 0) return null;
 
   return (
-    <div className="w-full h-12 md:h-16 flex mb-10 shadow-sm">
+    <div className="w-full h-12 md:h-16 flex mb-10 shadow-sm rounded-lg overflow-hidden">
       {palette.map((hex, i) => (
         <ColorBlock key={i} hex={hex} />
       ))}
