@@ -227,7 +227,7 @@ export default function HomePage() {
           onClick={() => setShowEditor(true)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg bg-[#69E147] hover:bg-[#CCFF00] text-black text-3xl font-black flex items-center justify-center transition-all shadow-lg border-none cursor-pointer"
+          className="fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg bg-[#69E147] hover:bg-[#D81B60] hover:text-white text-black text-3xl font-black flex items-center justify-center transition-all shadow-lg border-none cursor-pointer"
         >
           +
         </motion.button>

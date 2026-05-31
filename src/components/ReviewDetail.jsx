@@ -575,7 +575,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             {isAdmin && (
               <button
                 onClick={onEdit}
-                className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#69E147] hover:bg-[#CCFF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
+                className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#69E147] hover:bg-[#D81B60] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
               >
                 <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
                   {t('editReview')}
@@ -585,7 +585,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
 
             <ShareCard 
               review={review} 
-              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#CCFF00] hover:bg-[#D4FF00] text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95" 
+              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#69E147] hover:bg-[#D81B60] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95" 
             />
 
             {isAdmin && (
