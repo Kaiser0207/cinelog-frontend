@@ -25,7 +25,7 @@ function ColorStrip({ palette }) {
   if (!palette || palette.length === 0) return null;
 
   return (
-    <div className="w-full h-12 md:h-16 flex mb-10 shadow-sm rounded-lg overflow-hidden">
+    <div className="w-[85%] md:w-full h-12 md:h-16 flex shadow-sm rounded-lg overflow-hidden border border-[#1A1A1A]/10">
       {palette.map((hex, i) => (
         <ColorBlock key={i} hex={hex} />
       ))}
@@ -281,12 +281,11 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
 
       {/* ===== TWO-COLUMN LAYOUT (Desktop) / SINGLE COLUMN (Mobile) ===== */}
       <div className="max-w-7xl mx-auto px-5 md:px-10 pt-6 pb-8">
-        {/* ===== COLOR STRIP (Position A) ===== */}
-        <ColorStrip palette={review.color_palette} />
-
         <div className="flex flex-col lg:flex-row gap-8">
           {/* ===== LEFT COLUMN: Content ===== */}
           <div className="flex-1 min-w-0 space-y-10">
+            {/* COLOR STRIP */}
+            <ColorStrip palette={review.color_palette} />
             {/* Overview */}
             {review.overview && (
               <motion.div
