@@ -29,8 +29,8 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ 
-        opacity: { duration: 0.5, delay: (index % 12) * 0.05, ease: [0.22, 1, 0.36, 1] },
-        y: { duration: 0.5, delay: (index % 12) * 0.05, ease: [0.22, 1, 0.36, 1] },
+        opacity: { duration: 0.5, delay: (index % 10) * 0.05, ease: [0.22, 1, 0.36, 1] },
+        y: { duration: 0.5, delay: (index % 10) * 0.05, ease: [0.22, 1, 0.36, 1] },
         layout: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
       }}
       onMouseEnter={handleMouseEnter}

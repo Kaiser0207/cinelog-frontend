@@ -34,8 +34,8 @@ export default function ReviewCard({ review, index = 0 }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ 
-        opacity: { duration: 0.5, delay: (index % 12) * 0.05, ease: [0.22, 1, 0.36, 1] },
-        y: { duration: 0.5, delay: (index % 12) * 0.05, ease: [0.22, 1, 0.36, 1] },
+        opacity: { duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] },
+        y: { duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] },
         layout: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
       }}
       onClick={() => navigate(`/review/${review.id}`)}
