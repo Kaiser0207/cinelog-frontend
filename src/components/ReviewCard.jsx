@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, getScoreColor } from '../utils/constants';
@@ -7,6 +7,7 @@ import { useLanguage } from './LanguageContext';
 export default function ReviewCard({ review, index = 0, gyroPermission = false }) {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const [isHovered, setIsHovered] = useState(false);
 
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
@@ -43,6 +44,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
 
   const handleMouseMove = (e) => {
     if (gyroPermission) return; // Don't track mouse if gyro is active
+    setIsHovered(true);
     const rect = e.currentTarget.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -52,6 +54,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
 
   const handleMouseLeave = () => {
     if (gyroPermission) return;
+    setIsHovered(false);
     x.set(0);
     y.set(0);
   };
