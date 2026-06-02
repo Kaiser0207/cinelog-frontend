@@ -29,14 +29,12 @@ export default function ReviewCard({ review, index = 0 }) {
 
   return (
     <motion.article
-      layout="position"
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ 
         opacity: { duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] },
-        y: { duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] },
-        layout: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
+        y: { duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }
       }}
       onClick={() => navigate(`/review/${review.id}`)}
       className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-[#9D174D]/20 hover:shadow-2xl max-w-full"
