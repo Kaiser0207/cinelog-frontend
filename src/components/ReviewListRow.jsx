@@ -62,7 +62,7 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
         <div className="flex items-center gap-4 md:gap-8 flex-shrink-0">
           <div className="flex items-center gap-1.5 bg-[#E8E2D2] px-2 py-1 rounded-md text-black">
             <span className="text-xs">✨</span>
-            <span className="text-sm font-black font-[var(--font-bebas)] tracking-wider pt-0.5">{rating}</span>
+            <span className="text-sm font-black font-[var(--font-bebas)] text-[#FE494A] tracking-wider pt-0.5">{rating}</span>
           </div>
           
           <div className="text-xs text-text-dim font-[var(--font-jetbrains)] hidden sm:block">
