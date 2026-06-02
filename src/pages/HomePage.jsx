@@ -74,7 +74,7 @@ export default function HomePage() {
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(() => {
       setSearchQuery(val);
-    }, 500);
+    }, 1500); // 防抖時間拉長至 1.5 秒，避免 AI Search 頻繁發送請求
   };
 
   // Close sort dropdown on outside click
