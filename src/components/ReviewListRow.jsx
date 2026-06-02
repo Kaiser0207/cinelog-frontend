@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TMDB_IMG_BASE } from '../utils/constants';
 
 export default function ReviewListRow({ review, index, onHover, onLeave, onClick, isExpanded, hasAnyExpanded, onToggleExpand }) {
-  const { title, release_date, runtime, poster_path, created_at, emotion, pacing, acting, cinematography, soundtrack, color_palette } = review;
+  const { title, release_date, runtime, poster_path, created_at, emotion, pacing, acting, cinematography, soundtrack, color_palette, custom_backdrop_url, directors_info, cast_info, review_text } = review;
   const rating = ((emotion + pacing + acting + cinematography + soundtrack) / 5).toFixed(1);
 
   const palette = color_palette 
@@ -13,6 +13,16 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
   const posterUrl = poster_path
     ? `${TMDB_IMG_BASE}w500${poster_path}`
     : null;
+
+  const expandedImageUrl = custom_backdrop_url
+    ? `${TMDB_IMG_BASE}w780${custom_backdrop_url}`
+    : posterUrl;
+
+  const parsedDirectors = typeof directors_info === 'string' ? JSON.parse(directors_info) : (directors_info || []);
+  const parsedCast = typeof cast_info === 'string' ? JSON.parse(cast_info) : (cast_info || []);
+  
+  const directorName = parsedDirectors.length > 0 ? parsedDirectors[0].name : '';
+  const topCast = parsedCast.length > 0 ? parsedCast.slice(0, 3).map(c => c.name).join(', ') : '';
 
   const handleMouseEnter = () => {
     // Only trigger hover on devices that support hover (not touch devices)
@@ -103,12 +113,12 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="flex flex-col gap-4 overflow-hidden md:hidden"
           >
-            {/* Expanded Poster */}
-            {posterUrl && (
+            {/* Expanded Cinematic Poster */}
+            {expandedImageUrl && (
               <img 
-                src={posterUrl} 
+                src={expandedImageUrl} 
                 alt={title} 
-                className="w-full h-56 object-cover rounded-xl shadow-lg border border-black/10" 
+                className="w-full aspect-video object-cover rounded-xl shadow-md border border-black/10 object-top" 
               />
             )}
 
@@ -118,7 +128,7 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
                 {title}
               </h2>
               {palette.length > 0 && (
-                <div className="flex w-full h-3 rounded-full overflow-hidden shadow-inner opacity-80">
+                <div className="flex w-full h-2 rounded-full overflow-hidden opacity-80 mt-1">
                   {palette.slice(0, 5).map((hex, i) => (
                     <div key={i} className="flex-1 h-full" style={{ backgroundColor: hex }} />
                   ))}
@@ -126,10 +136,23 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
               )}
             </div>
 
+            {/* Movie Info Details */}
+            <div className="flex flex-col gap-1 text-sm text-text-dim mt-1">
+              {directorName && (
+                <p><span className="font-bold text-[#1A1A1A]">Director:</span> {directorName}</p>
+              )}
+              {topCast && (
+                <p className="truncate"><span className="font-bold text-[#1A1A1A]">Cast:</span> {topCast}</p>
+              )}
+              {review_text && (
+                <p className="line-clamp-2 mt-1 italic text-xs border-l-2 border-[#FE494A]/30 pl-2">"{review_text}"</p>
+              )}
+            </div>
+
             {/* CTA Button */}
             <button 
               onClick={(e) => { e.stopPropagation(); onClick(); }}
-              className="w-full mt-2 py-4 bg-[#FE494A] text-[#E8E2D2] font-black font-[var(--font-syne)] tracking-widest uppercase rounded-lg shadow-[4px_4px_0px_rgba(0,0,0,1)] active:translate-y-1 active:translate-x-1 active:shadow-[0px_0px_0px_rgba(0,0,0,1)] transition-all"
+              className="w-full mt-3 py-4 bg-[#FE494A] text-[#E8E2D2] font-black font-[var(--font-syne)] tracking-widest uppercase rounded-lg shadow-lg shadow-[#FE494A]/20 active:translate-y-0.5 active:shadow-md transition-all"
             >
               閱讀影評 (Read Full Review)
             </button>
