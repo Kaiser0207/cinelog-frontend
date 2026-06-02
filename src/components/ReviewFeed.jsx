@@ -25,22 +25,20 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   // Initialize GSAP quickTo when portal mounts
   useEffect(() => {
     if (portalRef.current) {
-      xTo.current = gsap.quickTo(portalRef.current, "x", { duration: 0.4, ease: "power3" });
-      yTo.current = gsap.quickTo(portalRef.current, "y", { duration: 0.4, ease: "power3" });
+      xTo.current = gsap.quickTo(portalRef.current, "x", { duration: 0.3, ease: "power3" });
+      yTo.current = gsap.quickTo(portalRef.current, "y", { duration: 0.3, ease: "power3" });
     }
-  }, [hoveredImage]);
 
-  useEffect(() => {
-    if (!hoveredImage) return;
     const handleMouseMove = (e) => {
       if (xTo.current && yTo.current) {
         xTo.current(e.clientX + 16); // 16px offset
         yTo.current(e.clientY + 16);
       }
     };
+    
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [hoveredImage]);
+  }, []);
 
   const fetchReviews = useCallback(async (offset = 0, reset = false) => {
     if (loading) return;
@@ -172,24 +170,27 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
       {hasMore && <div ref={sentinelRef} className="h-20" />}
 
       {/* Global Hover Portal */}
-      <AnimatePresence>
-        {hoveredImage && viewMode === 'list' && (
-          <motion.div
-            ref={portalRef}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-0 left-0 pointer-events-none z-[999] will-change-transform"
-          >
-            <img 
-              src={hoveredImage} 
-              alt="Hover preview" 
-              className="w-48 h-72 object-cover rounded-xl shadow-2xl border border-white/10"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div 
+        ref={portalRef}
+        className="fixed top-0 left-0 pointer-events-none z-[999] will-change-transform"
+      >
+        <AnimatePresence>
+          {hoveredImage && viewMode === 'list' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <img 
+                src={hoveredImage} 
+                alt="Hover preview" 
+                className="w-48 h-72 object-cover rounded-xl shadow-2xl border border-white/10"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </>
   );
 }
