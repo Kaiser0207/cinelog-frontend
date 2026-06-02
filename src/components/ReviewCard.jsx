@@ -23,10 +23,10 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
   const rotateX = useTransform(smoothY, [-200, 200], [15, -15]);
   const rotateY = useTransform(smoothX, [-200, 200], [-15, 15]);
 
-  // Specular Highlight Position
-  const glareX = useTransform(smoothX, [-200, 200], [0, 100]);
-  const glareY = useTransform(smoothY, [-200, 200], [0, 100]);
-  const backgroundPosition = useMotionTemplate`${glareX}% ${glareY}%`;
+  // Cinema Projector Beam (Aggressive Gyroscope Mapping)
+  const beamX = useTransform(smoothX, [-200, 200], [-50, 150]);
+  const beamY = useTransform(smoothY, [-200, 200], [-50, 150]);
+  const backgroundPosition = useMotionTemplate`${beamX}% ${beamY}%`;
 
   useEffect(() => {
     if (!gyroPermission) return;
@@ -105,13 +105,13 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
 
-      {/* Specular Highlight (Glare) Layer */}
+      {/* Cinematic Projector Beam Layer */}
       <motion.div 
-        className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-30 group-hover:opacity-60 transition-opacity"
+        className={`absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-80 group-hover:opacity-100 transition-opacity ${gyroPermission ? 'animate-projector' : ''}`}
         style={{ 
-          background: 'radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%)',
+          background: 'radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,245,225,0.7) 15%, rgba(255,255,255,0) 50%)',
           backgroundPosition: backgroundPosition,
-          backgroundSize: '200% 200%',
+          backgroundSize: '250% 250%',
         }} 
       />
 

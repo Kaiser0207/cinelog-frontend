@@ -121,6 +121,22 @@ body {
   0%, 100% { box-shadow: 0 0 8px rgba(105, 225, 71, 0.3), 0 0 24px rgba(105, 225, 71, 0.1); }
   50% { box-shadow: 0 0 16px rgba(105, 225, 71, 0.6), 0 0 48px rgba(105, 225, 71, 0.2); }
 }
+@keyframes projector-flicker {
+  0%, 100% { opacity: 0.8; }
+  10% { opacity: 0.95; }
+  20% { opacity: 0.85; }
+  30% { opacity: 1; }
+  40% { opacity: 0.9; }
+  50% { opacity: 0.95; }
+  60% { opacity: 0.8; }
+  70% { opacity: 0.95; }
+  80% { opacity: 0.9; }
+  90% { opacity: 0.85; }
+}
+
+.animate-projector {
+  animation: projector-flicker 0.1s infinite alternate;
+}
 
 .fade-in {
   animation: fadeIn 0.5s ease forwards;

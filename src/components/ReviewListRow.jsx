@@ -15,7 +15,7 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
     : null;
 
   const expandedImageUrl = custom_backdrop_url
-    ? `${TMDB_IMG_BASE}w780${custom_backdrop_url}`
+    ? `${TMDB_IMG_BASE}w1280${custom_backdrop_url}`
     : posterUrl;
 
   const parsedDirectors = typeof directors_info === 'string' ? JSON.parse(directors_info) : (directors_info || []);
