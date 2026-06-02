@@ -38,7 +38,7 @@ export default function ReviewCard({ review, index = 0 }) {
       }}
       onClick={() => navigate(`/review/${review.id}`)}
       whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
-      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#9D174D]/20 hover:shadow-2xl max-w-full"
+      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#FE494A]/20 hover:shadow-2xl max-w-full"
       style={{ aspectRatio: '16/10' }}
     >
       {/* Background Image */}
@@ -122,7 +122,7 @@ export default function ReviewCard({ review, index = 0 }) {
           )}
 
           {/* CTA */}
-          <div className="flex items-center gap-2 text-[#9D174D] text-xs font-bold uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
+          <div className="flex items-center gap-2 text-[#FE494A] text-xs font-bold uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
             <span>{t('readReview')}</span>
             <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
           </div>

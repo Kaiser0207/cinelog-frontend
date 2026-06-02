@@ -122,9 +122,9 @@ export default function ShareCard({ review, className }) {
                    fontSize: '110px',
                    fontWeight: 900,
                    lineHeight: 1,
-                   color: '#9D174D',
+                   color: '#FE494A',
                    fontFamily: "'Outfit', sans-serif",
-                   textShadow: `0 0 30px #9D174D80, 0 4px 20px rgba(0,0,0,0.8)`
+                   textShadow: `0 0 30px #FE494A80, 0 4px 20px rgba(0,0,0,0.8)`
                  }}>
                    {total.toFixed(1)}
                  </div>
@@ -189,7 +189,7 @@ export default function ShareCard({ review, className }) {
                 paddingTop: '20px',
                 borderTop: '2px solid rgba(255,255,255,0.2)'
               }}>
-                <div style={{ fontSize: '24px', color: '#9D174D', fontWeight: 900 }}>
+                <div style={{ fontSize: '24px', color: '#FE494A', fontWeight: 900 }}>
                   🔗 點擊連結閱讀完整影評
                 </div>
                 <div style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '2px' }}>
@@ -202,7 +202,7 @@ export default function ShareCard({ review, className }) {
 
       <button
         onClick={handleShare}
-        className={className || "group flex items-center gap-2 px-8 py-3 rounded-full bg-[#D480C0] hover:bg-[#9D174D] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"}
+        className={className || "group flex items-center gap-2 px-8 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"}
       >
         <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
           📱 Share to Story

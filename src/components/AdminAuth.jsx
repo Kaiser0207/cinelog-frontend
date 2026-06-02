@@ -207,7 +207,7 @@ function AdminAuthModal({ onVerified, onClose }) {
           <button
             type="submit"
             disabled={verifying || !pw.trim()}
-            className="w-full py-3 rounded-full bg-[#9D174D] hover:bg-[#FBA3B5] text-black font-bold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed border-none shadow-sm cursor-pointer"
+            className="w-full py-3 rounded-full bg-[#FE494A] hover:bg-[#FE494A] text-black font-bold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed border-none shadow-sm cursor-pointer"
           >
             {verifying ? (
               <span className="flex items-center justify-center gap-2">
@@ -359,7 +359,7 @@ function DeviceManagerModal({ password, onClose }) {
             <button
               onClick={handleRegister}
               disabled={registering || !newDeviceName.trim()}
-              className="bg-[#D480C0] hover:bg-[#9D174D] hover:text-white text-black font-bold px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 border-none cursor-pointer"
+              className="bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-bold px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 border-none cursor-pointer"
             >
               {registering ? '...' : 'Bind'}
             </button>
