@@ -11,11 +11,13 @@ export default function ReviewCard({ review, index = 0 }) {
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
   const total = computeTotal(entertainment, cinematic);
 
-  const backdropUrl = review.backdrop_path
-    ? `${TMDB_IMG_BASE}w780${review.backdrop_path}`
-    : review.poster_path
-      ? `${TMDB_IMG_BASE}w500${review.poster_path}`
-      : null;
+  const backdropUrl = review.custom_backdrop_url
+    ? review.custom_backdrop_url
+    : review.backdrop_path
+      ? `${TMDB_IMG_BASE}w780${review.backdrop_path}`
+      : review.poster_path
+        ? `${TMDB_IMG_BASE}w500${review.poster_path}`
+        : null;
 
   const genres = review.genres
     ? (typeof review.genres === 'string' ? JSON.parse(review.genres) : review.genres)
