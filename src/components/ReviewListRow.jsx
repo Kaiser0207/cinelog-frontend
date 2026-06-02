@@ -36,8 +36,8 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
       onClick={onClick}
       className="group relative flex items-center gap-4 py-4 px-2 border-b border-border-subtle hover:bg-[#FE494A]/10 cursor-pointer transition-colors w-full overflow-hidden"
     >
-      {/* Mobile Thumbnail (Visible on small screens only) */}
-      <div className="w-12 h-16 rounded-md bg-neutral-800 overflow-hidden flex-shrink-0 relative block md:hidden">
+      {/* Static Thumbnail */}
+      <div className="w-12 h-16 rounded-md bg-neutral-800 overflow-hidden flex-shrink-0 relative block">
         {posterUrl ? (
           <img src={posterUrl} alt={title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
