@@ -36,6 +36,7 @@ export default function ReviewCard({ review, index = 0 }) {
       transition={{ duration: 0.5, delay: (index % 12) * 0.05 }}
       onClick={() => navigate(`/review/${review.id}`)}
       className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-[#FFB6C1]/20 hover:shadow-2xl max-w-full"
+      style={{ aspectRatio: '16/10' }}
     >
       {/* Background Image */}
       {backdropUrl ? (
