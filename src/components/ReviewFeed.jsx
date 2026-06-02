@@ -16,23 +16,21 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   const [hasMore, setHasMore] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // Global Hover State for List View Reveal (GSAP quickTo)
+  // Global Hover State for List View Reveal
   const [hoveredImage, setHoveredImage] = useState(null);
   const portalRef = useRef(null);
-  const xTo = useRef(null);
-  const yTo = useRef(null);
 
-  // Initialize GSAP quickTo when portal mounts
+  // Initialize global mouse tracking for the portal
   useEffect(() => {
-    if (portalRef.current) {
-      xTo.current = gsap.quickTo(portalRef.current, "x", { duration: 0.3, ease: "power3" });
-      yTo.current = gsap.quickTo(portalRef.current, "y", { duration: 0.3, ease: "power3" });
-    }
-
     const handleMouseMove = (e) => {
-      if (xTo.current && yTo.current) {
-        xTo.current(e.clientX + 16); // 16px offset
-        yTo.current(e.clientY + 16);
+      if (portalRef.current) {
+        gsap.to(portalRef.current, {
+          x: e.clientX + 16,
+          y: e.clientY + 16,
+          duration: 0.3,
+          ease: "power3.out",
+          overwrite: "auto"
+        });
       }
     };
     
