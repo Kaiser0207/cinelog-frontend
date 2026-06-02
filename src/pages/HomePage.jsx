@@ -21,6 +21,11 @@ export default function HomePage() {
   const { lang, toggleLanguage, t } = useLanguage();
   const { isAdmin, requireAuth, openDeviceManager } = useAdmin();
   const [sortOpen, setSortOpen] = useState(false);
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('cinelog_view_mode') || 'grid');
+
+  useEffect(() => {
+    localStorage.setItem('cinelog_view_mode', viewMode);
+  }, [viewMode]);
   const sortRef = useRef(null);
   
   const clickCount = useRef(0);
@@ -189,7 +194,40 @@ export default function HomePage() {
       {/* Feed */}
       <main className="max-w-7xl mx-auto px-5 pb-24" key={refreshKey}>
         {/* Sort Dropdown aligned to the right */}
-        <div className="flex justify-end mb-6">
+        <div className="flex justify-between items-center mb-6">
+          {/* View Mode Toggle */}
+          <div className="flex bg-[#E8E2D2] rounded-full p-1 border border-border-subtle shadow-sm">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'grid' ? 'bg-[#FFB6C1] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
+              title="Grid View"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'list' ? 'bg-[#FFB6C1] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
+              title="List View"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          {/* Sort Dropdown aligned to the right */}
           <div className="relative" ref={sortRef}>
             <button
               type="button"
@@ -242,7 +280,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <ReviewFeed sort={sort} genre={genre} searchQuery={searchQuery} searchMode={searchMode} />
+        <ReviewFeed sort={sort} genre={genre} searchQuery={searchQuery} searchMode={searchMode} viewMode={viewMode} />
       </main>
 
       {/* Vibrant Blue Neo-brutalist Footer */}

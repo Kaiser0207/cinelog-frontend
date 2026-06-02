@@ -29,13 +29,13 @@ export default function ReviewCard({ review, index = 0 }) {
 
   return (
     <motion.article
+      layout="position"
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.5, delay: (index % 12) * 0.05 }}
       onClick={() => navigate(`/review/${review.id}`)}
-      className="relative cursor-pointer card-hover group overflow-hidden rounded-lg border border-border-subtle"
-      style={{ aspectRatio: '16/10' }}
+      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-[#FFB6C1]/20 hover:shadow-2xl max-w-full"
     >
       {/* Background Image */}
       {backdropUrl ? (
