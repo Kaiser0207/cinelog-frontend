@@ -121,21 +121,19 @@ body {
   0%, 100% { box-shadow: 0 0 8px rgba(105, 225, 71, 0.3), 0 0 24px rgba(105, 225, 71, 0.1); }
   50% { box-shadow: 0 0 16px rgba(105, 225, 71, 0.6), 0 0 48px rgba(105, 225, 71, 0.2); }
 }
-@keyframes projector-flicker {
-  0%, 100% { opacity: 0.8; }
-  10% { opacity: 0.95; }
-  20% { opacity: 0.85; }
-  30% { opacity: 1; }
-  40% { opacity: 0.9; }
-  50% { opacity: 0.95; }
-  60% { opacity: 0.8; }
-  70% { opacity: 0.95; }
-  80% { opacity: 0.9; }
-  90% { opacity: 0.85; }
+@keyframes dustDrift {
+  0% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px) rotate(1deg);
+  }
+  100% {
+    transform: translateY(-40px) translateX(0px) rotate(0deg); /* Seamless loop tiling */
+  }
 }
-
-.animate-projector {
-  animation: projector-flicker 0.1s infinite alternate;
+.animate-dust {
+  animation: dustDrift 12s linear infinite;
 }
 
 .fade-in {

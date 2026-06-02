@@ -106,14 +106,37 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
 
       {/* Cinematic Projector Beam Layer */}
-      <motion.div 
-        className={`absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-80 group-hover:opacity-100 transition-opacity ${gyroPermission ? 'animate-projector' : ''}`}
-        style={{ 
+      <motion.div
+        className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-90 transition-opacity"
+        style={{
           background: 'radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,245,225,0.7) 15%, rgba(255,255,255,0) 50%)',
           backgroundPosition: backgroundPosition,
           backgroundSize: '250% 250%',
-        }} 
+        }}
       />
+
+      {/* Floating Dust Particles (Masked by the projector beam) */}
+      {gyroPermission && (
+        <motion.div 
+          className="absolute inset-0 z-10 pointer-events-none overflow-hidden"
+          style={{
+            WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0) 50%)',
+            WebkitMaskPosition: backgroundPosition,
+            WebkitMaskSize: '250% 250%',
+            maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0) 50%)',
+            maskPosition: backgroundPosition,
+            maskSize: '250% 250%',
+          }}
+        >
+          <div 
+            className="absolute -inset-[50%] opacity-30 mix-blend-screen animate-dust"
+            style={{ 
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.5\'/%3E%3C/svg%3E")',
+              backgroundSize: '150px 150px'
+            }}
+          />
+        </motion.div>
+      )}
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6">
