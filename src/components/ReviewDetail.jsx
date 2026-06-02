@@ -506,8 +506,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         </div>
       </div>
 
-      {/* ===== MOBILE FLOATING SCORE BAR ===== */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[90]">
+      {/* ===== MOBILE FLOATING SCORE BAR (UNIFIED NATIVE SHEET) ===== */}
+      <div className="lg:hidden fixed inset-0 z-[90] pointer-events-none">
         {/* Backdrop overlay when expanded */}
         <AnimatePresence>
           {mobileScoreOpen && (
@@ -515,79 +515,71 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-[89]"
+              className="absolute inset-0 bg-black/60 pointer-events-auto"
               onClick={() => setMobileScoreOpen(false)}
             />
           )}
         </AnimatePresence>
 
-        {/* Expandable Score Panel */}
-        <AnimatePresence>
-          {mobileScoreOpen && (
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              drag="y"
-              dragControls={dragControls}
-              dragListener={false}
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0, bottom: 0.5 }}
-              onDragEnd={(e, info) => {
-                if (info.offset.y > 50) setMobileScoreOpen(false);
-              }}
-              className="relative z-[91] bg-bg-deep/95 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl px-5 pb-6 pt-2 max-h-[70vh] overflow-y-auto overscroll-contain"
-            >
-              {/* Drag Handle (Touch Target) */}
-              <div 
-                className="w-full py-4 -mt-2 mb-2 flex justify-center cursor-grab active:cursor-grabbing touch-none"
-                onPointerDown={(e) => dragControls.start(e)}
-              >
-                <div className="w-10 h-1 bg-black/20 rounded-full" />
-              </div>
-              
-              <ScoreCards compact />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Mini Score Bar */}
-        {!mobileScoreOpen && (
-          <motion.button
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            transition={{ delay: 0.5, type: 'spring', damping: 20 }}
-            onClick={() => setMobileScoreOpen(true)}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0.5, bottom: 0 }}
-            onDragEnd={(e, info) => {
-              if (info.offset.y < -30) setMobileScoreOpen(true);
-            }}
-            className="w-full flex items-center justify-around px-6 py-4 bg-bg-deep/85 backdrop-blur-2xl border-t border-white/10 cursor-pointer border-x-0 border-b-0"
-            style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
+        {/* Unified Bottom Sheet */}
+        <motion.div
+          initial={false}
+          animate={{ y: mobileScoreOpen ? 0 : 'calc(100% - 85px)' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          drag="y"
+          dragControls={dragControls}
+          dragListener={false}
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0.05, bottom: 0.1 }}
+          onDragEnd={(e, info) => {
+            if (mobileScoreOpen && info.offset.y > 40) setMobileScoreOpen(false);
+            if (!mobileScoreOpen && info.offset.y < -30) setMobileScoreOpen(true);
+          }}
+          className="absolute bottom-0 left-0 right-0 w-full bg-bg-deep/95 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col pointer-events-auto"
+        >
+          {/* Top Handle / Mini Bar (Always visible) */}
+          <div 
+            className="h-[85px] w-full flex items-center justify-around px-6 cursor-grab active:cursor-grabbing touch-none shrink-0"
+            onClick={() => setMobileScoreOpen(!mobileScoreOpen)}
+            onPointerDown={(e) => dragControls.start(e)}
+            style={{ paddingBottom: mobileScoreOpen ? '0px' : 'env(safe-area-inset-bottom, 0px)' }}
           >
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#FE494A]" />
-              <span className="text-3xl font-black font-[var(--font-syne)] tabular-nums tracking-wide text-[#FE494A]">
-                {total.toFixed(1)}
-              </span>
-              <span className="text-xs text-text-dim font-bold mt-1">/10</span>
-            </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div className="flex items-center gap-2">
-              <span className="text-base text-text-muted">🎭</span>
-              <span className="text-lg font-bold text-text-primary tabular-nums">{entertainment.toFixed(1)}</span>
-            </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div className="flex items-center gap-2">
-              <span className="text-base text-text-muted">🎬</span>
-              <span className="text-lg font-bold text-text-primary tabular-nums">{cinematic.toFixed(1)}</span>
-            </div>
-            <span className="text-text-dim text-sm ml-2 animate-bounce">▲</span>
-          </motion.button>
-        )}
+            {mobileScoreOpen ? (
+              // Just a drag handle when expanded
+              <div className="w-12 h-1.5 bg-black/20 rounded-full" />
+            ) : (
+              // Mini Score Bar Content
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-[#FE494A]" />
+                  <span className="text-3xl font-black font-[var(--font-syne)] tabular-nums tracking-wide text-[#FE494A]">
+                    {total.toFixed(1)}
+                  </span>
+                  <span className="text-xs text-text-dim font-bold mt-1">/10</span>
+                </div>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="flex items-center gap-2">
+                  <span className="text-base text-text-muted">🎭</span>
+                  <span className="text-lg font-bold text-text-primary tabular-nums">{entertainment.toFixed(1)}</span>
+                </div>
+                <div className="w-px h-8 bg-white/10" />
+                <div className="flex items-center gap-2">
+                  <span className="text-base text-text-muted">🎬</span>
+                  <span className="text-lg font-bold text-text-primary tabular-nums">{cinematic.toFixed(1)}</span>
+                </div>
+                <span className="text-text-dim text-sm ml-2 animate-bounce">▲</span>
+              </>
+            )}
+          </div>
+
+          {/* Expandable Content (ScoreCards) */}
+          <div 
+            className="px-5 pb-8 overflow-y-auto max-h-[70vh] overscroll-contain"
+            style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
+          >
+            <ScoreCards compact />
+          </div>
+        </motion.div>
       </div>
 
       {/* Vibrant Blue Neo-brutalist Footer */}
