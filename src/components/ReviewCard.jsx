@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, getScoreColor } from '../utils/constants';
 import { useLanguage } from './LanguageContext';
@@ -10,6 +10,25 @@ export default function ReviewCard({ review, index = 0 }) {
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
   const total = computeTotal(entertainment, cinematic);
+
+  // 3D Tilt Effect
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useTransform(y, [-200, 200], [5, -5]);
+  const rotateY = useTransform(x, [-200, 200], [-5, 5]);
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    x.set(e.clientX - centerX);
+    y.set(e.clientY - centerY);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
 
   const backdropUrl = review.custom_backdrop_url
     ? review.custom_backdrop_url
@@ -36,10 +55,12 @@ export default function ReviewCard({ review, index = 0 }) {
         opacity: { duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] },
         y: { duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }
       }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       onClick={() => navigate(`/review/${review.id}`)}
       whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
       className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#FE494A]/20 hover:shadow-2xl max-w-full"
-      style={{ aspectRatio: '16/10' }}
+      style={{ aspectRatio: '16/10', rotateX, rotateY, transformPerspective: 1000 }}
     >
       {/* Background Image */}
       {backdropUrl ? (
@@ -68,7 +89,7 @@ export default function ReviewCard({ review, index = 0 }) {
             }}
           >
             <span
-              className="text-xl font-black font-[var(--font-outfit)] text-[#FE494A]"
+              className="text-xl font-black font-[var(--font-syne)] tracking-tighter text-[#FE494A]"
             >
               {total.toFixed(1)}
             </span>
@@ -95,7 +116,7 @@ export default function ReviewCard({ review, index = 0 }) {
           )}
 
           {/* Title */}
-          <h3 className="text-xl md:text-2xl font-bold font-[var(--font-outfit)] text-white leading-tight mb-1 truncate">
+          <h3 className="text-xl md:text-2xl font-bold font-[var(--font-syne)] tracking-tighter text-white leading-tight mb-1 truncate">
             {review.title}
           </h3>
 

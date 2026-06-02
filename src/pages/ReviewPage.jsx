@@ -71,7 +71,7 @@ export default function ReviewPage() {
         className="min-h-screen flex flex-col items-center justify-center text-center p-6"
       >
         <span className="text-7xl mb-4">🎬</span>
-        <h2 className="text-2xl font-bold font-[var(--font-outfit)] text-text-primary mb-2">
+        <h2 className="text-2xl font-bold font-[var(--font-syne)] tracking-tightertext-text-primary mb-2">
           Review Not Found
         </h2>
         <p className="text-text-muted mb-6">

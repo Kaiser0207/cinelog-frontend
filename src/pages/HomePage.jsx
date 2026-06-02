@@ -118,7 +118,7 @@ export default function HomePage() {
       <div className="relative pt-24 pb-12 px-5 flex flex-col items-start md:items-center justify-center min-h-[40vh]">
         <motion.h1
           style={{ y: titleY, skewX: titleSkew, opacity: titleOpacity }}
-          className="text-8xl md:text-[12rem] lg:text-[15rem] font-black font-[var(--font-bebas)] tracking-tighter text-[#1A1A1A] uppercase leading-none z-0"
+          className="text-8xl md:text-[12rem] lg:text-[15rem] font-black font-[var(--font-syne)] tracking-tighter text-[#1A1A1A] uppercase leading-none z-0"
         >
           <span className="md:hidden">CINE<br/>ROOMS</span>
           <span className="hidden md:inline">CINEROOMS</span>

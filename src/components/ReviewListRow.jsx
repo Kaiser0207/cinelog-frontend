@@ -36,8 +36,8 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
       onClick={onClick}
       className="group relative flex items-center gap-4 py-4 px-2 border-b border-border-subtle hover:bg-[#FE494A]/10 cursor-pointer transition-colors w-full overflow-hidden"
     >
-      {/* Mobile Thumbnail (Visible on small screens, or always) */}
-      <div className="w-12 h-16 rounded-md bg-neutral-800 overflow-hidden flex-shrink-0 relative">
+      {/* Mobile Thumbnail (Visible on small screens only) */}
+      <div className="w-12 h-16 rounded-md bg-neutral-800 overflow-hidden flex-shrink-0 relative block md:hidden">
         {posterUrl ? (
           <img src={posterUrl} alt={title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
@@ -50,7 +50,7 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
         
         {/* Title & Year */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-base md:text-xl font-bold font-[var(--font-outfit)] text-text-primary truncate group-hover:text-[#FE494A] transition-colors">
+          <h3 className="text-base md:text-xl font-bold font-[var(--font-syne)] tracking-tighter text-[#1A1A1A] truncate group-hover:text-[#FE494A] transition-colors">
             {title}
           </h3>
           <p className="text-xs md:text-sm text-text-dim mt-0.5 font-[var(--font-jetbrains)] uppercase tracking-wide">

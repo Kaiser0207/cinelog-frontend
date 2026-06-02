@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import gsap from 'gsap';
 import ReviewCard, { ReviewCardSkeleton } from './ReviewCard';
 import ReviewListRow from './ReviewListRow';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
@@ -15,23 +16,31 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   const [hasMore, setHasMore] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // Global Hover State for List View Reveal
+  // Global Hover State for List View Reveal (GSAP quickTo)
   const [hoveredImage, setHoveredImage] = useState(null);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springConfig = { damping: 25, stiffness: 300 };
-  const springX = useSpring(mouseX, springConfig);
-  const springY = useSpring(mouseY, springConfig);
+  const portalRef = useRef(null);
+  const xTo = useRef(null);
+  const yTo = useRef(null);
+
+  // Initialize GSAP quickTo when portal mounts
+  useEffect(() => {
+    if (portalRef.current) {
+      xTo.current = gsap.quickTo(portalRef.current, "x", { duration: 0.4, ease: "power3" });
+      yTo.current = gsap.quickTo(portalRef.current, "y", { duration: 0.4, ease: "power3" });
+    }
+  }, [hoveredImage]);
 
   useEffect(() => {
     if (!hoveredImage) return;
     const handleMouseMove = (e) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
+      if (xTo.current && yTo.current) {
+        xTo.current(e.clientX + 16); // 16px offset
+        yTo.current(e.clientY + 16);
+      }
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [hoveredImage, mouseX, mouseY]);
+  }, [hoveredImage]);
 
   const fetchReviews = useCallback(async (offset = 0, reset = false) => {
     if (loading) return;
@@ -119,7 +128,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
         className="flex flex-col items-center justify-center py-24 text-center"
       >
         <span className="text-6xl mb-4">🎬</span>
-        <h3 className="text-xl font-bold font-[var(--font-outfit)] text-text-primary mb-2">
+        <h3 className="text-xl font-bold font-[var(--font-syne)] tracking-tighter text-[#1A1A1A] mb-2">
           No Reviews Yet
         </h3>
         <p className="text-text-muted text-sm max-w-sm">
@@ -130,7 +139,8 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   }
   return (
     <>
-      <div 
+      <motion.div 
+        layout="position"
         className={viewMode === 'grid' 
           ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" 
           : "flex flex-col gap-0"}
@@ -156,7 +166,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
               : <div key={`skel-list-${i}`} className="w-full h-16 bg-neutral-900 animate-pulse border-b border-border-subtle" />
           ))
         }
-      </div>
+      </motion.div>
 
       {/* Sentinel for infinite scroll */}
       {hasMore && <div ref={sentinelRef} className="h-20" />}
@@ -165,12 +175,12 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
       <AnimatePresence>
         {hoveredImage && viewMode === 'list' && (
           <motion.div
+            ref={portalRef}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.15 }}
-            style={{ x: springX, y: springY }}
-            className="fixed top-0 left-0 pointer-events-none z-[999] ml-4 mt-4"
+            transition={{ duration: 0.2 }}
+            className="fixed top-0 left-0 pointer-events-none z-[999] will-change-transform"
           >
             <img 
               src={hoveredImage} 

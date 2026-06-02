@@ -49,7 +49,7 @@ function ColorBlock({ hex }) {
       <AnimatePresence>
         {hovered && (
           <motion.div
-            className="text-white font-black text-xs md:text-sm font-[var(--font-jetbrains)] tracking-wider drop-shadow-md whitespace-nowrap"
+            className="text-white font-black text-xs md:text-sm font-[var(--font-syne)] tracking-wider drop-shadow-md whitespace-nowrap"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
@@ -135,11 +135,11 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
     <div className={compact ? "space-y-3" : "space-y-6"}>
       {/* Total Score */}
       <div className="glass p-6 flex flex-col items-center justify-center text-center rounded-lg border border-border-subtle relative">
-        <p className="absolute top-6 left-6 text-sm font-bold font-[var(--font-bebas)] uppercase tracking-widest text-text-muted">{t('totalScore')}</p>
-        <span className="text-6xl md:text-8xl font-black font-[var(--font-bebas)] tabular-nums text-[#FE494A] mt-6">
+        <p className="absolute top-6 left-6 text-sm font-bold font-[var(--font-syne)] uppercase tracking-widest text-text-muted">{t('totalScore')}</p>
+        <span className="text-6xl md:text-8xl font-black font-[var(--font-syne)] tabular-nums text-[#FE494A] mt-6">
           {total.toFixed(1)}
         </span>
-        <p className="text-sm font-bold font-[var(--font-bebas)] text-text-dim mt-2">/ 10.0</p>
+        <p className="text-sm font-bold font-[var(--font-syne)] text-text-dim mt-2">/ 10.0</p>
       </div>
 
       {/* Entertainment */}
@@ -181,7 +181,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         onClick={() => navigate('/')}
         className="group fixed top-6 left-6 z-[100] px-5 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
       >
-        <span className="inline-block font-bold font-[var(--font-jetbrains)] text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
+        <span className="inline-block font-bold font-[var(--font-syne)] text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
           {t('back')}
         </span>
       </button>
@@ -189,7 +189,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Language Toggle Button */}
       <button
         onClick={toggleLanguage}
-        className="fixed top-6 right-6 z-[100] px-4 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all border-none font-[var(--font-jetbrains)] font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
+        className="fixed top-6 right-6 z-[100] px-4 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all border-none font-[var(--font-syne)] font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
       >
         <span>🌐</span>
         <span>{lang === 'en' ? '繁' : 'EN'}</span>
@@ -253,7 +253,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-4xl md:text-8xl font-black font-[var(--font-bebas)] text-white uppercase leading-none mb-4 drop-shadow-md"
+              className="text-4xl md:text-8xl font-black font-[var(--font-syne)] text-white uppercase leading-none mb-4 drop-shadow-md"
             >
               {review.title}
             </motion.h1>
@@ -311,7 +311,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               >
                 {directors.length > 0 && (
                   <div>
-                    <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FE494A] uppercase tracking-wider mb-3 border-b-4 border-[#FE494A] pb-2">
+                    <h3 className="text-2xl font-bold font-[var(--font-syne)] text-[#FE494A] uppercase tracking-wider mb-3 border-b-4 border-[#FE494A] pb-2">
                       {t('directors')}
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -331,7 +331,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 )}
                 {writers.length > 0 && (
                   <div>
-                    <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FE494A] uppercase tracking-wider mb-3 border-b-4 border-[#FE494A] pb-2">
+                    <h3 className="text-2xl font-bold font-[var(--font-syne)] text-[#FE494A] uppercase tracking-wider mb-3 border-b-4 border-[#FE494A] pb-2">
                       {t('writers')}
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -359,7 +359,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FE494A] uppercase tracking-wider mb-4 border-b-4 border-[#FE494A] pb-2">
+                <h3 className="text-2xl font-bold font-[var(--font-syne)] text-[#FE494A] uppercase tracking-wider mb-4 border-b-4 border-[#FE494A] pb-2">
                   {t('cast')}
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -384,7 +384,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.65 }}
             >
-              <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FE494A] uppercase tracking-wider mb-4 border-b-4 border-[#FE494A] pb-2">
+              <h3 className="text-2xl font-bold font-[var(--font-syne)] text-[#FE494A] uppercase tracking-wider mb-4 border-b-4 border-[#FE494A] pb-2">
                 {t('review')}
               </h3>
               <div
@@ -405,11 +405,11 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 transition={{ delay: 0.7 }}
                 className="border border-accent-blue/30 rounded-lg bg-[#1A1A1A] p-6"
               >
-                <h3 className="text-3xl font-black font-[var(--font-bebas)] uppercase text-accent-blue mb-4">
+                <h3 className="text-3xl font-black font-[var(--font-syne)] uppercase text-accent-blue mb-4">
                   🤖 {t('aiDirectorsCut')}
                 </h3>
                 {review.ai_recommendation && (
-                  <p className="text-white text-lg font-medium leading-relaxed font-[var(--font-inter)] mb-6">
+                  <p className="text-white text-lg font-medium leading-relaxed font-[var(--font-syne)] mb-6">
                     {review.ai_recommendation}
                   </p>
                 )}
@@ -438,7 +438,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.75 }}
               >
-                <h3 className="text-2xl font-bold font-[var(--font-bebas)] text-[#FE494A] uppercase tracking-wider mb-4 border-b-4 border-[#FE494A] pb-2">
+                <h3 className="text-2xl font-bold font-[var(--font-syne)] text-[#FE494A] uppercase tracking-wider mb-4 border-b-4 border-[#FE494A] pb-2">
                   ✨ {t('recommendations')}
                 </h3>
                 <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
@@ -548,7 +548,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           >
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#FE494A]" />
-              <span className="text-3xl font-black font-[var(--font-bebas)] tabular-nums tracking-wide text-[#FE494A]">
+              <span className="text-3xl font-black font-[var(--font-syne)] tabular-nums tracking-wide text-[#FE494A]">
                 {total.toFixed(1)}
               </span>
               <span className="text-xs text-text-dim font-bold mt-1">/10</span>
@@ -574,17 +574,17 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           {/* Decorative Section Header */}
           <div className="space-y-4">
             <div className="space-y-1">
-              <h2 className="text-5xl md:text-6xl font-black font-[var(--font-bebas)] text-[#D480C0] tracking-wider leading-none">
+              <h2 className="text-5xl md:text-6xl font-black font-[var(--font-syne)] text-[#D480C0] tracking-wider leading-none">
                 <span className="md:hidden">CINE<br/>ROOMS</span>
                 <span className="hidden md:inline">CINEROOMS</span>
               </h2>
-              <p className="text-base md:text-2xl font-bold font-[var(--font-bebas)] text-[#D480C0]/80 tracking-wider">
+              <p className="text-base md:text-2xl font-bold font-[var(--font-syne)] text-[#D480C0]/80 tracking-wider">
                 {t('footerSubtitle')}
               </p>
             </div>
             <div className="w-16 h-1 bg-[#D480C0] md:mx-auto rounded-full" />
             <p 
-              className="max-w-xl mx-auto text-xs md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)] text-white px-2 md:px-0"
+              className="max-w-xl mx-auto text-xs md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-syne)] text-white px-2 md:px-0"
               style={{ textAlign: 'justify', textJustify: 'inter-word' }}
             >
               {t('footerDesc')}
@@ -594,7 +594,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           {/* Watch History */}
           {watchDates.length > 0 && (
             <div className="w-full max-w-2xl px-2">
-              <h3 className="text-xl font-black font-[var(--font-bebas)] text-white tracking-widest mb-6">
+              <h3 className="text-xl font-black font-[var(--font-syne)] text-white tracking-widest mb-6">
                 {t('watchHistoryUpper')}
               </h3>
               <div className="flex flex-wrap justify-center gap-4">
@@ -604,10 +604,10 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                     whileHover={{ scale: 1.05 }}
                     className="flex items-center gap-3 bg-white/10 text-white px-6 py-2.5 rounded-2xl border border-white/20 shadow-sm backdrop-blur-sm"
                   >
-                    <span className="text-xs font-black uppercase text-[#D480C0] font-[var(--font-jetbrains)] bg-[#D480C0]/15 px-2 py-0.5 rounded">
+                    <span className="text-xs font-black uppercase text-[#D480C0] font-[var(--font-syne)] bg-[#D480C0]/15 px-2 py-0.5 rounded">
                       {['1st', '2nd', '3rd'][i] || `${i + 1}th`}
                     </span>
-                    <span className="text-base font-bold font-[var(--font-jetbrains)]">{formatDate(date)}</span>
+                    <span className="text-base font-bold font-[var(--font-syne)]">{formatDate(date)}</span>
                   </motion.div>
                 ))}
               </div>
@@ -645,7 +645,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           </div>
 
           {/* Timestamps */}
-          <div className="text-[10px] md:text-xs font-bold font-[var(--font-jetbrains)] text-white/50 flex flex-wrap justify-center gap-6 pt-8 border-t border-white/10 w-full">
+          <div className="text-[10px] md:text-xs font-bold font-[var(--font-syne)] text-white/50 flex flex-wrap justify-center gap-6 pt-8 border-t border-white/10 w-full">
             {review.created_at && (
               <span>{t('created')} {formatDate(review.created_at)}</span>
             )}
