@@ -14,6 +14,7 @@ export default function ReviewPage() {
   const [showEditor, setShowEditor] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchReview();
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
