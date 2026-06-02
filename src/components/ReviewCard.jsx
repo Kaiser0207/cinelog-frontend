@@ -115,27 +115,41 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
         }}
       />
 
-      {/* Floating Dust Particles (Masked by the projector beam) */}
-      {gyroPermission && (
-        <motion.div 
-          className="absolute inset-0 z-10 pointer-events-none overflow-hidden"
-          style={{
-            WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0) 50%)',
-            WebkitMaskPosition: backgroundPosition,
-            WebkitMaskSize: '250% 250%',
-            maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0) 50%)',
-            maskPosition: backgroundPosition,
-            maskSize: '250% 250%',
-          }}
-        >
-          <div
-            className="absolute -inset-[50%] opacity-80 mix-blend-color-dodge animate-dust backdrop-blur-[1px]"
+      {/* 3D Gyroscope Effects Layers */}
+      {(gyroPermission || isHovered) && (
+        <>
+          {/* DESKTOP DUST (Hidden on mobile) */}
+          <motion.div 
+            className="hidden lg:block absolute inset-0 z-10 pointer-events-none overflow-hidden"
+            style={{ 
+              WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0) 50%)',
+              WebkitMaskPosition: backgroundPosition,
+              WebkitMaskSize: '250% 250%',
+              maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0) 50%)',
+              maskPosition: backgroundPosition,
+              maskSize: '250% 250%',
+            }}
+          >
+            <div
+              className="absolute -inset-[50%] opacity-80 mix-blend-color-dodge animate-dust backdrop-blur-[1px]"
+              style={{
+                backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='15' cy='25' r='1.5' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='60' cy='110' r='2' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='120' cy='40' r='1.5' fill='%23fff' opacity='0.8'/%3E%3Ccircle cx='30' cy='130' r='2.5' fill='%23fff' opacity='0.85'/%3E%3Ccircle cx='140' cy='90' r='1' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='85' cy='65' r='2' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='125' cy='125' r='1.5' fill='%23fff' opacity='0.75'/%3E%3Ccircle cx='25' cy='75' r='1' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='70' cy='10' r='2.5' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='95' cy='140' r='1.5' fill='%23fff' opacity='0.8'/%3E%3C/svg%3E\")",
+                backgroundSize: '150px 150px'
+              }}
+            />
+          </motion.div>
+
+          {/* MOBILE BREATHING LIGHT BEAM (Hidden on desktop) */}
+          <motion.div
+            className="lg:hidden absolute inset-[0%] z-10 pointer-events-none mix-blend-overlay animate-projector-breath"
             style={{
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='15' cy='25' r='1.5' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='60' cy='110' r='2' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='120' cy='40' r='1.5' fill='%23fff' opacity='0.8'/%3E%3Ccircle cx='30' cy='130' r='2.5' fill='%23fff' opacity='0.85'/%3E%3Ccircle cx='140' cy='90' r='1' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='85' cy='65' r='2' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='125' cy='125' r='1.5' fill='%23fff' opacity='0.75'/%3E%3Ccircle cx='25' cy='75' r='1' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='70' cy='10' r='2.5' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='95' cy='140' r='1.5' fill='%23fff' opacity='0.8'/%3E%3C/svg%3E\")",
-              backgroundSize: '150px 150px'
+              backgroundImage: 'radial-gradient(circle at center, rgba(255,255,255, 1) 0%, rgba(255,255,255, 0.4) 20%, rgba(255,255,255, 0) 60%)',
+              backgroundPosition,
+              backgroundSize: '250% 250%',
+              backgroundRepeat: 'no-repeat'
             }}
           />
-        </motion.div>
+        </>
       )}
 
       {/* Content */}
