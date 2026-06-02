@@ -200,7 +200,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'grid' ? 'bg-[#9D174D] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
+              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'grid' ? 'bg-[#9D174D] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
               title="Grid View"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -213,7 +213,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'list' ? 'bg-[#9D174D] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
+              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'list' ? 'bg-[#9D174D] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
               title="List View"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24">
