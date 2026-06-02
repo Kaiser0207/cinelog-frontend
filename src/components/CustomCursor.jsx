@@ -54,8 +54,8 @@ export default function CustomCursor() {
         width: isHovering ? 60 : 20,
         height: isHovering ? 60 : 20,
         backgroundColor: isOverBlue 
-          ? (isHovering ? '#69E147' : '#9D174D') 
-          : (isHovering ? '#9D174D' : '#69E147'),
+          ? (isHovering ? '#D480C0' : '#9D174D') 
+          : (isHovering ? '#9D174D' : '#D480C0'),
         mixBlendMode: isHovering ? 'normal' : 'normal',
       }}
       transition={{

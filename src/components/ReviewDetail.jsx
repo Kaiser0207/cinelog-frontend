@@ -179,7 +179,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Back Button */}
       <button
         onClick={() => navigate('/')}
-        className="group fixed top-6 left-6 z-[100] px-5 py-2 bg-[#9D174D] hover:bg-[#69E147] hover:text-black text-white rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
+        className="group fixed top-6 left-6 z-[100] px-5 py-2 bg-[#9D174D] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
       >
         <span className="inline-block font-bold font-[var(--font-jetbrains)] text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
           {t('back')}
@@ -189,7 +189,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Language Toggle Button */}
       <button
         onClick={toggleLanguage}
-        className="fixed top-6 right-6 z-[100] px-4 py-2 bg-[#9D174D] hover:bg-[#69E147] hover:text-black text-white rounded-full shadow-lg transition-all border-none font-[var(--font-jetbrains)] font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
+        className="fixed top-6 right-6 z-[100] px-4 py-2 bg-[#9D174D] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all border-none font-[var(--font-jetbrains)] font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
       >
         <span>🌐</span>
         <span>{lang === 'en' ? '繁' : 'EN'}</span>
@@ -574,15 +574,15 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           {/* Decorative Section Header */}
           <div className="space-y-4">
             <div className="space-y-1">
-              <h2 className="text-5xl md:text-6xl font-black font-[var(--font-bebas)] text-[#69E147] tracking-wider leading-none">
+              <h2 className="text-5xl md:text-6xl font-black font-[var(--font-bebas)] text-[#D480C0] tracking-wider leading-none">
                 <span className="md:hidden">CINE<br/>ROOMS</span>
                 <span className="hidden md:inline">CINEROOMS</span>
               </h2>
-              <p className="text-base md:text-2xl font-bold font-[var(--font-bebas)] text-[#69E147]/80 tracking-wider">
+              <p className="text-base md:text-2xl font-bold font-[var(--font-bebas)] text-[#D480C0]/80 tracking-wider">
                 {t('footerSubtitle')}
               </p>
             </div>
-            <div className="w-16 h-1 bg-[#69E147] md:mx-auto rounded-full" />
+            <div className="w-16 h-1 bg-[#D480C0] md:mx-auto rounded-full" />
             <p 
               className="max-w-xl mx-auto text-xs md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)] text-white px-2 md:px-0"
               style={{ textAlign: 'justify', textJustify: 'inter-word' }}
@@ -604,7 +604,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                     whileHover={{ scale: 1.05 }}
                     className="flex items-center gap-3 bg-white/10 text-white px-6 py-2.5 rounded-2xl border border-white/20 shadow-sm backdrop-blur-sm"
                   >
-                    <span className="text-xs font-black uppercase text-[#69E147] font-[var(--font-jetbrains)] bg-[#69E147]/15 px-2 py-0.5 rounded">
+                    <span className="text-xs font-black uppercase text-[#D480C0] font-[var(--font-jetbrains)] bg-[#D480C0]/15 px-2 py-0.5 rounded">
                       {['1st', '2nd', '3rd'][i] || `${i + 1}th`}
                     </span>
                     <span className="text-base font-bold font-[var(--font-jetbrains)]">{formatDate(date)}</span>
@@ -619,7 +619,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             {isAdmin && (
               <button
                 onClick={onEdit}
-                className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#9D174D] hover:bg-[#69E147] hover:text-black text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
+                className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#9D174D] hover:bg-[#D480C0] hover:text-black text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
               >
                 <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
                   {t('editReview')}
@@ -629,7 +629,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
 
             <ShareCard 
               review={review} 
-              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#9D174D] hover:bg-[#69E147] hover:text-black text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95" 
+              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#9D174D] hover:bg-[#D480C0] hover:text-black text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95" 
             />
 
             {isAdmin && (

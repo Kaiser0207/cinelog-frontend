@@ -339,7 +339,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                       placeholder="Or paste a custom image URL..."
                       className="flex-1 bg-[#E8E2D2] border border-border-subtle p-3 text-sm rounded-lg focus:outline-none focus:border-black/50 transition-colors text-black placeholder-black/40"
                     />
-                    <label className="cursor-pointer bg-[#69E147] hover:bg-[#9D174D] hover:text-white text-black font-bold px-4 py-3 rounded-lg text-sm whitespace-nowrap transition-colors flex items-center justify-center min-w-[100px]">
+                    <label className="cursor-pointer bg-[#D480C0] hover:bg-[#9D174D] hover:text-white text-black font-bold px-4 py-3 rounded-lg text-sm whitespace-nowrap transition-colors flex items-center justify-center min-w-[100px]">
                       {uploadingImage ? (
                         <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>⟳</motion.span>
                       ) : (

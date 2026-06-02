@@ -359,7 +359,7 @@ function DeviceManagerModal({ password, onClose }) {
             <button
               onClick={handleRegister}
               disabled={registering || !newDeviceName.trim()}
-              className="bg-[#69E147] hover:bg-[#9D174D] hover:text-white text-black font-bold px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 border-none cursor-pointer"
+              className="bg-[#D480C0] hover:bg-[#9D174D] hover:text-white text-black font-bold px-4 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 border-none cursor-pointer"
             >
               {registering ? '...' : 'Bind'}
             </button>

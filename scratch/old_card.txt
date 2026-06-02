@@ -1,23 +1,19 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, getScoreColor } from '../utils/constants';
-import { useLanguage } from './LanguageContext';
 
 export default function ReviewCard({ review, index = 0 }) {
   const navigate = useNavigate();
-  const { t } = useLanguage();
 
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
   const total = computeTotal(entertainment, cinematic);
 
-  const backdropUrl = review.custom_backdrop_url
-    ? review.custom_backdrop_url
-    : review.backdrop_path
-      ? `${TMDB_IMG_BASE}w780${review.backdrop_path}`
-      : review.poster_path
-        ? `${TMDB_IMG_BASE}w500${review.poster_path}`
-        : null;
+  const backdropUrl = review.backdrop_path
+    ? `${TMDB_IMG_BASE}w780${review.backdrop_path}`
+    : review.poster_path
+      ? `${TMDB_IMG_BASE}w500${review.poster_path}`
+      : null;
 
   const genres = review.genres
     ? (typeof review.genres === 'string' ? JSON.parse(review.genres) : review.genres)
@@ -32,13 +28,9 @@ export default function ReviewCard({ review, index = 0 }) {
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ 
-        opacity: { duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] },
-        y: { duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }
-      }}
+      transition={{ duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
       onClick={() => navigate(`/review/${review.id}`)}
-      whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
-      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#9D174D]/20 hover:shadow-2xl max-w-full"
+      className="relative cursor-pointer card-hover group overflow-hidden rounded-lg border border-border-subtle"
       style={{ aspectRatio: '16/10' }}
     >
       {/* Background Image */}
@@ -68,7 +60,7 @@ export default function ReviewCard({ review, index = 0 }) {
             }}
           >
             <span
-              className="text-xl font-black font-[var(--font-outfit)] text-[#D480C0]"
+              className="text-xl font-black font-[var(--font-outfit)] text-[#FE494A]"
             >
               {total.toFixed(1)}
             </span>
@@ -122,8 +114,8 @@ export default function ReviewCard({ review, index = 0 }) {
           )}
 
           {/* CTA */}
-          <div className="flex items-center gap-2 text-[#9D174D] text-xs font-bold uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
-            <span>{t('readReview')}</span>
+          <div className="flex items-center gap-2 text-[#FFB6C1] text-xs font-bold uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
+            <span>閱讀影評</span>
             <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
           </div>
         </div>

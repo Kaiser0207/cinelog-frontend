@@ -174,7 +174,7 @@ export default function HomePage() {
                 key={g}
                 data-cursor={isActive ? '' : 'FILTER'}
                 onClick={() => setGenre(g === 'All' ? '' : g)}
-                className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#69E147] hover:border-[#69E147] ${
+                className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
                   isActive
                     ? 'bg-[#9D174D] shadow-none border-transparent'
                     : 'bg-[#E8E2D2] border border-border-subtle'
@@ -287,15 +287,15 @@ export default function HomePage() {
       <div ref={footerRef} data-theme="blue" className="w-full bg-[#0000FF] text-white py-16 md:py-24 px-5 relative z-10">
         <div className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center text-left md:text-center space-y-6 md:space-y-8">
           <div className="space-y-1">
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black font-[var(--font-bebas)] text-[#69E147] tracking-wider leading-none">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black font-[var(--font-bebas)] text-[#D480C0] tracking-wider leading-none">
               <span className="md:hidden">CINE<br/>ROOMS</span>
               <span className="hidden md:inline">CINEROOMS</span>
             </h2>
-            <p className="text-base md:text-2xl font-bold font-[var(--font-bebas)] text-[#69E147]/80 tracking-wider">
+            <p className="text-base md:text-2xl font-bold font-[var(--font-bebas)] text-[#D480C0]/80 tracking-wider">
               {t('footerSubtitle')}
             </p>
           </div>
-          <div className="w-16 h-1 bg-[#69E147] mx-auto rounded-full" />
+          <div className="w-16 h-1 bg-[#D480C0] mx-auto rounded-full" />
           <p 
             className="max-w-2xl mx-auto text-xs md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)] text-white px-2 md:px-0"
             style={{ textAlign: 'justify', textJustify: 'inter-word' }}
@@ -308,7 +308,7 @@ export default function HomePage() {
             target="_blank"
             rel="noopener noreferrer"
             data-cursor="INSTAGRAM"
-            className="group inline-flex items-center gap-3 px-6 md:px-8 py-3 rounded-full bg-[#69E147] hover:bg-[#9D174D] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer mb-6 border-none shadow-sm active:scale-95 text-xs md:text-sm"
+            className="group inline-flex items-center gap-3 px-6 md:px-8 py-3 rounded-full bg-[#D480C0] hover:bg-[#9D174D] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer mb-6 border-none shadow-sm active:scale-95 text-xs md:text-sm"
           >
             <span className="text-lg md:text-xl">📸</span>
             <span className="font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
@@ -337,14 +337,14 @@ export default function HomePage() {
             className="group fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg cursor-pointer shadow-lg overflow-hidden"
           >
             {/* Bottom Layer: Beige background -> Dark Pink */}
-            <div className="absolute inset-0 flex items-center justify-center text-3xl font-black bg-[#9D174D] group-hover:bg-[#69E147] group-hover:text-black text-white transition-all duration-300 pointer-events-none">
+            <div className="absolute inset-0 flex items-center justify-center text-3xl font-black bg-[#9D174D] group-hover:bg-[#D480C0] group-hover:text-black text-white transition-all duration-300 pointer-events-none">
               +
             </div>
             {/* Top Layer: Blue background -> Neon Green (Clipped) */}
             <div 
               ref={greenBtnRef}
               style={{ clipPath: 'inset(56px 0 0 0)' }}
-              className="absolute inset-0 flex items-center justify-center text-3xl font-black bg-[#69E147] group-hover:bg-[#9D174D] group-hover:text-white text-black transition-all duration-300 pointer-events-none"
+              className="absolute inset-0 flex items-center justify-center text-3xl font-black bg-[#D480C0] group-hover:bg-[#9D174D] group-hover:text-white text-black transition-all duration-300 pointer-events-none"
             >
               +
             </div>
