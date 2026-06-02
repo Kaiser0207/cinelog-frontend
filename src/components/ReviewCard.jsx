@@ -37,7 +37,7 @@ export default function ReviewCard({ review, index = 0 }) {
         y: { duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }
       }}
       onClick={() => navigate(`/review/${review.id}`)}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
       className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#9D174D]/20 hover:shadow-2xl max-w-full"
       style={{ aspectRatio: '16/10' }}
     >
