@@ -147,7 +147,7 @@ body {
   }
 }
 .animate-projector-breath {
-  animation: projectorBreath 6s ease-in-out infinite alternate;
+  animation: projectorBreath 4s ease-in-out infinite alternate;
 }
 
 .fade-in {

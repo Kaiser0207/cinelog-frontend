@@ -525,16 +525,20 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         <motion.div
           initial={false}
           animate={{ y: mobileScoreOpen ? 0 : 'calc(100% - 85px)' }}
-          transition={{ type: 'spring', damping: 32, stiffness: 250, mass: 0.8 }}
+          transition={{ type: 'spring', damping: 30, stiffness: 220, mass: 0.8 }}
           drag="y"
           dragControls={dragControls}
           dragListener={false}
-          dragConstraints={{ top: 0, bottom: 0 }}
-          dragElastic={{ top: mobileScoreOpen ? 0.05 : 1, bottom: mobileScoreOpen ? 1 : 0.05 }}
           dragMomentum={false}
           onDragEnd={(e, info) => {
-            if (mobileScoreOpen && info.offset.y > 40) setMobileScoreOpen(false);
-            if (!mobileScoreOpen && info.offset.y < -30) setMobileScoreOpen(true);
+            // Dragging down (closing)
+            if (mobileScoreOpen && (info.offset.y > 40 || info.velocity.y > 300)) {
+              setMobileScoreOpen(false);
+            }
+            // Dragging up (opening)
+            if (!mobileScoreOpen && (info.offset.y < -30 || info.velocity.y < -300)) {
+              setMobileScoreOpen(true);
+            }
           }}
           className="absolute bottom-0 left-0 right-0 w-full bg-bg-deep/95 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col pointer-events-auto"
         >
