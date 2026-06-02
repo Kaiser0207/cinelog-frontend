@@ -1,9 +1,10 @@
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { useEffect } from 'react';
+import { motion, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, getScoreColor } from '../utils/constants';
 import { useLanguage } from './LanguageContext';
 
-export default function ReviewCard({ review, index = 0 }) {
+export default function ReviewCard({ review, index = 0, gyroPermission = false }) {
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -14,10 +15,34 @@ export default function ReviewCard({ review, index = 0 }) {
   // 3D Tilt Effect
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-200, 200], [5, -5]);
-  const rotateY = useTransform(x, [-200, 200], [-5, 5]);
+
+  // Smooth springs for mobile gyroscope fluidity
+  const smoothX = useSpring(x, { damping: 20, stiffness: 100 });
+  const smoothY = useSpring(y, { damping: 20, stiffness: 100 });
+
+  const rotateX = useTransform(smoothY, [-200, 200], [15, -15]);
+  const rotateY = useTransform(smoothX, [-200, 200], [-15, 15]);
+
+  // Specular Highlight Position
+  const glareX = useTransform(smoothX, [-200, 200], [0, 100]);
+  const glareY = useTransform(smoothY, [-200, 200], [0, 100]);
+  const backgroundPosition = useMotionTemplate`${glareX}% ${glareY}%`;
+
+  useEffect(() => {
+    if (!gyroPermission) return;
+    const handleOrientation = (e) => {
+      // Clamp angles to prevent flipping
+      const gamma = Math.max(-30, Math.min(30, e.gamma || 0)); 
+      const beta = Math.max(-30, Math.min(30, e.beta || 0)); 
+      x.set(gamma * 6.6); // map [-30, 30] to roughly [-200, 200]
+      y.set((beta - 30) * 6.6); // Assume neutral holding angle is ~30 degrees beta
+    };
+    window.addEventListener('deviceorientation', handleOrientation);
+    return () => window.removeEventListener('deviceorientation', handleOrientation);
+  }, [gyroPermission, x, y]);
 
   const handleMouseMove = (e) => {
+    if (gyroPermission) return; // Don't track mouse if gyro is active
     const rect = e.currentTarget.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -26,6 +51,7 @@ export default function ReviewCard({ review, index = 0 }) {
   };
 
   const handleMouseLeave = () => {
+    if (gyroPermission) return;
     x.set(0);
     y.set(0);
   };
@@ -58,8 +84,9 @@ export default function ReviewCard({ review, index = 0 }) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={() => navigate(`/review/${review.id}`)}
-      whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
-      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#FE494A]/20 hover:shadow-2xl max-w-full"
+      whileHover={gyroPermission ? {} : { y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
+      whileTap={!gyroPermission && window.matchMedia('(max-width: 768px)').matches ? { scale: 0.97, rotateX: 2, rotateY: 2 } : {}}
+      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#FE494A]/20 hover:shadow-2xl max-w-full transform-gpu"
       style={{ aspectRatio: '16/10', rotateX, rotateY, transformPerspective: 1000 }}
     >
       {/* Background Image */}
@@ -77,6 +104,16 @@ export default function ReviewCard({ review, index = 0 }) {
       {/* Dark Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
+
+      {/* Specular Highlight (Glare) Layer */}
+      <motion.div 
+        className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-30 group-hover:opacity-60 transition-opacity"
+        style={{ 
+          background: 'radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%)',
+          backgroundPosition: backgroundPosition,
+          backgroundSize: '200% 200%',
+        }} 
+      />
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6">

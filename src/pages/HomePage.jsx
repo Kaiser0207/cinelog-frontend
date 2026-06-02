@@ -5,6 +5,7 @@ import ReviewEditor from '../components/ReviewEditor';
 import { SORT_OPTIONS } from '../utils/constants';
 import { useLanguage } from '../components/LanguageContext';
 import { useAdmin } from '../components/AdminAuth';
+import { useGyroscope } from '../hooks/useGyroscope';
 
 export default function HomePage() {
   const [sort, setSort] = useState('newest');
@@ -22,6 +23,7 @@ export default function HomePage() {
   const { isAdmin, requireAuth, openDeviceManager } = useAdmin();
   const [sortOpen, setSortOpen] = useState(false);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('cinelog_view_mode') || 'grid');
+  const { permissionGranted, requestPermission } = useGyroscope();
 
   useEffect(() => {
     localStorage.setItem('cinelog_view_mode', viewMode);
@@ -227,6 +229,20 @@ export default function HomePage() {
             </button>
           </div>
 
+          {/* 3D Gyroscope Toggle (Mobile Only) */}
+          <div className="md:hidden flex ml-3 bg-[#E8E2D2] rounded-full p-1 border border-border-subtle shadow-sm">
+            <button
+              type="button"
+              onClick={requestPermission}
+              className={`px-3 py-1.5 rounded-full transition-all duration-200 text-xs font-bold uppercase tracking-wider ${permissionGranted ? 'bg-[#FE494A] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
+              title="3D Tilt View"
+            >
+              3D View
+            </button>
+          </div>
+          
+          <div className="flex-1" />
+
           {/* Sort Dropdown aligned to the right */}
           <div className="relative" ref={sortRef}>
             <button
@@ -280,7 +296,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <ReviewFeed sort={sort} genre={genre} searchQuery={searchQuery} searchMode={searchMode} viewMode={viewMode} />
+        <ReviewFeed sort={sort} genre={genre} searchQuery={searchQuery} searchMode={searchMode} viewMode={viewMode} gyroPermission={permissionGranted} />
       </main>
 
       {/* Vibrant Blue Neo-brutalist Footer */}

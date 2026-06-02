@@ -1,10 +1,14 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TMDB_IMG_BASE } from '../utils/constants';
 
-export default function ReviewListRow({ review, index, onHover, onLeave, onClick }) {
-  const { title, release_date, runtime, poster_path, created_at, emotion, pacing, acting, cinematography, soundtrack } = review;
+export default function ReviewListRow({ review, index, onHover, onLeave, onClick, isExpanded, hasAnyExpanded, onToggleExpand }) {
+  const { title, release_date, runtime, poster_path, created_at, emotion, pacing, acting, cinematography, soundtrack, color_palette } = review;
   const rating = ((emotion + pacing + acting + cinematography + soundtrack) / 5).toFixed(1);
+
+  const palette = color_palette 
+    ? (typeof color_palette === 'string' ? JSON.parse(color_palette) : color_palette)
+    : [];
 
   const posterUrl = poster_path
     ? `${TMDB_IMG_BASE}w500${poster_path}`
@@ -23,19 +27,36 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
     }
   };
 
+  const handleRowClick = () => {
+    if (window.matchMedia('(hover: hover)').matches) {
+      onClick(); // Navigate on desktop
+    } else {
+      onToggleExpand(); // Expand on mobile touch
+    }
+  };
+
   return (
     <motion.div
+      layout
       initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ 
+        opacity: hasAnyExpanded && !isExpanded ? 0.3 : 1, 
+        y: 0 
+      }}
       transition={{ 
-        opacity: { duration: 0.5, delay: (index % 10) * 0.05, ease: [0.22, 1, 0.36, 1] },
-        y: { duration: 0.5, delay: (index % 10) * 0.05, ease: [0.22, 1, 0.36, 1] }
+        opacity: { duration: 0.4 },
+        y: { duration: 0.5, delay: (index % 10) * 0.05, ease: [0.22, 1, 0.36, 1] },
+        layout: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={onClick}
-      className="group relative flex items-center gap-4 py-4 px-2 border-b border-border-subtle hover:bg-[#FE494A]/10 cursor-pointer transition-colors w-full overflow-hidden"
+      className={`group relative flex flex-col py-4 px-2 border-b border-border-subtle hover:bg-[#FE494A]/10 transition-colors w-full overflow-hidden ${hasAnyExpanded && !isExpanded ? 'grayscale-[50%]' : ''}`}
     >
+      {/* Row Header (Always visible) */}
+      <div 
+        onClick={handleRowClick}
+        className="flex items-center gap-4 cursor-pointer w-full"
+      >
       {/* Static Thumbnail */}
       <div className="w-12 h-16 rounded-md bg-neutral-800 overflow-hidden flex-shrink-0 relative block">
         {posterUrl ? (
@@ -69,8 +90,53 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
             {new Date(created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
         </div>
-        
       </div>
+      </div>
+
+      {/* Expanded Accordion Content (Mobile Only) */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0, marginTop: 0 }}
+            animate={{ height: 'auto', opacity: 1, marginTop: 16 }}
+            exit={{ height: 0, opacity: 0, marginTop: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-col gap-4 overflow-hidden md:hidden"
+          >
+            {/* Expanded Poster */}
+            {posterUrl && (
+              <img 
+                src={posterUrl} 
+                alt={title} 
+                className="w-full h-56 object-cover rounded-xl shadow-lg border border-black/10" 
+              />
+            )}
+
+            {/* Title & Palette */}
+            <div className="flex flex-col gap-2">
+              <h2 className="text-3xl font-black font-[var(--font-syne)] tracking-tighter text-[#1A1A1A] leading-none uppercase">
+                {title}
+              </h2>
+              {palette.length > 0 && (
+                <div className="flex w-full h-3 rounded-full overflow-hidden shadow-inner opacity-80">
+                  {palette.slice(0, 5).map((hex, i) => (
+                    <div key={i} className="flex-1 h-full" style={{ backgroundColor: hex }} />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* CTA Button */}
+            <button 
+              onClick={(e) => { e.stopPropagation(); onClick(); }}
+              className="w-full mt-2 py-4 bg-[#FE494A] text-[#E8E2D2] font-black font-[var(--font-syne)] tracking-widest uppercase rounded-lg shadow-[4px_4px_0px_rgba(0,0,0,1)] active:translate-y-1 active:translate-x-1 active:shadow-[0px_0px_0px_rgba(0,0,0,1)] transition-all"
+            >
+              閱讀影評 (Read Full Review)
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </motion.div>
   );
 }

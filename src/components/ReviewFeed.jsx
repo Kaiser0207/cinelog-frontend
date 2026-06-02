@@ -9,7 +9,7 @@ import { API_URL, flattenReview } from '../utils/constants';
 
 const LIMIT = 12;
 
-export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = '', searchMode = 'standard', viewMode = 'grid' }) {
+export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = '', searchMode = 'standard', viewMode = 'grid', gyroPermission }) {
   const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -18,6 +18,10 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
 
   // Global Hover State for List View Reveal
   const [hoveredImage, setHoveredImage] = useState(null);
+  
+  // Mobile Accordion State
+  const [expandedRowId, setExpandedRowId] = useState(null);
+
   const portalRef = useRef(null);
 
   // Initialize global mouse tracking for the portal
@@ -143,7 +147,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
       >
         {reviews.map((review, i) => (
           viewMode === 'grid' ? (
-            <ReviewCard key={review.id} review={review} index={i % LIMIT} />
+            <ReviewCard key={review.id} review={review} index={i % LIMIT} gyroPermission={gyroPermission} />
           ) : (
             <ReviewListRow 
               key={review.id} 
@@ -151,6 +155,9 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
               index={i % LIMIT} 
               onHover={setHoveredImage} 
               onLeave={() => setHoveredImage(null)} 
+              isExpanded={expandedRowId === review.id}
+              hasAnyExpanded={expandedRowId !== null}
+              onToggleExpand={() => setExpandedRowId(expandedRowId === review.id ? null : review.id)}
               onClick={() => navigate(`/review/${review.id}`)}
             />
           )
