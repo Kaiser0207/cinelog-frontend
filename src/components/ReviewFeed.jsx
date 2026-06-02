@@ -15,6 +15,24 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   const [hasMore, setHasMore] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
 
+  // Global Hover State for List View Reveal
+  const [hoveredImage, setHoveredImage] = useState(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springConfig = { damping: 25, stiffness: 300 };
+  const springX = useSpring(mouseX, springConfig);
+  const springY = useSpring(mouseY, springConfig);
+
+  useEffect(() => {
+    if (!hoveredImage) return;
+    const handleMouseMove = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [hoveredImage, mouseX, mouseY]);
+
   const fetchReviews = useCallback(async (offset = 0, reset = false) => {
     if (loading) return;
     setLoading(true);
@@ -108,25 +126,6 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
       </motion.div>
     );
   }
-
-    // Global Hover State for List View Reveal
-  const [hoveredImage, setHoveredImage] = useState(null);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springConfig = { damping: 25, stiffness: 300 };
-  const springX = useSpring(mouseX, springConfig);
-  const springY = useSpring(mouseY, springConfig);
-
-  useEffect(() => {
-    if (!hoveredImage) return;
-    const handleMouseMove = (e) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [hoveredImage, mouseX, mouseY]);
-
   return (
     <>
       <motion.div 
