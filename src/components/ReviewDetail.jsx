@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useNavigate } from 'react-router-dom';
@@ -69,6 +69,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const { addToast } = useToast();
   const { lang, toggleLanguage, t } = useLanguage();
   const [mobileScoreOpen, setMobileScoreOpen] = useState(false);
+  const dragControls = useDragControls();
   const [recommendations, setRecommendations] = useState([]);
 
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
@@ -528,9 +529,24 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative z-[91] bg-bg-deep/95 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl px-5 py-6 max-h-[70vh] overflow-y-auto"
+              drag="y"
+              dragControls={dragControls}
+              dragListener={false}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.5 }}
+              onDragEnd={(e, info) => {
+                if (info.offset.y > 50) setMobileScoreOpen(false);
+              }}
+              className="relative z-[91] bg-bg-deep/95 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl px-5 pb-6 pt-2 max-h-[70vh] overflow-y-auto overscroll-contain"
             >
-              <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-4" />
+              {/* Drag Handle (Touch Target) */}
+              <div 
+                className="w-full py-4 -mt-2 mb-2 flex justify-center cursor-grab active:cursor-grabbing touch-none"
+                onPointerDown={(e) => dragControls.start(e)}
+              >
+                <div className="w-10 h-1 bg-black/20 rounded-full" />
+              </div>
+              
               <ScoreCards compact />
             </motion.div>
           )}
@@ -543,6 +559,12 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             animate={{ y: 0 }}
             transition={{ delay: 0.5, type: 'spring', damping: 20 }}
             onClick={() => setMobileScoreOpen(true)}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0.5, bottom: 0 }}
+            onDragEnd={(e, info) => {
+              if (info.offset.y < -30) setMobileScoreOpen(true);
+            }}
             className="w-full flex items-center justify-around px-6 py-4 bg-bg-deep/85 backdrop-blur-2xl border-t border-white/10 cursor-pointer border-x-0 border-b-0"
             style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
           >
