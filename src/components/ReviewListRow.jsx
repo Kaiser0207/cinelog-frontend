@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 import { TMDB_IMG_BASE } from '../utils/constants';
 
 export default function ReviewListRow({ review, index, onHover, onLeave, onClick }) {
-  const { movie, created_at, emotion, pacing, acting, cinematography, soundtrack } = review;
+  const { title, release_date, runtime, poster_path, created_at, emotion, pacing, acting, cinematography, soundtrack } = review;
   const rating = ((emotion + pacing + acting + cinematography + soundtrack) / 5).toFixed(1);
 
-  const posterUrl = movie?.poster_path
-    ? `${TMDB_IMG_BASE}w500${movie.poster_path}`
+  const posterUrl = poster_path
+    ? `${TMDB_IMG_BASE}w500${poster_path}`
     : null;
 
   const handleMouseEnter = () => {
@@ -37,7 +37,7 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
       {/* Mobile Thumbnail (Visible on small screens, or always) */}
       <div className="w-12 h-16 rounded-md bg-neutral-800 overflow-hidden flex-shrink-0 relative">
         {posterUrl ? (
-          <img src={posterUrl} alt={movie?.title} className="w-full h-full object-cover" loading="lazy" />
+          <img src={posterUrl} alt={title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-xs text-neutral-500">N/A</div>
         )}
@@ -49,10 +49,10 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
         {/* Title & Year */}
         <div className="flex-1 min-w-0">
           <h3 className="text-base md:text-xl font-bold font-[var(--font-outfit)] text-text-primary truncate group-hover:text-[#FFB6C1] transition-colors">
-            {movie?.title}
+            {title}
           </h3>
           <p className="text-xs md:text-sm text-text-dim mt-0.5 font-[var(--font-jetbrains)] uppercase tracking-wide">
-            {movie?.release_date ? new Date(movie.release_date).getFullYear() : 'YYYY'} • {movie?.runtime || '--'} MIN
+            {release_date ? new Date(release_date).getFullYear() : 'YYYY'} • {runtime || '--'} MIN
           </p>
         </div>
 

@@ -101,9 +101,11 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   if (initialLoad) {
     const skeletonCount = searchQuery ? 6 : 12;
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-0"}>
         {[...Array(skeletonCount)].map((_, i) => (
-          <ReviewCardSkeleton key={i} />
+          viewMode === 'grid' 
+            ? <ReviewCardSkeleton key={`initial-skel-${i}`} />
+            : <div key={`skel-list-init-${i}`} className="w-full h-16 bg-neutral-900 animate-pulse border-b border-border-subtle" />
         ))}
       </div>
     );
