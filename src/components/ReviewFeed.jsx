@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import ReviewCard, { ReviewCardSkeleton } from './ReviewCard';
 import ReviewListRow from './ReviewListRow';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
@@ -7,7 +8,8 @@ import { API_URL, flattenReview } from '../utils/constants';
 
 const LIMIT = 12;
 
-export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = '', searchMode = 'standard' }) {
+export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = '', searchMode = 'standard', viewMode = 'grid' }) {
+  const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -143,6 +145,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
               index={i % LIMIT} 
               onHover={setHoveredImage} 
               onLeave={() => setHoveredImage(null)} 
+              onClick={() => navigate(`/review/${review.id}`)}
             />
           )
         ))}
