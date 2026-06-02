@@ -78,9 +78,10 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   const sentinelRef = useInfiniteScroll(loadMore, loading);
 
   if (initialLoad) {
+    const skeletonCount = searchQuery ? 6 : 12;
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {[...Array(6)].map((_, i) => (
+        {[...Array(skeletonCount)].map((_, i) => (
           <ReviewCardSkeleton key={i} />
         ))}
       </div>
