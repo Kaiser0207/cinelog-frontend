@@ -126,14 +126,14 @@ body {
     transform: translateY(0px) translateX(0px) rotate(0deg);
   }
   50% {
-    transform: translateY(-20px) translateX(10px) rotate(1deg);
+    transform: translateY(-60px) translateX(15px) rotate(2deg);
   }
   100% {
-    transform: translateY(-40px) translateX(0px) rotate(0deg); /* Seamless loop tiling */
+    transform: translateY(-120px) translateX(0px) rotate(0deg); /* Seamless loop tiling */
   }
 }
 .animate-dust {
-  animation: dustDrift 12s linear infinite;
+  animation: dustDrift 8s linear infinite;
 }
 
 .fade-in {
