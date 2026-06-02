@@ -99,8 +99,8 @@ export default function HomePage() {
   const titleOpacity = useTransform(scrollY, [0, 300], [1, 0.2]);
 
   const GENRE_PILLS = [
-    'All', 'Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi',
-    'Thriller', 'Romance', 'Animation', 'Documentary',
+    '全部', '動作', '喜劇', '劇情', '恐怖', '科幻',
+    '驚悚', '愛情', '動畫', '懸疑',
   ];
 
   const handleSaved = () => {
@@ -168,12 +168,12 @@ export default function HomePage() {
       <div className="relative z-10 w-full px-5 -mt-12 mb-16 overflow-hidden">
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none items-center justify-start md:justify-center px-4 w-full">
           {GENRE_PILLS.map((g) => {
-            const isActive = (g === 'All' && genre === '') || genre === g;
+            const isActive = genre === g || (g === '全部' && genre === '');
             return (
               <button
                 key={g}
                 data-cursor={isActive ? '' : 'FILTER'}
-                onClick={() => setGenre(g === 'All' ? '' : g)}
+                onClick={() => setGenre(g === '全部' ? '' : g)}
                 className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
                   isActive
                     ? 'bg-[#FE494A] shadow-none border-transparent'
