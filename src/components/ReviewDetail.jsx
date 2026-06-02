@@ -454,7 +454,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                         <img
                           src={`${TMDB_IMG_BASE}w185${movie.poster_path}`}
                           alt={movie.title}
-                          className="w-32 h-48 object-cover rounded-lg border border-white/10 group-hover:border-[#FFB6C1] transition-all group-hover:scale-105 shadow-lg"
+                          className="w-32 h-48 object-cover rounded-lg border border-white/10 group-hover:border-[#9D174D] transition-all group-hover:scale-105 shadow-lg"
                         />
                       ) : (
                         <div className="w-32 h-48 bg-bg-card rounded-lg border border-white/10 flex items-center justify-center text-text-dim text-xs">

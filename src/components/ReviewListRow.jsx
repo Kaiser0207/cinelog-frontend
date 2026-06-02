@@ -36,7 +36,7 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
-      className="group relative flex items-center gap-4 py-4 px-2 border-b border-border-subtle hover:bg-[#FFB6C1]/10 cursor-pointer transition-colors w-full overflow-hidden"
+      className="group relative flex items-center gap-4 py-4 px-2 border-b border-border-subtle hover:bg-[#9D174D]/10 cursor-pointer transition-colors w-full overflow-hidden"
     >
       {/* Mobile Thumbnail (Visible on small screens, or always) */}
       <div className="w-12 h-16 rounded-md bg-neutral-800 overflow-hidden flex-shrink-0 relative">
@@ -52,7 +52,7 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
         
         {/* Title & Year */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-base md:text-xl font-bold font-[var(--font-outfit)] text-text-primary truncate group-hover:text-[#FFB6C1] transition-colors">
+          <h3 className="text-base md:text-xl font-bold font-[var(--font-outfit)] text-text-primary truncate group-hover:text-[#9D174D] transition-colors">
             {title}
           </h3>
           <p className="text-xs md:text-sm text-text-dim mt-0.5 font-[var(--font-jetbrains)] uppercase tracking-wide">

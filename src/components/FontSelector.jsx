@@ -61,7 +61,7 @@ export default function FontSelector({ value, onChange }) {
                   {isHighlighted && (
                     <motion.div
                       layoutId="font-selector-highlight"
-                      className="absolute inset-0 bg-[#FFB6C1]/30 border-l-4 border-[#FFB6C1]"
+                      className="absolute inset-0 bg-[#9D174D]/30 border-l-4 border-[#9D174D]"
                       initial={false}
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />

@@ -44,7 +44,7 @@ export default function AIPredictButton({ reviewText, onPredict, disabled = fals
       whileTap={!disabled && !loading ? { scale: 0.99 } : {}}
       className={`
         relative w-full py-3 px-5 rounded-full font-bold text-sm
-        bg-[#FFB6C1] hover:bg-[#FBA3B5] text-black shadow-sm
+        bg-[#9D174D] hover:bg-[#FBA3B5] text-black shadow-sm
         transition-all duration-300
         disabled:opacity-40 disabled:cursor-not-allowed
         overflow-hidden border-none cursor-pointer

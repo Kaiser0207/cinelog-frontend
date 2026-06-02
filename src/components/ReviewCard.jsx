@@ -39,7 +39,7 @@ export default function ReviewCard({ review, index = 0 }) {
         layout: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
       }}
       onClick={() => navigate(`/review/${review.id}`)}
-      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-[#FFB6C1]/20 hover:shadow-2xl max-w-full"
+      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-[#9D174D]/20 hover:shadow-2xl max-w-full"
       style={{ aspectRatio: '16/10' }}
     >
       {/* Background Image */}
@@ -123,7 +123,7 @@ export default function ReviewCard({ review, index = 0 }) {
           )}
 
           {/* CTA */}
-          <div className="flex items-center gap-2 text-[#FFB6C1] text-xs font-bold uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
+          <div className="flex items-center gap-2 text-[#9D174D] text-xs font-bold uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
             <span>{t('readReview')}</span>
             <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
           </div>

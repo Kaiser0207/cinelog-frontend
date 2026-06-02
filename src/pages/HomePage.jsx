@@ -142,7 +142,7 @@ export default function HomePage() {
                 className={`ml-1 md:ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-all shrink-0 mr-0.5 md:mr-1 ${
                   searchMode === 'ai' 
                     ? 'bg-[#9D174D] text-[#E8E2D2] hover:bg-[#83113E] shadow-sm' 
-                    : 'bg-[#E8E2D2] shadow-sm text-[#9D174D] hover:bg-[#FFB6C1]'
+                    : 'bg-[#E8E2D2] shadow-sm text-[#9D174D] hover:bg-[#9D174D]'
                 }`}
               >
                 {searchMode === 'ai' ? '✦ AI' : '一般'}
@@ -152,7 +152,7 @@ export default function HomePage() {
             {/* Language Toggle Button */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center justify-center h-11 md:h-12 px-3 md:px-4 md:py-2.5 bg-[#E8E2D2] border-none rounded-full font-bold text-[10px] md:text-xs uppercase tracking-wider text-[#1A1A1A] hover:bg-[#FFB6C1] transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
+              className="flex items-center justify-center h-11 md:h-12 px-3 md:px-4 md:py-2.5 bg-[#E8E2D2] border-none rounded-full font-bold text-[10px] md:text-xs uppercase tracking-wider text-[#1A1A1A] hover:bg-[#9D174D] transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
               title={lang === 'en' ? '切換成中文' : 'Switch to English'}
             >
               <span className="md:inline hidden mr-1">🌐</span>
@@ -200,7 +200,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'grid' ? 'bg-[#FFB6C1] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
+              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'grid' ? 'bg-[#9D174D] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
               title="Grid View"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -213,7 +213,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'list' ? 'bg-[#FFB6C1] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
+              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'list' ? 'bg-[#9D174D] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
               title="List View"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24">
@@ -232,7 +232,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setSortOpen(!sortOpen)}
-              className="appearance-none text-xs md:text-sm bg-[#E8E2D2] border border-border-subtle rounded-full pl-4 md:pl-5 pr-10 md:pr-12 py-2 md:py-2.5 h-10 md:h-11 font-bold uppercase tracking-wider focus:border-[#FFB6C1] outline-none text-[#1A1A1A] transition-all cursor-pointer flex items-center gap-2 shadow-sm"
+              className="appearance-none text-xs md:text-sm bg-[#E8E2D2] border border-border-subtle rounded-full pl-4 md:pl-5 pr-10 md:pr-12 py-2 md:py-2.5 h-10 md:h-11 font-bold uppercase tracking-wider focus:border-[#9D174D] outline-none text-[#1A1A1A] transition-all cursor-pointer flex items-center gap-2 shadow-sm"
             >
               <span>{t(sort)}</span>
               <svg className={`w-4 h-4 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -261,7 +261,7 @@ export default function HomePage() {
                         {isActive && (
                           <motion.div
                             layoutId="sort-selector-highlight"
-                            className="absolute inset-0 bg-[#FFB6C1]/30 border-l-4 border-[#FFB6C1]"
+                            className="absolute inset-0 bg-[#9D174D]/30 border-l-4 border-[#9D174D]"
                             initial={false}
                             transition={{ type: "spring", stiffness: 400, damping: 30 }}
                           />
