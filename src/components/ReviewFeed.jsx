@@ -130,7 +130,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   }
   return (
     <>
-      <motion.div 
+      <div 
         className={viewMode === 'grid' 
           ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" 
           : "flex flex-col gap-0"}
@@ -156,7 +156,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
               : <div key={`skel-list-${i}`} className="w-full h-16 bg-neutral-900 animate-pulse border-b border-border-subtle" />
           ))
         }
-      </motion.div>
+      </div>
 
       {/* Sentinel for infinite scroll */}
       {hasMore && <div ref={sentinelRef} className="h-20" />}
