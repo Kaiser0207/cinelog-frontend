@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TMDB_IMG_BASE } from '../utils/constants';
 
 export default function ReviewListRow({ review, index, onHover, onLeave, onClick, isExpanded, hasAnyExpanded, onToggleExpand }) {
-  const { title, release_date, runtime, poster_path, created_at, emotion, pacing, acting, cinematography, soundtrack, color_palette, custom_backdrop_url, directors_info, cast_info, review_text } = review;
+  const { title, release_date, runtime, poster_path, backdrop_path, created_at, emotion, pacing, acting, cinematography, soundtrack, color_palette, custom_backdrop_url, directors_info, cast_info, review_text } = review;
   const rating = ((emotion + pacing + acting + cinematography + soundtrack) / 5).toFixed(1);
 
   const palette = color_palette 
@@ -15,7 +15,9 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
     : null;
 
   const expandedImageUrl = custom_backdrop_url
-    ? `${TMDB_IMG_BASE}w1280${custom_backdrop_url}`
+    ? custom_backdrop_url
+    : backdrop_path
+    ? `${TMDB_IMG_BASE}w780${backdrop_path}`
     : posterUrl;
 
   const parsedDirectors = typeof directors_info === 'string' ? JSON.parse(directors_info) : (directors_info || []);
