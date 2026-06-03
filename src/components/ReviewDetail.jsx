@@ -71,6 +71,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const [mobileScoreOpen, setMobileScoreOpen] = useState(false);
   const dragControls = useDragControls();
   const [recommendations, setRecommendations] = useState([]);
+  const [translatedOverview, setTranslatedOverview] = useState(null);
 
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
@@ -108,6 +109,18 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       })
       .catch(() => {});
   }, [review.tmdb_id]);
+
+  // Fetch english overview if language is en
+  useEffect(() => {
+    if (lang === 'en' && review.tmdb_id && !translatedOverview) {
+      fetch(`${API_URL}/api/movies/${review.tmdb_id}/en`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data?.overview) setTranslatedOverview(data.overview);
+        })
+        .catch(() => {});
+    }
+  }, [lang, review.tmdb_id, translatedOverview]);
 
   const handleDelete = () => {
     if (!window.confirm(t('confirmDelete'))) return;
@@ -298,7 +311,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">
                   {t('synopsis')}
                 </h3>
-                <p className="text-text-primary leading-relaxed text-sm">{review.overview}</p>
+                <p className="text-text-primary leading-relaxed text-sm">
+                  {lang === 'en' && translatedOverview ? translatedOverview : review.overview}
+                </p>
               </motion.div>
             )}
 

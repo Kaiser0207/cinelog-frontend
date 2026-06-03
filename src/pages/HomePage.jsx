@@ -105,6 +105,20 @@ export default function HomePage() {
     '驚悚', '愛情', '動畫', '懸疑',
   ];
 
+  const genreToKey = {
+    '全部': 'All',
+    '動作': 'Action',
+    '喜劇': 'Comedy',
+    '劇情': 'Drama',
+    '恐怖': 'Horror',
+    '科幻': 'Sci-Fi',
+    '驚悚': 'Thriller',
+    '愛情': 'Romance',
+    '動畫': 'Animation',
+    '懸疑': 'Mystery',
+    '紀錄片': 'Documentary'
+  };
+
   const handleSaved = () => {
     setRefreshKey((k) => k + 1);
   };
@@ -185,7 +199,7 @@ export default function HomePage() {
                 <span className={`inline-block text-sm font-bold font-[var(--font-jetbrains)] uppercase transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
                   isActive ? 'text-white' : 'text-[#1A1A1A]/70'
                 }`}>
-                  {t(g)}
+                  {t(genreToKey[g]) || g}
                 </span>
               </button>
             );

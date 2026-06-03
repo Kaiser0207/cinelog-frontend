@@ -29,6 +29,7 @@ export const translations = {
     Thriller: "Thriller",
     Romance: "Romance",
     Animation: "Animation",
+    Mystery: "Mystery",
     Documentary: "Documentary",
 
     // DetailPage
@@ -87,6 +88,7 @@ export const translations = {
     Thriller: "驚悚",
     Romance: "愛情",
     Animation: "動畫",
+    Mystery: "懸疑",
     Documentary: "紀錄片",
 
     // DetailPage
