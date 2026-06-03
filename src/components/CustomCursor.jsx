@@ -6,7 +6,7 @@ export default function CustomCursor() {
   const [isHovering, setIsHovering] = useState(false);
   const [hoverText, setHoverText] = useState('');
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [isOverBlue, setIsOverBlue] = useState(false);
+  const [isOverDark, setIsOverDark] = useState(false);
 
   useEffect(() => {
     // Detect touch device
@@ -18,7 +18,7 @@ export default function CustomCursor() {
     const updateMousePosition = (e) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
       if (e.target && e.target.closest) {
-        setIsOverBlue(!!e.target.closest('[data-theme="blue"]'));
+        setIsOverDark(!!e.target.closest('[data-theme="grey"]'));
       }
     };
 
@@ -53,7 +53,7 @@ export default function CustomCursor() {
         y: mousePosition.y - (isHovering ? 30 : 10),
         width: isHovering ? 60 : 20,
         height: isHovering ? 60 : 20,
-        backgroundColor: isOverBlue 
+        backgroundColor: isOverDark 
           ? (isHovering ? '#D480C0' : '#FE494A') 
           : (isHovering ? '#FE494A' : '#D480C0'),
         mixBlendMode: isHovering ? 'normal' : 'normal',
@@ -66,7 +66,7 @@ export default function CustomCursor() {
       }}
     >
       {isHovering && (
-        <span className={`${isOverBlue ? 'text-black' : 'text-white'} font-black font-[var(--font-bebas)] text-base tracking-widest`}>
+        <span className={`${isOverDark ? 'text-black' : 'text-white'} font-black font-[var(--font-bebas)] text-base tracking-widest`}>
           {hoverText}
         </span>
       )}
