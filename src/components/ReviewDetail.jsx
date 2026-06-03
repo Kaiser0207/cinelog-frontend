@@ -592,8 +592,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         </motion.div>
       </div>
 
-      {/* Vibrant Blue Neo-brutalist Footer */}
-      <div data-theme="blue" className="w-full bg-[#0000FF] text-white py-16 md:py-20 px-5">
+      {/* Cool Grey Neo-brutalist Footer */}
+      <div data-theme="grey" className="w-full bg-[#3B4856] text-white py-16 md:py-20 px-5">
         <div className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center space-y-12 text-left md:text-center">
           {/* Decorative Section Header */}
           <div className="space-y-4">
