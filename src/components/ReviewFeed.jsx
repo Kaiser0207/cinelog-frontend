@@ -30,31 +30,26 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   const [recentlyWatchedData, setRecentlyWatchedData] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_URL}/reviews?limit=100`)
-      .then(res => res.json())
+    fetch(`${API_URL}/api/reviews?limit=100&sort=newest`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then(data => {
-        const items = data.map(flattenReview);
-        const sorted = items.sort((a, b) => {
+        const rawItems = data.reviews || data || [];
+        const items = rawItems.map(flattenReview);
+        const sorted = [...items].sort((a, b) => {
           const getLatestDate = (item) => {
             let dates = [];
-            if (typeof item.watch_dates === 'string') {
-              try {
-                dates = JSON.parse(item.watch_dates || '[]');
-              } catch (e) {
-                dates = [];
-              }
-            } else {
-              dates = item.watch_dates || [];
-            }
+            try {
+              dates = typeof item.watch_dates === 'string'
+                ? JSON.parse(item.watch_dates || '[]')
+                : (item.watch_dates || []);
+            } catch (e) { dates = []; }
             return dates.length > 0 ? dates[dates.length - 1] : '1970-01-01';
           };
-          const aDate = getLatestDate(a);
-          const bDate = getLatestDate(b);
-          const diff = new Date(bDate).getTime() - new Date(aDate).getTime();
-          if (diff === 0) {
-            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-          }
-          return diff;
+          const diff = new Date(getLatestDate(b)).getTime() - new Date(getLatestDate(a)).getTime();
+          return diff !== 0 ? diff : new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
         });
         setRecentlyWatchedData(sorted.slice(0, 5));
       })

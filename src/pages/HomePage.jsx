@@ -438,7 +438,6 @@ export default function HomePage() {
         onHomeClick={handleHomeClick}
         onSearchClick={() => setShowSearchOverlay(true)}
         onAddClick={() => setShowEditor(true)}
-        onStatsClick={() => setShowStatsModal(true)}
         isAdmin={isAdmin}
       />
     </motion.div>
