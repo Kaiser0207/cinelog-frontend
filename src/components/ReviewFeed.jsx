@@ -246,13 +246,13 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
           
           if (viewMode === 'grid') {
             return (
-              <div key={review.id} className={isHero ? "hidden md:block" : "block"}>
+              <div key={review.id}>
                 <ReviewCard review={review} index={i % LIMIT} gyroPermission={gyroPermission} />
               </div>
             );
           } else {
             return (
-              <div key={review.id} className={isHero ? "hidden md:block" : "block"}>
+              <div key={review.id}>
                 <ReviewListRow 
                   review={review} 
                   index={i % LIMIT} 

@@ -8,7 +8,7 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, isAd
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-[110]">
       {/* Frosted glass background */}
-      <div className="absolute inset-0 bg-[#2A333D]/90 backdrop-blur-2xl border-t border-white/[0.08]" />
+      <div className="absolute inset-0 bg-[#3B4856]/95 backdrop-blur-xl border-t border-white/[0.06]" />
       
       <div className="relative flex items-center justify-around h-[68px] px-4" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         
@@ -32,7 +32,7 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, isAd
             <motion.button
               whileTap={{ scale: 0.88 }}
               onClick={onAddClick}
-              className="w-[52px] h-[52px] rounded-2xl bg-[#FE494A] flex items-center justify-center shadow-lg shadow-[#FE494A]/25 border-[3px] border-[#2A333D]"
+              className="w-[52px] h-[52px] rounded-2xl bg-[#FE494A] flex items-center justify-center shadow-lg shadow-[#FE494A]/25 border-[3px] border-[#3B4856]"
             >
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24">
                 <line x1="12" y1="5" x2="12" y2="19" />
