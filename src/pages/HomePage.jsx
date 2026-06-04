@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import ReviewFeed from '../components/ReviewFeed';
-import ReviewEditor from '../components/ReviewEditor';
 import BottomNav from '../components/BottomNav';
-import SearchOverlay from '../components/SearchOverlay';
-import StatsModal from '../components/StatsModal';
 import { SORT_OPTIONS } from '../utils/constants';
+
+const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
+const SearchOverlay = lazy(() => import('../components/SearchOverlay'));
+const StatsModal = lazy(() => import('../components/StatsModal'));
 import { useLanguage } from '../components/LanguageContext';
 import { useAdmin } from '../components/AdminAuth';
 import { useGyroscope } from '../hooks/useGyroscope';
@@ -30,6 +31,8 @@ export default function HomePage() {
   const [sortOpen, setSortOpen] = useState(false);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('cinelog_view_mode') || 'grid');
   const { permissionGranted, requestPermission } = useGyroscope();
+  
+  const activeGenreRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem('cinelog_view_mode', viewMode);
@@ -198,6 +201,7 @@ export default function HomePage() {
             return (
               <button
                 key={g}
+                ref={isActive ? activeGenreRef : null}
                 data-cursor={isActive ? '' : 'FILTER'}
                 onClick={() => setGenre(g === '全部' ? '' : g)}
                 className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
@@ -404,29 +408,31 @@ export default function HomePage() {
       )}
 
       {/* Editor Modal */}
-      <AnimatePresence>
-        {showEditor && (
-          <ReviewEditor
-            onClose={() => setShowEditor(false)}
-            onSaved={handleSaved}
-          />
-        )}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {showEditor && (
+            <ReviewEditor
+              onClose={() => setShowEditor(false)}
+              onSaved={handleSaved}
+            />
+          )}
+        </AnimatePresence>
 
-      <SearchOverlay
-        isOpen={showSearchOverlay}
-        onClose={() => setShowSearchOverlay(false)}
-        searchInput={searchInput}
-        onSearchChange={handleSearchChange}
-        searchMode={searchMode}
-        onModeToggle={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
-      />
+        <SearchOverlay
+          isOpen={showSearchOverlay}
+          onClose={() => setShowSearchOverlay(false)}
+          searchInput={searchInput}
+          onSearchChange={handleSearchChange}
+          searchMode={searchMode}
+          onModeToggle={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
+        />
 
-      <StatsModal
-        isOpen={showStatsModal}
-        onClose={() => setShowStatsModal(false)}
-        reviews={loadedReviews}
-      />
+        <StatsModal
+          isOpen={showStatsModal}
+          onClose={() => setShowStatsModal(false)}
+          reviews={loadedReviews}
+        />
+      </Suspense>
 
       <BottomNav 
         onHomeClick={handleHomeClick}

@@ -121,6 +121,7 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
                 src={expandedImageUrl} 
                 alt={title} 
                 className="w-full aspect-video object-cover rounded-xl shadow-md border border-black/10 object-top" 
+                loading="lazy"
               />
             )}
 
