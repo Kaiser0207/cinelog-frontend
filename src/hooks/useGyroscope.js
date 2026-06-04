@@ -1,12 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 
 export function useGyroscope() {
-  const [permissionGranted, setPermissionGranted] = useState(
-    localStorage.getItem('gyro_permission') === 'granted'
-  );
+  const [permissionGranted, setPermissionGranted] = useState(() => {
+    const isTouch = window.matchMedia("(pointer: coarse)").matches || 'ontouchstart' in window;
+    return isTouch && localStorage.getItem('gyro_permission') === 'granted';
+  });
   const [orientation, setOrientation] = useState({ beta: 0, gamma: 0 });
 
   const requestPermission = useCallback(async () => {
+    // Only allow gyroscope on touch devices
+    if (!window.matchMedia("(pointer: coarse)").matches && !('ontouchstart' in window)) {
+      setPermissionGranted(false);
+      localStorage.setItem('gyro_permission', 'denied');
+      return;
+    }
+
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
       try {
         const response = await DeviceOrientationEvent.requestPermission();
@@ -21,7 +29,7 @@ export function useGyroscope() {
         console.error('Error requesting gyroscope permission:', error);
       }
     } else {
-      // Non-iOS 13+ devices, or no gyroscope available
+      // Non-iOS 13+ touch devices (Android), assume granted and rely on events
       setPermissionGranted(true);
       localStorage.setItem('gyro_permission', 'granted');
     }
