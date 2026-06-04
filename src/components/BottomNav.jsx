@@ -20,17 +20,6 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, onSt
           </span>
         </button>
 
-        {/* Search */}
-        <button 
-          onClick={onSearchClick}
-          className="flex flex-col items-center justify-center w-16 h-full gap-1 active:scale-95 transition-transform"
-        >
-          <span className="text-xl">🔍</span>
-          <span className="text-[10px] font-bold font-[var(--font-jetbrains)] text-[#E8E2D2]/80 uppercase tracking-wider">
-            {t('navSearch') || 'Search'}
-          </span>
-        </button>
-
         {/* Add (Admin Only) */}
         {isAdmin && (
           <div className="relative -top-5">
@@ -44,14 +33,14 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, onSt
           </div>
         )}
 
-        {/* Stats */}
+        {/* Search */}
         <button 
-          onClick={onStatsClick}
+          onClick={onSearchClick}
           className="flex flex-col items-center justify-center w-16 h-full gap-1 active:scale-95 transition-transform"
         >
-          <span className="text-xl">📊</span>
+          <span className="text-xl">🔍</span>
           <span className="text-[10px] font-bold font-[var(--font-jetbrains)] text-[#E8E2D2]/80 uppercase tracking-wider">
-            {t('navStats') || 'Stats'}
+            {t('navSearch') || 'Search'}
           </span>
         </button>
 
