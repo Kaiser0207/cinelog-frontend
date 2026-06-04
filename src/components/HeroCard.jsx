@@ -33,7 +33,13 @@ export default function HeroCard({ review }) {
   const cinematic = computeCinematic(acting, cinematography, soundtrack);
   const score = computeTotal(entertainment, cinematic);
 
-  const heroImage = backdrop_path ? `${TMDB_IMG_BASE}w780${backdrop_path}` : null;
+  const heroImage = review.custom_backdrop_url 
+    ? review.custom_backdrop_url 
+    : backdrop_path 
+      ? `${TMDB_IMG_BASE}w780${backdrop_path}` 
+      : review.poster_path 
+        ? `${TMDB_IMG_BASE}w500${review.poster_path}` 
+        : null;
   const latestWatchDate = watch_dates.length > 0 ? watch_dates[watch_dates.length - 1] : null;
 
   return (

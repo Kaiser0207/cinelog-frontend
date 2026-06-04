@@ -37,7 +37,11 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
       };
       const aDate = getLatestDate(a);
       const bDate = getLatestDate(b);
-      return new Date(bDate) - new Date(aDate);
+      const diff = new Date(bDate).getTime() - new Date(aDate).getTime();
+      if (diff === 0) {
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      }
+      return diff;
     });
   }, [reviews, sort, searchQuery]);
 
@@ -162,7 +166,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
 
   const showHero = recentlyWatchedReviews.length > 0 && viewMode === 'grid';
   const heroReview = showHero ? recentlyWatchedReviews[0] : null;
-  const horizontalScrollReviews = showHero ? recentlyWatchedReviews.slice(1, 9) : [];
+  const horizontalScrollReviews = showHero ? recentlyWatchedReviews.slice(0, 5) : [];
 
   return (
     <>
