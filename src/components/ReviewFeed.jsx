@@ -11,7 +11,7 @@ import { useLanguage } from './LanguageContext';
 
 const LIMIT = 12;
 
-export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = '', searchMode = 'standard', viewMode = 'grid', gyroPermission }) {
+export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = '', searchMode = 'standard', viewMode = 'grid', gyroPermission, onReviewsLoaded }) {
   const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -74,8 +74,13 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
 
         if (reset) {
           setReviews(items);
+          if (onReviewsLoaded) onReviewsLoaded(items);
         } else {
-          setReviews((prev) => [...prev, ...items]);
+          setReviews((prev) => {
+            const next = [...prev, ...items];
+            if (onReviewsLoaded) onReviewsLoaded(next);
+            return next;
+          });
         }
 
         // Disable infinite scroll for search

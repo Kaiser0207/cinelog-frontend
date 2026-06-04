@@ -63,6 +63,25 @@ export const translations = {
     deleteSuccess: "Review deleted.",
     recentlyWatched: "Recently Watched",
     featured: "Featured",
+
+    // Mobile specific
+    navHome: "Home",
+    navSearch: "Search",
+    navStats: "Stats",
+    statistics: "Statistics",
+    totalReviews: "Total Reviews",
+    averageScore: "Average Score",
+    topGenre: "Top Genre",
+    statsDesc: "Keep watching movies to build your cinematic profile.",
+    searchPlaceholder: "Search movies...",
+    searchAiPlaceholder: "Describe the feeling...",
+    searchingFor: "Searching for",
+    closeToViewResults: "Close this screen to view results",
+    searchTips: "Search Tips",
+    standardSearch: "Standard Search",
+    standardDesc: "Search by movie title, director, or cast members.",
+    aiSearch: "AI Semantic Search",
+    aiDesc: 'Search by vibe, mood, or concepts. Example: "a movie about space travel and love"',
   },
   zh: {
     // Brand Statement
@@ -124,6 +143,25 @@ export const translations = {
     deleteSuccess: "影評已成功刪除。",
     recentlyWatched: "最近觀看",
     featured: "精選影評",
+
+    // Mobile specific
+    navHome: "首頁",
+    navSearch: "搜尋",
+    navStats: "統計",
+    statistics: "觀影統計",
+    totalReviews: "總觀影數",
+    averageScore: "平均給分",
+    topGenre: "最愛類型",
+    statsDesc: "繼續觀看電影來建立您的個人電影檔案。",
+    searchPlaceholder: "搜尋電影...",
+    searchAiPlaceholder: "描述你想看的感覺...",
+    searchingFor: "正在搜尋",
+    closeToViewResults: "關閉此畫面查看結果",
+    searchTips: "搜尋提示",
+    standardSearch: "一般搜尋",
+    standardDesc: "輸入電影名稱、導演或演員名字。",
+    aiSearch: "AI 語意搜尋",
+    aiDesc: '描述電影氛圍、劇情或概念。例如：「關於太空旅行和愛情的電影」',
   }
 };
 

@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import ReviewFeed from '../components/ReviewFeed';
 import ReviewEditor from '../components/ReviewEditor';
+import BottomNav from '../components/BottomNav';
+import SearchOverlay from '../components/SearchOverlay';
+import StatsModal from '../components/StatsModal';
 import { SORT_OPTIONS } from '../utils/constants';
 import { useLanguage } from '../components/LanguageContext';
 import { useAdmin } from '../components/AdminAuth';
@@ -11,6 +14,9 @@ export default function HomePage() {
   const [sort, setSort] = useState('newest');
   const [genre, setGenre] = useState('');
   const [showEditor, setShowEditor] = useState(false);
+  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [loadedReviews, setLoadedReviews] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
   
   // Search State
@@ -123,6 +129,10 @@ export default function HomePage() {
     setRefreshKey((k) => k + 1);
   };
 
+  const handleHomeClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -141,10 +151,10 @@ export default function HomePage() {
         </motion.h1>
         
         <div className="absolute top-6 right-5 md:right-6 z-[60] flex flex-col md:flex-row items-end md:items-center gap-3" data-cursor="FILTER">
-          {/* Mobile Top Row: Search + Language */}
+          {/* Top Row: Language */}
           <div className="flex items-center gap-2 md:gap-3">
-            {/* Dual-Mode Search Bar */}
-            <div className="relative flex items-center bg-[#E8E2D2] border border-[#1A1A1A]/10 rounded-full p-1 shadow-sm h-11 md:h-12 transition-all focus-within:ring-2 focus-within:ring-[#FE494A]/20 focus-within:border-[#FE494A]/30">
+            {/* Desktop Search Bar (Hidden on Mobile) */}
+            <div className="hidden md:flex relative items-center bg-[#E8E2D2] border border-[#1A1A1A]/10 rounded-full p-1 shadow-sm h-12 transition-all focus-within:ring-2 focus-within:ring-[#FE494A]/20 focus-within:border-[#FE494A]/30">
               <span className="pl-3 md:pl-4 pr-2 md:pr-3 text-[#1A1A1A]/50 text-xs md:text-sm">🔍</span>
               <input
                 type="text"
@@ -314,7 +324,15 @@ export default function HomePage() {
           </div>
         </div>
 
-        <ReviewFeed sort={sort} genre={genre} searchQuery={searchQuery} searchMode={searchMode} viewMode={viewMode} gyroPermission={permissionGranted} />
+        <ReviewFeed 
+          sort={sort} 
+          genre={genre} 
+          searchQuery={searchQuery} 
+          searchMode={searchMode} 
+          viewMode={viewMode} 
+          gyroPermission={permissionGranted}
+          onReviewsLoaded={setLoadedReviews}
+        />
       </main>
 
       {/* Cool Grey Neo-brutalist Footer */}
@@ -368,7 +386,7 @@ export default function HomePage() {
             onClick={() => setShowEditor(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="group fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg cursor-pointer shadow-lg overflow-hidden"
+            className="hidden md:block group fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg cursor-pointer shadow-lg overflow-hidden"
           >
             {/* Bottom Layer: Beige background -> Dark Pink */}
             <div className="absolute inset-0 flex items-center justify-center text-3xl font-black bg-[#FE494A] group-hover:bg-[#D480C0] group-hover:text-black text-white transition-all duration-300 pointer-events-none">
@@ -394,6 +412,29 @@ export default function HomePage() {
           />
         )}
       </AnimatePresence>
+
+      <SearchOverlay
+        isOpen={showSearchOverlay}
+        onClose={() => setShowSearchOverlay(false)}
+        searchInput={searchInput}
+        onSearchChange={handleSearchChange}
+        searchMode={searchMode}
+        onModeToggle={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
+      />
+
+      <StatsModal
+        isOpen={showStatsModal}
+        onClose={() => setShowStatsModal(false)}
+        reviews={loadedReviews}
+      />
+
+      <BottomNav 
+        onHomeClick={handleHomeClick}
+        onSearchClick={() => setShowSearchOverlay(true)}
+        onAddClick={() => setShowEditor(true)}
+        onStatsClick={() => setShowStatsModal(true)}
+        isAdmin={isAdmin}
+      />
     </motion.div>
   );
 }
