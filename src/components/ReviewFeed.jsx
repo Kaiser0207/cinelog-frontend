@@ -36,7 +36,16 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
         const items = data.map(flattenReview);
         const sorted = items.sort((a, b) => {
           const getLatestDate = (item) => {
-            const dates = typeof item.watch_dates === 'string' ? JSON.parse(item.watch_dates || '[]') : (item.watch_dates || []);
+            let dates = [];
+            if (typeof item.watch_dates === 'string') {
+              try {
+                dates = JSON.parse(item.watch_dates || '[]');
+              } catch (e) {
+                dates = [];
+              }
+            } else {
+              dates = item.watch_dates || [];
+            }
             return dates.length > 0 ? dates[dates.length - 1] : '1970-01-01';
           };
           const aDate = getLatestDate(a);

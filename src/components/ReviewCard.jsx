@@ -77,13 +77,12 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ 
         opacity: { duration: 0.6, delay: (index % 12) * 0.05, ease: [0.22, 1, 0.36, 1] },
-        y: { duration: 0.6, delay: (index % 12) * 0.05, ease: [0.22, 1, 0.36, 1] },
-        scale: { duration: 0.6, delay: (index % 12) * 0.05, ease: [0.22, 1, 0.36, 1] }
+        y: { duration: 0.6, delay: (index % 12) * 0.05, ease: [0.22, 1, 0.36, 1] }
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
