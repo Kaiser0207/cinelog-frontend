@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import ReviewCard, { ReviewCardSkeleton } from './ReviewCard';
 import ReviewListRow from './ReviewListRow';
+import HeroCard from './HeroCard';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
-import { API_URL, flattenReview } from '../utils/constants';
+import { API_URL, flattenReview, TMDB_IMG_BASE } from '../utils/constants';
+import { useLanguage } from './LanguageContext';
 
 const LIMIT = 12;
 
@@ -137,31 +139,105 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
       </motion.div>
     );
   }
+  const { t } = useLanguage();
+
+  const recentlyWatchedReviews = useMemo(() => {
+    if (sort !== 'newest' || searchQuery || reviews.length < 2) return [];
+    
+    return [...reviews].sort((a, b) => {
+      const aDate = a.watch_dates?.[a.watch_dates.length - 1] || '1970-01-01';
+      const bDate = b.watch_dates?.[b.watch_dates.length - 1] || '1970-01-01';
+      return new Date(bDate) - new Date(aDate);
+    });
+  }, [reviews, sort, searchQuery]);
+
+  const showHero = recentlyWatchedReviews.length > 0 && viewMode === 'grid';
+  const heroReview = showHero ? recentlyWatchedReviews[0] : null;
+  const horizontalScrollReviews = showHero ? recentlyWatchedReviews.slice(1, 9) : [];
+
   return (
     <>
+      {showHero && (
+        <div className="md:hidden flex flex-col w-full mb-8">
+          <HeroCard review={heroReview} />
+          
+          {horizontalScrollReviews.length > 0 && (
+            <div className="flex flex-col w-full mt-4">
+              <div className="flex items-center gap-3 mb-4">
+                <h3 className="text-sm font-bold font-[var(--font-syne)] uppercase tracking-wider text-text-dim">
+                  {t('recentlyWatched')}
+                </h3>
+                <div className="h-px flex-1 bg-border-subtle" />
+              </div>
+              
+              <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 scrollbar-none w-full">
+                {horizontalScrollReviews.map((rev) => (
+                  <div 
+                    key={rev.id}
+                    onClick={() => navigate(`/review/${rev.id}`)}
+                    className="flex flex-col gap-2 flex-shrink-0 w-[130px] snap-start cursor-pointer group"
+                  >
+                    <div className="w-full aspect-[2/3] rounded-xl overflow-hidden bg-[#1A1A1A] shadow-md group-active:scale-95 transition-transform duration-200 relative">
+                      {rev.poster_path && (
+                        <img 
+                          src={`${TMDB_IMG_BASE}w342${rev.poster_path}`} 
+                          alt={rev.title}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      <div className="absolute top-2 right-2 bg-[#1A1A1A]/80 backdrop-blur-md text-[#E8E2D2] px-1.5 py-0.5 rounded flex items-center gap-1 border border-white/10 shadow-sm">
+                        <span className="text-[10px]">✨</span>
+                        <span className="text-[10px] font-bold font-[var(--font-bebas)] tracking-wider">
+                          {rev.total_score ? rev.total_score.toFixed(1) : '-'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <h4 className="text-xs font-bold font-[var(--font-syne)] text-[#1A1A1A] truncate w-full uppercase">
+                        {rev.title}
+                      </h4>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <motion.div 
         layout="position"
         className={viewMode === 'grid' 
           ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" 
           : "flex flex-col gap-0"}
       >
-        {reviews.map((review, i) => (
-          viewMode === 'grid' ? (
-            <ReviewCard key={review.id} review={review} index={i % LIMIT} gyroPermission={gyroPermission} />
-          ) : (
-            <ReviewListRow 
-              key={review.id} 
-              review={review} 
-              index={i % LIMIT} 
-              onHover={setHoveredImage} 
-              onLeave={() => setHoveredImage(null)} 
-              isExpanded={expandedRowId === review.id}
-              hasAnyExpanded={expandedRowId !== null}
-              onToggleExpand={() => setExpandedRowId(expandedRowId === review.id ? null : review.id)}
-              onClick={() => navigate(`/review/${review.id}`)}
-            />
-          )
-        ))}
+        {reviews.map((review, i) => {
+          const isHero = heroReview && review.id === heroReview.id;
+          
+          if (viewMode === 'grid') {
+            return (
+              <div key={review.id} className={isHero ? "hidden md:block" : "block"}>
+                <ReviewCard review={review} index={i % LIMIT} gyroPermission={gyroPermission} />
+              </div>
+            );
+          } else {
+            return (
+              <div key={review.id} className={isHero ? "hidden md:block" : "block"}>
+                <ReviewListRow 
+                  review={review} 
+                  index={i % LIMIT} 
+                  onHover={setHoveredImage} 
+                  onLeave={() => setHoveredImage(null)} 
+                  isExpanded={expandedRowId === review.id}
+                  hasAnyExpanded={expandedRowId !== null}
+                  onToggleExpand={() => setExpandedRowId(expandedRowId === review.id ? null : review.id)}
+                  onClick={() => navigate(`/review/${review.id}`)}
+                />
+              </div>
+            );
+          }
+        })}
         {loading &&
           [...Array(3)].map((_, i) => (
             viewMode === 'grid' 

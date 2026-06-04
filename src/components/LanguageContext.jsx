@@ -61,6 +61,8 @@ export const translations = {
     updated: "Updated:",
     confirmDelete: "Delete this review permanently?",
     deleteSuccess: "Review deleted.",
+    recentlyWatched: "Recently Watched",
+    featured: "Featured",
   },
   zh: {
     // Brand Statement
@@ -120,6 +122,8 @@ export const translations = {
     updated: "更新於：",
     confirmDelete: "確定要永久刪除此篇影評嗎？",
     deleteSuccess: "影評已成功刪除。",
+    recentlyWatched: "最近觀看",
+    featured: "精選影評",
   }
 };
 
