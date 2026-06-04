@@ -89,12 +89,12 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
       onMouseLeave={handleMouseLeave}
       onClick={() => navigate(`/review/${review.id}`)}
       whileHover={gyroPermission ? {} : { y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
-      whileTap={{ scale: 0.95, filter: "brightness(0.9)" }}
-      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 shadow-lg hover:shadow-[#FE494A]/20 hover:shadow-2xl max-w-full transform-gpu"
+      whileTap={!gyroPermission && window.innerWidth <= 768 ? { scale: 0.97, rotateX: 2, rotateY: 2 } : { scale: 0.95, filter: "brightness(0.9)" }}
+      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#FE494A]/20 hover:shadow-2xl max-w-full transform-gpu"
       style={{ 
         aspectRatio: '16/10', 
-        rotateX: window.innerWidth > 768 ? rotateX : 0, 
-        rotateY: window.innerWidth > 768 ? rotateY : 0, 
+        rotateX, 
+        rotateY, 
         transformPerspective: 1000 
       }}
     >

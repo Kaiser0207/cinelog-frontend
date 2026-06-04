@@ -27,23 +27,35 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   const portalRef = useRef(null);
   const { t } = useLanguage();
 
+  const [recentlyWatchedData, setRecentlyWatchedData] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/reviews?limit=100`)
+      .then(res => res.json())
+      .then(data => {
+        const items = data.map(flattenReview);
+        const sorted = items.sort((a, b) => {
+          const getLatestDate = (item) => {
+            const dates = typeof item.watch_dates === 'string' ? JSON.parse(item.watch_dates || '[]') : (item.watch_dates || []);
+            return dates.length > 0 ? dates[dates.length - 1] : '1970-01-01';
+          };
+          const aDate = getLatestDate(a);
+          const bDate = getLatestDate(b);
+          const diff = new Date(bDate).getTime() - new Date(aDate).getTime();
+          if (diff === 0) {
+            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+          }
+          return diff;
+        });
+        setRecentlyWatchedData(sorted.slice(0, 5));
+      })
+      .catch(err => console.error('Failed to fetch recently watched:', err));
+  }, []);
+
   const recentlyWatchedReviews = useMemo(() => {
     if (sort !== 'newest' || searchQuery || reviews.length < 2) return [];
-
-    return [...reviews].sort((a, b) => {
-      const getLatestDate = (item) => {
-        const dates = typeof item.watch_dates === 'string' ? JSON.parse(item.watch_dates || '[]') : (item.watch_dates || []);
-        return dates.length > 0 ? dates[dates.length - 1] : '1970-01-01';
-      };
-      const aDate = getLatestDate(a);
-      const bDate = getLatestDate(b);
-      const diff = new Date(bDate).getTime() - new Date(aDate).getTime();
-      if (diff === 0) {
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-      }
-      return diff;
-    });
-  }, [reviews, sort, searchQuery]);
+    return recentlyWatchedData;
+  }, [reviews, sort, searchQuery, recentlyWatchedData]);
 
   // Initialize global mouse tracking for the portal
   useEffect(() => {
