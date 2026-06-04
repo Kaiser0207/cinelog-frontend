@@ -25,6 +25,21 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   const [expandedRowId, setExpandedRowId] = useState(null);
 
   const portalRef = useRef(null);
+  const { t } = useLanguage();
+
+  const recentlyWatchedReviews = useMemo(() => {
+    if (sort !== 'newest' || searchQuery || reviews.length < 2) return [];
+
+    return [...reviews].sort((a, b) => {
+      const getLatestDate = (item) => {
+        const dates = typeof item.watch_dates === 'string' ? JSON.parse(item.watch_dates || '[]') : (item.watch_dates || []);
+        return dates.length > 0 ? dates[dates.length - 1] : '1970-01-01';
+      };
+      const aDate = getLatestDate(a);
+      const bDate = getLatestDate(b);
+      return new Date(bDate) - new Date(aDate);
+    });
+  }, [reviews, sort, searchQuery]);
 
   // Initialize global mouse tracking for the portal
   useEffect(() => {
@@ -144,21 +159,6 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
       </motion.div>
     );
   }
-  const { t } = useLanguage();
-
-  const recentlyWatchedReviews = useMemo(() => {
-    if (sort !== 'newest' || searchQuery || reviews.length < 2) return [];
-    
-    return [...reviews].sort((a, b) => {
-      const getLatestDate = (item) => {
-        const dates = typeof item.watch_dates === 'string' ? JSON.parse(item.watch_dates || '[]') : (item.watch_dates || []);
-        return dates.length > 0 ? dates[dates.length - 1] : '1970-01-01';
-      };
-      const aDate = getLatestDate(a);
-      const bDate = getLatestDate(b);
-      return new Date(bDate) - new Date(aDate);
-    });
-  }, [reviews, sort, searchQuery]);
 
   const showHero = recentlyWatchedReviews.length > 0 && viewMode === 'grid';
   const heroReview = showHero ? recentlyWatchedReviews[0] : null;

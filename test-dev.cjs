@@ -17,7 +17,7 @@ const puppeteer = require('puppeteer');
   });
 
   try {
-    await page.goto('http://localhost:4173', { waitUntil: 'networkidle0', timeout: 10000 });
+    await page.goto('http://localhost:5173', { waitUntil: 'networkidle0', timeout: 10000 });
   } catch (err) {
     console.log('NAVIGATION ERROR:', err.message);
   }

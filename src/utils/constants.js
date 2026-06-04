@@ -82,7 +82,7 @@ export function flattenReview(review) {
     runtime: movie.runtime,
     release_date: movie.release_date,
     overview: movie.overview,
-    genres: movie.genres || [],
+    genres: (movie.genres || []).map(g => typeof g === 'object' ? g.name : g),
     color_palette: movie.color_palette || [],
   };
 }

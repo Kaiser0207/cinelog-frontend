@@ -80,7 +80,7 @@ export default function HeroCard({ review }) {
               key={genre}
               className="text-[10px] font-bold text-white/80 border border-white/20 rounded-full px-2.5 py-0.5 backdrop-blur-sm font-[var(--font-jetbrains)]"
             >
-              {t(genre) || genre}
+              {t(genre?.name || genre) || (genre?.name || genre)}
             </span>
           ))}
         </div>
