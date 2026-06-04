@@ -22,11 +22,16 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
       const cin = computeCinematic(r.acting || 0, r.cinematography || 0, r.soundtrack || 0);
       totalScoreSum += computeTotal(ent, cin);
 
-      if (r.genres) {
-        r.genres.forEach(g => {
-          genreCounts[g] = (genreCounts[g] || 0) + 1;
-        });
+      let gList = [];
+      if (typeof r.genres === 'string') {
+        try { gList = JSON.parse(r.genres); } catch(e) {}
+      } else if (Array.isArray(r.genres)) {
+        gList = r.genres;
       }
+      
+      gList.forEach(g => {
+        genreCounts[g] = (genreCounts[g] || 0) + 1;
+      });
     });
 
     const avgScore = totalScoreSum / totalReviews;
