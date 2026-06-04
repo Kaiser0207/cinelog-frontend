@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReviewDetail from '../components/ReviewDetail';
-import ReviewEditor from '../components/ReviewEditor';
 import { API_URL, flattenReview } from '../utils/constants';
+
+const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
 
 export default function ReviewPage() {
   const { id } = useParams();
@@ -99,15 +100,17 @@ export default function ReviewPage() {
         onDeleted={() => navigate('/')}
       />
 
-      <AnimatePresence>
-        {showEditor && (
-          <ReviewEditor
-            review={review}
-            onClose={() => setShowEditor(false)}
-            onSaved={handleSaved}
-          />
-        )}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {showEditor && (
+            <ReviewEditor
+              review={review}
+              onClose={() => setShowEditor(false)}
+              onSaved={handleSaved}
+            />
+          )}
+        </AnimatePresence>
+      </Suspense>
     </motion.div>
   );
 }

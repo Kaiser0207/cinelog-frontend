@@ -2,14 +2,14 @@ import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import ReviewFeed from '../components/ReviewFeed';
 import BottomNav from '../components/BottomNav';
+import SearchOverlay from '../components/SearchOverlay';
+import StatsModal from '../components/StatsModal';
 import { SORT_OPTIONS } from '../utils/constants';
-
-const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
-const SearchOverlay = lazy(() => import('../components/SearchOverlay'));
-const StatsModal = lazy(() => import('../components/StatsModal'));
 import { useLanguage } from '../components/LanguageContext';
 import { useAdmin } from '../components/AdminAuth';
 import { useGyroscope } from '../hooks/useGyroscope';
+
+const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
 
 export default function HomePage() {
   const [sort, setSort] = useState('newest');
