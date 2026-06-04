@@ -18,10 +18,16 @@ export default function HeroCard({ review }) {
     pacing,
     acting,
     cinematography,
-    soundtrack,
-    genres = [],
-    watch_dates = []
+    soundtrack
   } = review;
+
+  const genres = review.genres
+    ? (typeof review.genres === 'string' ? JSON.parse(review.genres) : review.genres)
+    : [];
+
+  const watch_dates = review.watch_dates
+    ? (typeof review.watch_dates === 'string' ? JSON.parse(review.watch_dates) : review.watch_dates)
+    : [];
 
   const entertainment = computeEntertainment(emotion, pacing);
   const cinematic = computeCinematic(acting, cinematography, soundtrack);

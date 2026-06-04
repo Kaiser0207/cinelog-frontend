@@ -84,7 +84,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const directors = review.directors_info || [];
   const writers = review.writers_info || [];
 
-  const watchDates = review.watch_dates || [];
+  const watchDates = review.watch_dates 
+    ? (typeof review.watch_dates === 'string' ? JSON.parse(review.watch_dates) : review.watch_dates) 
+    : [];
   const fontFamily = FONT_MAP[review.review_font] || FONT_MAP['Outfit'];
 
   const backdropUrl = review.custom_backdrop_url
