@@ -11,6 +11,13 @@ export const FONTS = [
   { name: 'Bebas Neue', label: 'Bold Display', category: 'Action' },
   { name: 'JetBrains Mono', label: 'Monospace', category: 'Sci-fi' },
   { name: 'UnifrakturCook', label: 'Gothic', category: 'Fantasy' },
+  { name: 'DM Serif Display', label: 'Editorial Serif', category: 'Drama' },
+  { name: 'Cormorant Garamond', label: 'Elegant Serif', category: 'Romance' },
+  { name: 'Lora', label: 'Literary', category: 'Indie' },
+  { name: 'Space Grotesk', label: 'Modern Geometric', category: 'Thriller' },
+  { name: 'Ma Shan Zheng', label: '中文書法', category: 'Wuxia' },
+  { name: 'LXGW WenKai TC', label: '中文文楷', category: 'Literary' },
+  { name: 'Zhi Mang Xing', label: '中文手寫', category: 'Indie' },
 ];
 
 export const FONT_MAP = {
@@ -22,6 +29,13 @@ export const FONT_MAP = {
   'Bebas Neue': 'var(--font-bebas)',
   'JetBrains Mono': 'var(--font-jetbrains)',
   'UnifrakturCook': 'var(--font-unifraktur)',
+  'DM Serif Display': 'var(--font-dm-serif)',
+  'Cormorant Garamond': 'var(--font-cormorant)',
+  'Lora': 'var(--font-lora)',
+  'Space Grotesk': 'var(--font-space)',
+  'Ma Shan Zheng': 'var(--font-ma-shan)',
+  'LXGW WenKai TC': 'var(--font-wenkai)',
+  'Zhi Mang Xing': 'var(--font-zhimang)',
 };
 
 export const SCORE_LABELS = {
