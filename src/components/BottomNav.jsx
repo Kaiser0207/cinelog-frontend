@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
 
-export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, isAdmin }) {
+export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, onStatsClick, isAdmin }) {
   const { t } = useLanguage();
 
   return (
@@ -51,14 +51,29 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, isAd
         {/* Search */}
         <button 
           onClick={onSearchClick}
-          className="flex flex-col items-center justify-center gap-0.5 w-16 h-full active:scale-90 transition-transform"
+          className="flex flex-col items-center justify-center gap-0.5 w-16 h-full active:scale-90 transition-transform cursor-pointer"
         >
           <svg className="w-6 h-6 text-[#E8E2D2]/70" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <span className="text-[9px] font-bold font-jetbrains text-[#E8E2D2]/50 uppercase tracking-widest">
+          <span className="text-[9px] font-bold font-[var(--font-jetbrains)] text-[#E8E2D2]/50 uppercase tracking-widest">
             {t('navSearch') || 'Search'}
+          </span>
+        </button>
+
+        {/* Stats */}
+        <button 
+          onClick={onStatsClick}
+          className="flex flex-col items-center justify-center gap-0.5 w-16 h-full active:scale-90 transition-transform cursor-pointer"
+        >
+          <svg className="w-6 h-6 text-[#E8E2D2]/70" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <path d="M18 20V10" />
+            <path d="M12 20V4" />
+            <path d="M6 20V14" />
+          </svg>
+          <span className="text-[9px] font-bold font-[var(--font-jetbrains)] text-[#E8E2D2]/50 uppercase tracking-widest">
+            {t('statistics') || 'Stats'}
           </span>
         </button>
 

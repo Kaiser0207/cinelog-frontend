@@ -87,6 +87,15 @@ export const translations = {
     standardDesc: "Search by movie title, director, or cast members.",
     aiSearch: "AI Semantic Search",
     aiDesc: 'Search by vibe, mood, or concepts. Example: "a movie about space travel and love"',
+    
+    // New Features
+    aiTldr: "AI TL;DR",
+    aiTldrLoading: "Generating Summary...",
+    aiTldrSuccess: "Summary generated!",
+    aiTldrError: "Failed to generate summary.",
+    aiTldrRetry: "Regenerate Summary",
+    watchingTimeline: "Watching Timeline",
+    genreBreakdown: "Genre Breakdown",
   },
   zh: {
     // Brand Statement
@@ -172,6 +181,15 @@ export const translations = {
     standardDesc: "輸入電影名稱、導演或演員名字。",
     aiSearch: "AI 語意搜尋",
     aiDesc: '描述電影氛圍、劇情或概念。例如：「關於太空旅行和愛情的電影」',
+
+    // New Features
+    aiTldr: "AI 精華摘要",
+    aiTldrLoading: "摘要生成中...",
+    aiTldrSuccess: "摘要已生成！",
+    aiTldrError: "摘要生成失敗。",
+    aiTldrRetry: "重新生成摘要",
+    watchingTimeline: "觀影時間線",
+    genreBreakdown: "類型佔比",
   }
 };
 

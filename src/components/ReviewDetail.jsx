@@ -7,6 +7,7 @@ import ScoreSlider from './ScoreSlider';
 import RadarChart from './RadarChart';
 import SpotifyEmbed from './SpotifyEmbed';
 import ShareCard from './ShareCard';
+import TLDRButton from './TLDRButton';
 import { useAdmin } from './AdminAuth';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
@@ -20,6 +21,33 @@ import {
   formatDate,
   API_URL,
 } from '../utils/constants';
+
+function ReadingProgressBar() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <div
+      className="fixed top-0 left-0 right-0 z-[101] h-[3px] pointer-events-none"
+      aria-hidden="true"
+    >
+      <div
+        className="h-full bg-gradient-to-r from-[#FE494A] to-[#D480C0] transition-none"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+  );
+}
 
 function ColorStrip({ palette }) {
   if (!palette || palette.length === 0) return null;
@@ -257,6 +285,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       transition={{ duration: 0.5 }}
       className="relative"
     >
+      <ReadingProgressBar />
+
       {/* Back Button */}
       <button
         onClick={() => navigate('/')}
@@ -469,9 +499,13 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.65 }}
             >
-              <h3 className="text-2xl font-bold font-syne text-[#FE494A] uppercase tracking-wider mb-4 border-b-4 border-[#FE494A] pb-2">
-                {t('review')}
-              </h3>
+              <div className="flex items-center justify-between mb-2 border-b-4 border-[#FE494A] pb-2">
+                <h3 className="text-2xl font-bold font-[var(--font-syne)] text-[#FE494A] uppercase tracking-wider">
+                  {t('review')}
+                </h3>
+              </div>
+              <TLDRButton reviewText={review.review_text} movieTitle={review.title} />
+
               <div
                 className="prose-cinelog"
                 style={{ fontFamily }}
