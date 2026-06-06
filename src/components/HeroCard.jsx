@@ -48,7 +48,7 @@ export default function HeroCard({ review }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       onClick={() => navigate(`/review/${id}`)}
-      className="relative w-full h-[42vh] max-h-[380px] min-h-[300px] md:max-h-[440px] rounded-3xl overflow-hidden shadow-2xl cursor-pointer group mb-6"
+      className="relative w-full h-[42vh] max-h-[380px] min-h-[300px] md:max-h-[440px] rounded-3xl overflow-hidden shadow-2xl cursor-pointer group"
     >
       {/* Background Image */}
       {heroImage ? (

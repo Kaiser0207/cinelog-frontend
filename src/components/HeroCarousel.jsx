@@ -1,23 +1,48 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, animate } from 'framer-motion';
 import HeroCard from './HeroCard';
 
 /**
  * Auto-advancing hero carousel of the manually-featured reviews.
  * - Slides right every `interval` ms and loops back to the start.
- * - Manual control via finger/mouse swipe and the dot indicators.
+ * - Finger/mouse drag follows 1:1 and snaps to the nearest slide on release.
+ * - Dot indicators jump to a specific slide.
  * Falls back to a single static HeroCard when only one review is featured.
  */
-export default function HeroCarousel({ reviews = [], interval = 5000 }) {
+export default function HeroCarousel({ reviews = [], interval = 8000 }) {
   const [index, setIndex] = useState(0);
+  const [width, setWidth] = useState(0);
+  const containerRef = useRef(null);
+  const indexRef = useRef(0);
   const timer = useRef(null);
+  const x = useMotionValue(0);
   const n = reviews.length;
+
+  // Measure one slide's width (== container width) and realign on resize.
+  useEffect(() => {
+    const measure = () => {
+      const w = containerRef.current?.offsetWidth || 0;
+      setWidth(w);
+      x.set(-indexRef.current * w);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [n]);
+
+  // Snap to the active slide whenever it changes.
+  useEffect(() => {
+    indexRef.current = index;
+    if (width) {
+      animate(x, -index * width, { type: 'spring', stiffness: 260, damping: 30 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, width]);
 
   const start = () => {
     stop();
-    if (n > 1) {
-      timer.current = setInterval(() => setIndex((i) => (i + 1) % n), interval);
-    }
+    if (n > 1) timer.current = setInterval(() => setIndex((i) => (i + 1) % n), interval);
   };
   const stop = () => {
     if (timer.current) clearInterval(timer.current);
@@ -29,7 +54,6 @@ export default function HeroCarousel({ reviews = [], interval = 5000 }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [n, interval]);
 
-  // Keep index valid if the featured set shrinks.
   useEffect(() => {
     if (index > n - 1) setIndex(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -43,22 +67,25 @@ export default function HeroCarousel({ reviews = [], interval = 5000 }) {
     start(); // reset the auto-advance timer after manual interaction
   };
 
+  const handleDragEnd = (e, info) => {
+    const { offset, velocity } = info;
+    let target = index;
+    if (offset.x < -width * 0.2 || velocity.x < -400) target = index + 1;
+    else if (offset.x > width * 0.2 || velocity.x > 400) target = index - 1;
+    goTo(Math.max(0, Math.min(n - 1, target)));
+  };
+
   return (
     <div className="relative w-full">
-      <div className="relative w-full overflow-hidden rounded-3xl">
+      <div ref={containerRef} className="relative w-full overflow-hidden rounded-3xl">
         <motion.div
           className="flex"
-          animate={{ x: `-${index * 100}%` }}
-          transition={{ type: 'spring', stiffness: 300, damping: 34 }}
+          style={{ x }}
           drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
+          dragConstraints={{ left: -(n - 1) * width, right: 0 }}
+          dragElastic={0.12}
           onDragStart={stop}
-          onDragEnd={(e, info) => {
-            if (info.offset.x < -60) goTo(index + 1);
-            else if (info.offset.x > 60) goTo(index - 1);
-            else start();
-          }}
+          onDragEnd={handleDragEnd}
         >
           {reviews.map((rev) => (
             <div key={rev.id} className="w-full flex-shrink-0">
@@ -69,7 +96,7 @@ export default function HeroCarousel({ reviews = [], interval = 5000 }) {
       </div>
 
       {/* Dot indicators */}
-      <div className="flex justify-center gap-2 mt-1">
+      <div className="flex justify-center gap-2 mt-3">
         {reviews.map((_, i) => (
           <button
             key={i}
