@@ -250,7 +250,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[9000] overflow-y-auto"
+      className="fixed inset-0 z-[9000] overflow-y-auto overflow-x-hidden"
     >
       {/* Dimmed/blurred backdrop kept OUT of the textarea's ancestor chain — an
           ancestor with backdrop-filter or transform breaks iOS caret tap. */}
@@ -279,7 +279,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
           {/* Content */}
           <div className="p-5 md:p-8 grid md:grid-cols-2 gap-8">
             {/* Left Column: Movie + Review Text */}
-            <div className="space-y-6">
+            <div className="space-y-6 min-w-0">
               {/* Movie Search */}
               <MovieSearch onSelect={handleMovieSelect} disabled={isEdit} />
 
@@ -340,7 +340,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                       value={form.custom_backdrop_url}
                       onChange={(e) => update('custom_backdrop_url', e.target.value)}
                       placeholder="Or paste a custom image URL..."
-                      className="flex-1 bg-[#E8E2D2] border border-border-subtle p-3 text-sm rounded-lg focus:outline-none focus:border-black/50 transition-colors text-black placeholder-black/40"
+                      className="flex-1 min-w-0 bg-[#E8E2D2] border border-border-subtle p-3 text-sm rounded-lg focus:outline-none focus:border-black/50 transition-colors text-black placeholder-black/40"
                     />
                     <label className="cursor-pointer bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-bold px-4 py-3 rounded-lg text-sm whitespace-nowrap transition-colors flex items-center justify-center min-w-[100px]">
                       {uploadingImage ? (
@@ -399,7 +399,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
             </div>
 
             {/* Right Column: Scores */}
-            <div className="space-y-6">
+            <div className="space-y-6 min-w-0">
               {/* AI Predict */}
               <AIPredictButton
                 reviewText={form.review_text}
