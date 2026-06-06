@@ -152,10 +152,10 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Total Score */}
       <div className="glass p-6 flex flex-col items-center justify-center text-center rounded-lg border border-border-subtle relative">
         <p className="absolute top-6 left-6 text-sm font-bold font-syne uppercase tracking-widest text-text-muted">{t('totalScore')}</p>
-        <span className="text-6xl md:text-8xl font-black font-syne tabular-nums text-[#FE494A] mt-6">
+        <span className="text-6xl md:text-8xl font-black tabular-nums text-[#FE494A] mt-6">
           {total.toFixed(1)}
         </span>
-        <p className="text-sm font-bold font-syne text-text-dim mt-2">/ 10.0</p>
+        <p className="text-sm font-bold text-text-dim mt-2">/ 10.0</p>
       </div>
 
       {/* Entertainment */}
