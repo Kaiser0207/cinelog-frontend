@@ -544,7 +544,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         <motion.div
           initial={false}
           animate={{ y: mobileScoreOpen ? 0 : 'calc(100% - 85px)' }}
-          transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
+          transition={{ type: 'spring', damping: 40, stiffness: 360, mass: 1 }}
           drag="y"
           dragControls={dragControls}
           dragListener={false}
@@ -552,8 +552,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             top: mobileScoreOpen ? 0 : -600, 
             bottom: mobileScoreOpen ? 600 : 0 
           }}
-          dragElastic={0.2}
-          dragMomentum={true}
+          dragElastic={0.08}
+          dragMomentum={false}
           onDragEnd={(e, info) => {
             // Dragging down (closing)
             if (mobileScoreOpen && (info.offset.y > 40 || info.velocity.y > 200)) {
@@ -581,7 +581,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               <>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-[#FE494A]" />
-                  <span className="text-3xl font-black font-syne tabular-nums tracking-wide text-[#FE494A]">
+                  <span className="text-3xl font-black tabular-nums tracking-wide text-[#FE494A]">
                     {total.toFixed(1)}
                   </span>
                   <span className="text-xs text-text-dim font-bold mt-1">/10</span>
