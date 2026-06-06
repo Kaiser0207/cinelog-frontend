@@ -262,7 +262,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
         <div className="max-w-5xl mx-auto bg-bg-surface border border-border-subtle md:rounded-2xl overflow-hidden">
           {/* Header */}
           <div style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }} className="sticky top-0 z-10 flex items-center justify-between px-5 pb-4 bg-bg-surface/90 backdrop-blur-xl border-b border-border-subtle">
-            <h2 className="text-lg font-bold font-[var(--font-syne)] tracking-tighter">
+            <h2 className="text-lg font-bold font-syne tracking-tighter">
               {isEdit ? '✏️ 編輯影評' : '🎬 新增影評'}
             </h2>
             <button
@@ -315,7 +315,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               {/* Backdrop Selection */}
               {form.title && (
                 <div className="space-y-3">
-                  <label className="block text-sm text-text-muted font-bold font-[var(--font-bebas)] tracking-wider">
+                  <label className="block text-sm text-text-muted font-bold font-bebas tracking-wider">
                     COVER IMAGE (TMDB OR CUSTOM URL)
                   </label>
                   {form.backdrops && form.backdrops.length > 0 && (
@@ -411,7 +411,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                   key={total}
                   initial={animated ? { scale: 1.3 } : false}
                   animate={{ scale: 1 }}
-                  className="text-5xl font-black font-[var(--font-syne)] tracking-tightertabular-nums text-[#1A1A1A]"
+                  className="text-5xl font-black font-syne tracking-tightertabular-nums text-[#1A1A1A]"
                 >
                   {total.toFixed(1)}
                 </motion.span>

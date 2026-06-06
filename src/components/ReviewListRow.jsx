@@ -83,10 +83,10 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
         
         {/* Title & Year */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-base md:text-xl font-bold font-[var(--font-syne)] tracking-tighter text-[#1A1A1A] truncate group-hover:text-[#FE494A] transition-colors">
+          <h3 className="text-base md:text-xl font-bold font-syne tracking-tighter text-[#1A1A1A] truncate group-hover:text-[#FE494A] transition-colors">
             {title}
           </h3>
-          <p className="text-xs md:text-sm text-text-dim mt-0.5 font-[var(--font-jetbrains)] uppercase tracking-wide">
+          <p className="text-xs md:text-sm text-text-dim mt-0.5 font-jetbrains uppercase tracking-wide">
             {release_date ? new Date(release_date).getFullYear() : 'YYYY'} • {runtime || '--'} MIN
           </p>
         </div>
@@ -95,10 +95,10 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
         <div className="flex items-center gap-4 md:gap-8 flex-shrink-0">
           <div className="flex items-center gap-1.5 bg-[#E8E2D2] px-2 py-1 rounded-md text-black">
             <span className="text-xs">✨</span>
-            <span className="text-sm font-black font-[var(--font-bebas)] text-[#FE494A] tracking-wider pt-0.5">{rating}</span>
+            <span className="text-sm font-black font-bebas text-[#FE494A] tracking-wider pt-0.5">{rating}</span>
           </div>
           
-          <div className="text-xs text-text-dim font-[var(--font-jetbrains)] hidden sm:block">
+          <div className="text-xs text-text-dim font-jetbrains hidden sm:block">
             {new Date(created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
         </div>
@@ -127,7 +127,7 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
 
             {/* Title & Palette */}
             <div className="flex flex-col gap-2">
-              <h2 className="text-3xl font-black font-[var(--font-syne)] tracking-tighter text-[#1A1A1A] leading-none uppercase">
+              <h2 className="text-3xl font-black font-syne tracking-tighter text-[#1A1A1A] leading-none uppercase">
                 {title}
               </h2>
               {palette.length > 0 && (
@@ -155,7 +155,7 @@ export default function ReviewListRow({ review, index, onHover, onLeave, onClick
             {/* CTA Button */}
             <button 
               onClick={(e) => { e.stopPropagation(); onClick(); }}
-              className="w-full mt-3 py-4 bg-[#FE494A] text-[#E8E2D2] font-black font-[var(--font-syne)] tracking-widest uppercase rounded-lg shadow-lg shadow-[#FE494A]/20 active:translate-y-0.5 active:shadow-md transition-all"
+              className="w-full mt-3 py-4 bg-[#FE494A] text-[#E8E2D2] font-black font-syne tracking-widest uppercase rounded-lg shadow-lg shadow-[#FE494A]/20 active:translate-y-0.5 active:shadow-md transition-all"
             >
               閱讀影評 (Read Full Review)
             </button>

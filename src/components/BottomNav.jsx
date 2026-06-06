@@ -27,7 +27,7 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, isAd
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
-          <span className="text-[9px] font-bold font-[var(--font-jetbrains)] text-[#E8E2D2]/50 uppercase tracking-widest">
+          <span className="text-[9px] font-bold font-jetbrains text-[#E8E2D2]/50 uppercase tracking-widest">
             {t('navHome') || 'Home'}
           </span>
         </button>
@@ -57,7 +57,7 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, isAd
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
-          <span className="text-[9px] font-bold font-[var(--font-jetbrains)] text-[#E8E2D2]/50 uppercase tracking-widest">
+          <span className="text-[9px] font-bold font-jetbrains text-[#E8E2D2]/50 uppercase tracking-widest">
             {t('navSearch') || 'Search'}
           </span>
         </button>

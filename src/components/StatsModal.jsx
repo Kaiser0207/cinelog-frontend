@@ -61,7 +61,7 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
         className="w-[90%] max-w-sm bg-[#E8E2D2] p-6 rounded-3xl shadow-2xl border border-[#1A1A1A]/10 pointer-events-auto flex flex-col gap-6"
       >
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-black font-[var(--font-syne)] text-[#1A1A1A] tracking-tighter uppercase">
+          <h2 className="text-2xl font-black font-syne text-[#1A1A1A] tracking-tighter uppercase">
             {t('statistics') || 'Statistics'}
           </h2>
           <button 
@@ -74,34 +74,34 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-[#1A1A1A] rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-            <span className="text-4xl font-black font-[var(--font-bebas)] text-[#D480C0] tracking-wider mb-1">
+            <span className="text-4xl font-black font-bebas text-[#D480C0] tracking-wider mb-1">
               {stats.totalReviews}
             </span>
-            <span className="text-[10px] font-bold font-[var(--font-jetbrains)] text-white/60 uppercase">
+            <span className="text-[10px] font-bold font-jetbrains text-white/60 uppercase">
               {t('totalReviews') || 'Total Reviews'}
             </span>
           </div>
 
           <div className="bg-[#1A1A1A] rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-            <span className="text-4xl font-black font-[var(--font-bebas)] text-[#FE494A] tracking-wider mb-1 flex items-center gap-1">
+            <span className="text-4xl font-black font-bebas text-[#FE494A] tracking-wider mb-1 flex items-center gap-1">
               <span className="text-xl">✨</span> {stats.avgScore}
             </span>
-            <span className="text-[10px] font-bold font-[var(--font-jetbrains)] text-white/60 uppercase">
+            <span className="text-[10px] font-bold font-jetbrains text-white/60 uppercase">
               {t('averageScore') || 'Average Score'}
             </span>
           </div>
         </div>
 
         <div className="bg-[#3B4856] rounded-2xl p-5 flex items-center justify-between shadow-inner">
-          <span className="text-xs font-bold font-[var(--font-jetbrains)] text-white/80 uppercase">
+          <span className="text-xs font-bold font-jetbrains text-white/80 uppercase">
             {t('topGenre') || 'Top Genre'}
           </span>
-          <span className="text-lg font-bold font-[var(--font-syne)] text-[#D480C0] tracking-wider uppercase">
+          <span className="text-lg font-bold font-syne text-[#D480C0] tracking-wider uppercase">
             {t(stats.topGenre) || stats.topGenre}
           </span>
         </div>
 
-        <p className="text-center text-[10px] text-[#1A1A1A]/40 font-[var(--font-inter)] font-medium px-2">
+        <p className="text-center text-[10px] text-[#1A1A1A]/40 font-inter font-medium px-2">
           {t('statsDesc') || 'Keep watching movies to build your cinematic profile.'}
         </p>
       </motion.div>

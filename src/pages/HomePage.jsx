@@ -170,7 +170,7 @@ export default function HomePage() {
               />
               <button
                 onClick={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
-                className={`ml-1 md:ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-black font-[var(--font-jetbrains)] uppercase transition-all shrink-0 mr-0.5 md:mr-1 ${
+                className={`ml-1 md:ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-black font-jetbrains uppercase transition-all shrink-0 mr-0.5 md:mr-1 ${
                   searchMode === 'ai' 
                     ? 'bg-[#FE494A] text-[#E8E2D2] hover:bg-[#FE494A] shadow-sm' 
                     : 'bg-[#E8E2D2] shadow-sm text-[#FE494A] hover:bg-[#FE494A]'
@@ -212,7 +212,7 @@ export default function HomePage() {
                     : 'bg-[#E8E2D2] border border-border-subtle'
                 }`}
               >
-                <span className={`inline-block text-sm font-bold font-[var(--font-jetbrains)] uppercase transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
+                <span className={`inline-block text-sm font-bold font-jetbrains uppercase transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
                   isActive ? 'text-white' : 'text-[#1A1A1A]/70'
                 }`}>
                   {t(genreToKey[g]) || g}
@@ -349,13 +349,13 @@ export default function HomePage() {
               <span className="md:hidden">CINE<br/>ROOMS</span>
               <span className="hidden md:inline">CINEROOMS</span>
             </h2>
-            <p className="text-base md:text-2xl font-bold font-[var(--font-bebas)] text-[#D480C0]/80 tracking-wider">
+            <p className="text-base md:text-2xl font-bold font-bebas text-[#D480C0]/80 tracking-wider">
               {t('footerSubtitle')}
             </p>
           </div>
           <div className="w-16 h-1 bg-[#D480C0] mx-auto rounded-full" />
           <p 
-            className="max-w-2xl mx-auto text-xs md:text-base font-medium opacity-90 leading-relaxed font-[var(--font-inter)] text-white px-2 md:px-0"
+            className="max-w-2xl mx-auto text-xs md:text-base font-medium opacity-90 leading-relaxed font-inter text-white px-2 md:px-0"
             style={{ textAlign: 'justify', textJustify: 'inter-word' }}
           >
             {t('footerDesc')}
@@ -374,7 +374,7 @@ export default function HomePage() {
             </span>
           </a>
 
-          <div className="text-[10px] md:text-xs font-bold font-[var(--font-jetbrains)] text-white/50 border-t border-white/10 pt-8 w-full space-y-1">
+          <div className="text-[10px] md:text-xs font-bold font-jetbrains text-white/50 border-t border-white/10 pt-8 w-full space-y-1">
             <p 
               onClick={handleAdminTrigger} 
               className="select-none cursor-pointer"

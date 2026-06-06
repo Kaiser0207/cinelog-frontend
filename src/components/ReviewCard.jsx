@@ -176,7 +176,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
             }}
           >
             <span
-              className="text-xl font-black font-[var(--font-syne)] tracking-tighter text-[#FE494A]"
+              className="text-xl font-black font-syne tracking-tighter text-[#FE494A]"
             >
               {total.toFixed(1)}
             </span>
@@ -203,7 +203,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
           )}
 
           {/* Title */}
-          <h3 className="text-xl md:text-2xl font-bold font-[var(--font-syne)] tracking-tighter text-white leading-tight mb-1 truncate">
+          <h3 className="text-xl md:text-2xl font-bold font-syne tracking-tighter text-white leading-tight mb-1 truncate">
             {review.title}
           </h3>
 

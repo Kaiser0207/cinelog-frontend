@@ -170,7 +170,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
         className="flex flex-col items-center justify-center py-24 text-center"
       >
         <span className="text-6xl mb-4">🎬</span>
-        <h3 className="text-xl font-bold font-[var(--font-syne)] tracking-tighter text-[#1A1A1A] mb-2">
+        <h3 className="text-xl font-bold font-syne tracking-tighter text-[#1A1A1A] mb-2">
           No Reviews Yet
         </h3>
         <p className="text-text-muted text-sm max-w-sm">
@@ -193,7 +193,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
           {horizontalScrollReviews.length > 0 && (
             <div className="flex flex-col w-full mt-4">
               <div className="flex items-center gap-3 mb-4">
-                <h3 className="text-sm font-bold font-[var(--font-syne)] uppercase tracking-wider text-text-dim">
+                <h3 className="text-sm font-bold font-syne uppercase tracking-wider text-text-dim">
                   {t('recentlyWatched')}
                 </h3>
                 <div className="h-px flex-1 bg-border-subtle" />
@@ -217,13 +217,13 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
                       )}
                       <div className="absolute top-2 right-2 bg-[#1A1A1A]/80 backdrop-blur-md text-[#E8E2D2] px-1.5 py-0.5 rounded flex items-center gap-1 border border-white/10 shadow-sm">
                         <span className="text-[10px]">✨</span>
-                        <span className="text-[10px] font-bold font-[var(--font-bebas)] tracking-wider">
+                        <span className="text-[10px] font-bold font-bebas tracking-wider">
                           {rev.total_score ? rev.total_score.toFixed(1) : '-'}
                         </span>
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <h4 className="text-xs font-bold font-[var(--font-syne)] text-[#1A1A1A] truncate w-full uppercase">
+                      <h4 className="text-xs font-bold font-syne text-[#1A1A1A] truncate w-full uppercase">
                         {rev.title}
                       </h4>
                     </div>

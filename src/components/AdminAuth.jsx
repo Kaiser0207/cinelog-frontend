@@ -165,7 +165,7 @@ function AdminAuthModal({ onVerified, onClose }) {
       >
         <div className="text-center mb-6">
           <div className="text-3xl mb-2">🔐</div>
-          <h2 className="text-xl font-bold font-[var(--font-syne)] tracking-tightertext-text-primary">
+          <h2 className="text-xl font-bold font-syne tracking-tightertext-text-primary">
             Admin Access
           </h2>
           <p className="text-text-muted text-sm mt-1">

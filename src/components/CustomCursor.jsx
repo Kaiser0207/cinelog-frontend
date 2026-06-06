@@ -66,7 +66,7 @@ export default function CustomCursor() {
       }}
     >
       {isHovering && (
-        <span className={`${isOverDark ? 'text-black' : 'text-white'} font-black font-[var(--font-bebas)] text-base tracking-widest`}>
+        <span className={`${isOverDark ? 'text-black' : 'text-white'} font-black font-bebas text-base tracking-widest`}>
           {hoverText}
         </span>
       )}

@@ -44,7 +44,7 @@ export default function SearchOverlay({ isOpen, onClose, searchInput, searchQuer
             />
             <button
               onClick={onModeToggle}
-              className={`ml-2 px-4 py-2 rounded-full text-[10px] font-black font-[var(--font-jetbrains)] uppercase transition-all shrink-0 mr-1 ${
+              className={`ml-2 px-4 py-2 rounded-full text-[10px] font-black font-jetbrains uppercase transition-all shrink-0 mr-1 ${
                 searchMode === 'ai' 
                   ? 'bg-[#FE494A] text-[#E8E2D2] shadow-sm' 
                   : 'bg-[#E8E2D2] text-[#FE494A] shadow-sm'
@@ -73,7 +73,7 @@ export default function SearchOverlay({ isOpen, onClose, searchInput, searchQuer
             </div>
           ) : (
             <div className="flex flex-col gap-6 mt-4">
-              <h3 className="text-xs font-bold font-[var(--font-syne)] uppercase tracking-wider text-[#1A1A1A]/40">
+              <h3 className="text-xs font-bold font-syne uppercase tracking-wider text-[#1A1A1A]/40">
                 {t('searchTips') || 'Search Tips'}
               </h3>
               <div className="flex flex-col gap-3">

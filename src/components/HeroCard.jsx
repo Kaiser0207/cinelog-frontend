@@ -68,12 +68,12 @@ export default function HeroCard({ review }) {
 
       {/* Top Label & Score */}
       <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-        <div className="bg-[#FE494A] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md font-[var(--font-jetbrains)]">
+        <div className="bg-[#FE494A] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md font-jetbrains">
           {t('featured')}
         </div>
         <div className="bg-[#1A1A1A]/80 backdrop-blur-md text-[#E8E2D2] px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1.5 shadow-xl">
           <span className="text-xs">✨</span>
-          <span className="text-sm font-black font-[var(--font-bebas)] tracking-wider pt-0.5">{score.toFixed(1)}</span>
+          <span className="text-sm font-black font-bebas tracking-wider pt-0.5">{score.toFixed(1)}</span>
         </div>
       </div>
 
@@ -84,7 +84,7 @@ export default function HeroCard({ review }) {
           {genres.slice(0, 3).map((genre) => (
             <span
               key={genre}
-              className="text-[10px] font-bold text-white/80 border border-white/20 rounded-full px-2.5 py-0.5 backdrop-blur-sm font-[var(--font-jetbrains)]"
+              className="text-[10px] font-bold text-white/80 border border-white/20 rounded-full px-2.5 py-0.5 backdrop-blur-sm font-jetbrains"
             >
               {t(genre?.name || genre) || (genre?.name || genre)}
             </span>
@@ -92,13 +92,13 @@ export default function HeroCard({ review }) {
         </div>
 
         {/* Title */}
-        <h2 className="text-3xl font-black font-[var(--font-syne)] text-white uppercase tracking-tighter leading-tight drop-shadow-lg line-clamp-2">
+        <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter leading-tight drop-shadow-lg line-clamp-2">
           {title}
         </h2>
 
         {/* Watch Date */}
         {latestWatchDate && (
-          <p className="text-xs font-bold text-white/60 font-[var(--font-jetbrains)] uppercase flex items-center gap-1.5">
+          <p className="text-xs font-bold text-white/60 font-jetbrains uppercase flex items-center gap-1.5">
             <span>👀</span> {t('recentlyWatched')}: {formatDate(latestWatchDate)}
           </p>
         )}
