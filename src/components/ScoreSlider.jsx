@@ -36,7 +36,7 @@ export default function ScoreSlider({
           max={10}
           step={0.5}
           value={value}
-          onChange={(e) => onChange?.(parseFloat(e.target.value))}
+          onChange={(e) => { onChange?.(parseFloat(e.target.value)); if (navigator.vibrate) navigator.vibrate(3); }}
           disabled={readOnly}
           className={`relative z-10 w-full ${readOnly ? 'opacity-70 cursor-default' : 'cursor-pointer'}`}
           style={{

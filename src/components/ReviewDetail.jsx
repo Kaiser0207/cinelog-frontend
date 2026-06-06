@@ -587,6 +587,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               info.velocity.y < -250 ? true
               : info.velocity.y > 250 ? false
               : sheetY.get() < closedY / 2;
+            if (navigator.vibrate) navigator.vibrate(8);
             setMobileScoreOpen(open);
           }}
           className="absolute bottom-0 left-0 right-0 w-full bg-bg-deep/95 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col pointer-events-auto"

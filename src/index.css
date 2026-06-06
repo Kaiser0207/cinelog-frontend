@@ -145,6 +145,15 @@ body {
 .animate-dust-a { animation: dustUp 26s linear infinite; }   /* far layer: large, slow */
 .animate-dust-b { animation: dustUp 15s linear infinite; }   /* near layer: small, faster */
 
+/* Respect "Reduce Motion": stop the ambient/looping effects */
+@media (prefers-reduced-motion: reduce) {
+  .animate-dust-a, .animate-dust-b, .animate-dust,
+  .animate-projector-breath, .animate-bounce {
+    animation: none !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

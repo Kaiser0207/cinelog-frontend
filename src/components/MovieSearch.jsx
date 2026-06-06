@@ -65,6 +65,7 @@ export default function MovieSearch({ onSelect, disabled = false }) {
           type="text"
           value={query}
           onChange={handleInputChange}
+          onFocus={(e) => setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300)}
           placeholder="輸入電影名稱..."
           disabled={disabled}
           className={`w-full pl-10 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}

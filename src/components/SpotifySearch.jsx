@@ -67,6 +67,7 @@ export default function SpotifySearch({ onSelect }) {
           type="text"
           value={query}
           onChange={handleInputChange}
+          onFocus={(e) => setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300)}
           placeholder="搜尋歌曲..."
           className="w-full pl-10"
         />

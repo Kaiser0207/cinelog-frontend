@@ -148,8 +148,9 @@ export default function HomePage() {
       {/* Massive Hero Section */}
       <div className="relative pt-24 pb-12 px-5 flex flex-col items-start md:items-center justify-center min-h-[40vh]">
         <motion.h1
+          onClick={handleAdminTrigger}
           style={{ y: titleY, skewX: titleSkew, opacity: titleOpacity }}
-          className="text-8xl md:text-[12rem] lg:text-[15rem] font-black font-nevis tracking-tighter text-[#1A1A1A] uppercase leading-none z-0"
+          className="text-8xl md:text-[12rem] lg:text-[15rem] font-black font-nevis tracking-tighter text-[#1A1A1A] uppercase leading-none z-0 select-none"
         >
           <span className="md:hidden">CINE<br/>ROOMS</span>
           <span className="hidden md:inline">CINEROOMS</span>
@@ -330,11 +331,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        <ReviewFeed 
-          sort={sort} 
-          genre={genre} 
-          searchQuery={searchQuery} 
-          searchMode={searchMode} 
+        <ReviewFeed
+          sort={sort}
+          genre={genre}
+          searchQuery={showSearchOverlay ? '' : searchQuery}
+          searchMode={searchMode}
           viewMode={viewMode} 
           gyroPermission={permissionGranted}
           onReviewsLoaded={setLoadedReviews}

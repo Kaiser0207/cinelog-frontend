@@ -250,14 +250,17 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9000] overflow-y-auto"
+      className="fixed inset-0 z-[9000] overflow-y-auto"
     >
+      {/* Dimmed/blurred backdrop kept OUT of the textarea's ancestor chain — an
+          ancestor with backdrop-filter or transform breaks iOS caret tap. */}
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm pointer-events-none" />
       <motion.div
-        initial={{ y: 40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 40, opacity: 0 }}
-        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="min-h-screen md:py-8 md:px-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        className="relative min-h-screen md:py-8 md:px-4"
       >
         <div className="max-w-5xl mx-auto bg-bg-surface border border-border-subtle md:rounded-2xl overflow-hidden">
           {/* Header */}

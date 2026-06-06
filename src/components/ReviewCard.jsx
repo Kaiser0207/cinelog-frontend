@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useSpring, useMotionTemplate, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, getScoreColor } from '../utils/constants';
 import { useLanguage } from './LanguageContext';
@@ -8,6 +8,8 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [isHovered, setIsHovered] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const reduce = useReducedMotion();
 
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
@@ -21,8 +23,8 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
   const smoothX = useSpring(x, { damping: 20, stiffness: 100 });
   const smoothY = useSpring(y, { damping: 20, stiffness: 100 });
 
-  const rotateX = useTransform(smoothY, [-200, 200], [15, -15]);
-  const rotateY = useTransform(smoothX, [-200, 200], [-15, 15]);
+  const rotateX = useTransform(smoothY, [-200, 200], reduce ? [0, 0] : [15, -15]);
+  const rotateY = useTransform(smoothX, [-200, 200], reduce ? [0, 0] : [-15, 15]);
 
   // Cinema Projector Beam (Aggressive Gyroscope Mapping)
   const beamX = useTransform(smoothX, [-200, 200], [-50, 150]);
@@ -30,7 +32,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
   const backgroundPosition = useMotionTemplate`${beamX}% ${beamY}%`;
 
   useEffect(() => {
-    if (!gyroPermission) return;
+    if (!gyroPermission || reduce) return;
     // Throttle to ~30fps — deviceorientation fires 60+/s and drains battery.
     let lastUpdate = 0;
     const handleOrientation = (e) => {
@@ -94,7 +96,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
       onClick={() => navigate(`/review/${review.id}`)}
       whileHover={gyroPermission ? {} : { y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
       whileTap={!gyroPermission && window.innerWidth <= 768 ? { scale: 0.97, rotateX: 2, rotateY: 2 } : { scale: 0.95, filter: "brightness(0.9)" }}
-      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#FE494A]/20 hover:shadow-2xl max-w-full transform-gpu"
+      className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#FE494A]/20 hover:shadow-2xl max-w-full transform-gpu [content-visibility:auto] [contain-intrinsic-size:auto_460px]"
       style={{ 
         aspectRatio: '16/10', 
         rotateX, 
@@ -104,12 +106,19 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
     >
       {/* Background Image */}
       {backdropUrl ? (
-        <img
-          src={backdropUrl}
-          alt={review.title}
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          loading="lazy"
-        />
+        <>
+          {/* Placeholder until the image decodes — avoids blank→pop */}
+          {!imgLoaded && (
+            <div className="absolute inset-0 bg-gradient-to-br from-bg-card to-bg-elevated skeleton" />
+          )}
+          <img
+            src={backdropUrl}
+            alt={review.title}
+            onLoad={() => setImgLoaded(true)}
+            className={`absolute inset-0 w-full h-full object-cover transition-[transform,opacity] duration-700 group-hover:scale-105 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            loading="lazy"
+          />
+        </>
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-bg-card to-bg-elevated" />
       )}
@@ -129,7 +138,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
       />
 
       {/* Floating dust drifting through the projector beam (mobile + desktop) */}
-      {(gyroPermission || isHovered) && (
+      {(gyroPermission || isHovered) && !reduce && (
         <>
           <motion.div
             className="block absolute inset-0 z-10 pointer-events-none overflow-hidden"
