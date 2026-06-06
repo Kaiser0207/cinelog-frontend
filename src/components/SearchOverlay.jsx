@@ -1,8 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
+import ReviewFeed from './ReviewFeed';
 
-export default function SearchOverlay({ isOpen, onClose, searchInput, onSearchChange, searchMode, onModeToggle }) {
+export default function SearchOverlay({ isOpen, onClose, searchInput, searchQuery, onSearchChange, searchMode, onModeToggle }) {
   const { t } = useLanguage();
   const inputRef = useRef(null);
 
@@ -54,13 +55,22 @@ export default function SearchOverlay({ isOpen, onClose, searchInput, onSearchCh
           </div>
         </div>
         
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 px-4 pb-4 overflow-y-auto">
           {searchInput ? (
-            <p className="text-center text-sm font-bold text-[#1A1A1A]/40 mt-10">
-              {t('searchingFor') || 'Searching for'} "{searchInput}"...
-              <br/>
-              <span className="text-[10px] font-normal">({t('closeToViewResults') || 'Close this screen to view results'})</span>
-            </p>
+            // Live results right inside the overlay — no need to close the screen
+            <div className="pt-2">
+              {searchQuery ? (
+                <ReviewFeed
+                  searchQuery={searchQuery}
+                  searchMode={searchMode}
+                  viewMode="list"
+                />
+              ) : (
+                <p className="text-center text-sm font-bold text-[#1A1A1A]/40 mt-10">
+                  {t('searchingFor') || 'Searching for'} "{searchInput}"…
+                </p>
+              )}
+            </div>
           ) : (
             <div className="flex flex-col gap-6 mt-4">
               <h3 className="text-xs font-bold font-[var(--font-syne)] uppercase tracking-wider text-[#1A1A1A]/40">

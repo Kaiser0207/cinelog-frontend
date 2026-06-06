@@ -88,9 +88,11 @@ export default function HomePage() {
     const val = e.target.value;
     setSearchInput(val);
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    // Standard search filters fast; AI search stays debounced to avoid spamming the API
+    const debounceMs = searchMode === 'ai' ? 1500 : 400;
     searchTimeoutRef.current = setTimeout(() => {
       setSearchQuery(val);
-    }, 1500); // 防抖時間拉長至 1.5 秒，避免 AI Search 頻繁發送請求
+    }, debounceMs);
   };
 
   // Close sort dropdown on outside click
@@ -422,6 +424,7 @@ export default function HomePage() {
           isOpen={showSearchOverlay}
           onClose={() => setShowSearchOverlay(false)}
           searchInput={searchInput}
+          searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           searchMode={searchMode}
           onModeToggle={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
