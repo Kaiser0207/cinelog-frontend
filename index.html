@@ -6,10 +6,19 @@
     <title>CineRooms — Your Cinematic Journal</title>
     <meta name="description" content="A personal cinematic journal: rate, review and revisit the films you love." />
 
-    <!-- Fonts: preconnect + non-render-blocking load -->
+    <!-- Fonts: preconnect + genuinely non-render-blocking load.
+         Load the (large, ~20-family) stylesheet as media="print" so it doesn't
+         block first paint, then flip to all once it arrives. display=swap means
+         text shows immediately in fallback fonts and swaps in with no blank flash.
+         <noscript> keeps fonts working if JS is disabled. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Noto+Serif+TC:wght@400;700;900&family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;600;700;800&family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=UnifrakturCook:wght@700&family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Google+Sans+Flex:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=LXGW+WenKai+TC:wght@300;400;700&family=Zhi+Mang+Xing&display=swap" />
+    <!-- Preload the self-hosted Nevis display face used for the CINEROOMS wordmark -->
+    <link rel="preload" as="font" type="font/ttf" href="/fonts/nevis.ttf" crossorigin />
+    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Noto+Serif+TC:wght@400;700;900&family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;600;700;800&family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=UnifrakturCook:wght@700&family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Google+Sans+Flex:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=LXGW+WenKai+TC:wght@300;400;700&family=Zhi+Mang+Xing&display=swap" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Noto+Serif+TC:wght@400;700;900&family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;600;700;800&family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=UnifrakturCook:wght@700&family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Google+Sans+Flex:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=LXGW+WenKai+TC:wght@300;400;700&family=Zhi+Mang+Xing&display=swap" />
+    </noscript>
 
     <!-- Open Graph / social link previews -->
     <meta property="og:type" content="website" />

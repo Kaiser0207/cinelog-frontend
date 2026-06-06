@@ -5,9 +5,35 @@ import { API_URL } from '../utils/constants';
 
 const AdminContext = createContext(null);
 
+const TOKEN_KEY = 'cinelog_admin_token';
+
+// Read the stored admin JWT, but treat it as absent if it has expired. Persisting
+// in localStorage means a token can outlive its 7-day TTL; without this check the
+// UI would think it's logged in while every admin API call 403s. We only read the
+// `exp` claim (no signature check — the server still verifies on every request).
+function readValidToken() {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) return '';
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem(TOKEN_KEY);
+      return '';
+    }
+  } catch {
+    // Malformed token — drop it and force a fresh login.
+    localStorage.removeItem(TOKEN_KEY);
+    return '';
+  }
+  return token;
+}
+
 export function AdminProvider({ children }) {
-  const [password, setPassword] = useState(() => sessionStorage.getItem('cinelog_admin_token') || '');
-  const [isAdmin, setIsAdmin] = useState(() => !!sessionStorage.getItem('cinelog_admin_token'));
+  // Persist the 7-day admin JWT in localStorage so login survives app/tab
+  // restarts (sessionStorage is cleared on close, forcing re-login every visit).
+  // The token is short-lived and server-validated, so persisting it is bounded.
+  const [password, setPassword] = useState(readValidToken);
+  const [isAdmin, setIsAdmin] = useState(() => !!readValidToken());
   const [showModal, setShowModal] = useState(false);
   const [showDeviceManager, setShowDeviceManager] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
@@ -28,7 +54,7 @@ export function AdminProvider({ children }) {
   const handleVerified = useCallback((pw) => {
     setPassword(pw);
     setIsAdmin(true);
-    sessionStorage.setItem('cinelog_admin_token', pw);
+    localStorage.setItem(TOKEN_KEY, pw);
     setShowModal(false);
     if (pendingAction) {
       pendingAction(pw);
@@ -39,7 +65,7 @@ export function AdminProvider({ children }) {
   const logout = useCallback(() => {
     setPassword('');
     setIsAdmin(false);
-    sessionStorage.removeItem('cinelog_admin_token');
+    localStorage.removeItem(TOKEN_KEY);
   }, []);
 
   return (

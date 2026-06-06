@@ -671,7 +671,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           {/* Decorative Section Header */}
           <div className="space-y-4">
             <div className="space-y-1">
-              <h2 className="text-5xl md:text-6xl font-black font-syne text-[#D480C0] tracking-wider leading-none">
+              <h2 className="text-5xl md:text-6xl font-black font-nevis text-[#D480C0] tracking-wider leading-none">
                 <span className="md:hidden">CINE<br/>ROOMS</span>
                 <span className="hidden md:inline">CINEROOMS</span>
               </h2>
