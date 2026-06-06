@@ -161,6 +161,34 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
     }
   }, [lang, review.tmdb_id, translatedOverview]);
 
+  const [isFeatured, setIsFeatured] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    fetch(`${API_URL}/api/reviews/featured`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (active) setIsFeatured(!!data && data.id === review.id); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [review.id]);
+
+  const handleFeature = () => {
+    requireAuth(async (password) => {
+      try {
+        const res = await fetch(`${API_URL}/api/reviews/${review.id}/feature`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${password}` },
+        });
+        if (!res.ok) throw new Error('Failed to update featured');
+        const data = await res.json();
+        setIsFeatured(!!data.is_featured);
+        addToast(data.is_featured ? t('featuredSet') : t('featuredUnset'), 'success');
+      } catch (err) {
+        addToast(err.message, 'error');
+      }
+    });
+  };
+
   const handleDelete = () => {
     if (!window.confirm(t('confirmDelete'))) return;
 
@@ -692,6 +720,17 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               >
                 <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
                   {t('editReview')}
+                </span>
+              </button>
+            )}
+
+            {isAdmin && (
+              <button
+                onClick={handleFeature}
+                className={`group flex items-center justify-center gap-2 px-8 py-3 rounded-full font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95 ${isFeatured ? 'bg-[#D480C0] text-black' : 'bg-[#E8E2D2] text-[#1A1A1A] hover:bg-[#D480C0]'}`}
+              >
+                <span className="inline-block font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
+                  {isFeatured ? `✦ ${t('unfeature')}` : `✦ ${t('setFeatured')}`}
                 </span>
               </button>
             )}

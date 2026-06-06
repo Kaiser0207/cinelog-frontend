@@ -12,7 +12,7 @@ import { useGyroscope } from '../hooks/useGyroscope';
 const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
 
 export default function HomePage() {
-  const [sort, setSort] = useState('newest');
+  const [sort, setSort] = useState('watched');
   const [genre, setGenre] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);

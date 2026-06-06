@@ -47,6 +47,7 @@ export const SCORE_LABELS = {
 };
 
 export const SORT_OPTIONS = [
+  { value: 'watched', label: 'Recently Watched' },
   { value: 'newest', label: 'Newest First' },
   { value: 'rating', label: 'Highest Rated' },
   { value: 'title', label: 'Title A → Z' },

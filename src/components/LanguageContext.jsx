@@ -14,6 +14,7 @@ export const translations = {
     
     // HomePage
     filterAll: "All",
+    watched: "Recently Watched",
     newest: "Newest First",
     rating: "Highest Rated",
     title: "Title A → Z",
@@ -63,6 +64,10 @@ export const translations = {
     deleteSuccess: "Review deleted.",
     recentlyWatched: "Recently Watched",
     featured: "Featured",
+    setFeatured: "Set as Featured",
+    unfeature: "Unfeature",
+    featuredSet: "Set as featured cover ✨",
+    featuredUnset: "Removed from featured",
 
     // Mobile specific
     navHome: "Home",
@@ -94,6 +99,7 @@ export const translations = {
     
     // HomePage
     filterAll: "全部電影",
+    watched: "最近觀看",
     newest: "最新發表",
     rating: "評分最高",
     title: "片名 A → Z",
@@ -143,6 +149,10 @@ export const translations = {
     deleteSuccess: "影評已成功刪除。",
     recentlyWatched: "最近觀看",
     featured: "精選影評",
+    setFeatured: "設為精選",
+    unfeature: "取消精選",
+    featuredSet: "已設為精選封面 ✨",
+    featuredUnset: "已取消精選",
 
     // Mobile specific
     navHome: "首頁",

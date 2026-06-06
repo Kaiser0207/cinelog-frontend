@@ -27,39 +27,17 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   const portalRef = useRef(null);
   const { t } = useLanguage();
 
-  const [recentlyWatchedData, setRecentlyWatchedData] = useState([]);
+  // The Hero "cover" is a single, manually-featured review (admin pins it on
+  // the review page). Fetched independently so it isn't tied to pagination
+  // or the current sort — it's a deliberate editorial pick, not "most recent".
+  const [featuredReview, setFeaturedReview] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/reviews?limit=100&sort=newest`)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        const rawItems = data.reviews || data || [];
-        const items = rawItems.map(flattenReview);
-        const sorted = [...items].sort((a, b) => {
-          const getLatestDate = (item) => {
-            let dates = [];
-            try {
-              dates = typeof item.watch_dates === 'string'
-                ? JSON.parse(item.watch_dates || '[]')
-                : (item.watch_dates || []);
-            } catch (e) { dates = []; }
-            return dates.length > 0 ? dates[dates.length - 1] : '1970-01-01';
-          };
-          const diff = new Date(getLatestDate(b)).getTime() - new Date(getLatestDate(a)).getTime();
-          return diff !== 0 ? diff : new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-        });
-        setRecentlyWatchedData(sorted.slice(0, 5));
-      })
-      .catch(err => console.error('Failed to fetch recently watched:', err));
+    fetch(`${API_URL}/api/reviews/featured`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setFeaturedReview(data ? flattenReview(data) : null))
+      .catch((err) => console.error('Failed to fetch featured review:', err));
   }, []);
-
-  const recentlyWatchedReviews = useMemo(() => {
-    if (sort !== 'newest' || searchQuery || reviews.length < 2) return [];
-    return recentlyWatchedData;
-  }, [reviews, sort, searchQuery, recentlyWatchedData]);
 
   // Initialize global mouse tracking for the portal
   useEffect(() => {
@@ -180,58 +158,14 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
     );
   }
 
-  const showHero = recentlyWatchedReviews.length > 0 && viewMode === 'grid';
-  const heroReview = showHero ? recentlyWatchedReviews[0] : null;
-  const horizontalScrollReviews = showHero ? recentlyWatchedReviews.slice(0, 5) : [];
+  const showHero = !!featuredReview && !searchQuery && viewMode === 'grid';
+  const heroReview = showHero ? featuredReview : null;
 
   return (
     <>
       {showHero && (
-        <div className="md:hidden flex flex-col w-full mb-8">
+        <div className="w-full mb-8">
           <HeroCard review={heroReview} />
-          
-          {horizontalScrollReviews.length > 0 && (
-            <div className="flex flex-col w-full mt-4">
-              <div className="flex items-center gap-3 mb-4">
-                <h3 className="text-sm font-bold font-syne uppercase tracking-wider text-text-dim">
-                  {t('recentlyWatched')}
-                </h3>
-                <div className="h-px flex-1 bg-border-subtle" />
-              </div>
-              
-              <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 scrollbar-none w-full">
-                {horizontalScrollReviews.map((rev) => (
-                  <div 
-                    key={rev.id}
-                    onClick={() => navigate(`/review/${rev.id}`)}
-                    className="flex flex-col gap-2 flex-shrink-0 w-[130px] snap-start cursor-pointer group"
-                  >
-                    <div className="w-full aspect-[2/3] rounded-xl overflow-hidden bg-[#1A1A1A] shadow-md group-active:scale-95 transition-transform duration-200 relative">
-                      {rev.poster_path && (
-                        <img 
-                          src={`${TMDB_IMG_BASE}w342${rev.poster_path}`} 
-                          alt={rev.title}
-                          loading="lazy"
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                      <div className="absolute top-2 right-2 bg-[#1A1A1A]/80 backdrop-blur-md text-[#E8E2D2] px-1.5 py-0.5 rounded flex items-center gap-1 border border-white/10 shadow-sm">
-                        <span className="text-[10px]">✨</span>
-                        <span className="text-[10px] font-bold font-bebas tracking-wider">
-                          {rev.total_score ? rev.total_score.toFixed(1) : '-'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col">
-                      <h4 className="text-xs font-bold font-syne text-[#1A1A1A] truncate w-full uppercase">
-                        {rev.title}
-                      </h4>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -241,9 +175,9 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
           ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" 
           : "flex flex-col gap-0"}
       >
-        {reviews.map((review, i) => {
-          const isHero = heroReview && review.id === heroReview.id;
-          
+        {reviews
+          .filter((review) => !(showHero && heroReview && review.id === heroReview.id))
+          .map((review, i) => {
           if (viewMode === 'grid') {
             return (
               <div key={review.id}>

@@ -34,11 +34,11 @@ export default function HeroCard({ review }) {
   const score = computeTotal(entertainment, cinematic);
 
   const heroImage = review.custom_backdrop_url 
-    ? review.custom_backdrop_url 
-    : backdrop_path 
-      ? `${TMDB_IMG_BASE}w780${backdrop_path}` 
-      : review.poster_path 
-        ? `${TMDB_IMG_BASE}w500${review.poster_path}` 
+    ? review.custom_backdrop_url
+    : backdrop_path
+      ? `${TMDB_IMG_BASE}w1280${backdrop_path}`
+      : review.poster_path
+        ? `${TMDB_IMG_BASE}w780${review.poster_path}`
         : null;
   const latestWatchDate = watch_dates.length > 0 ? watch_dates[watch_dates.length - 1] : null;
 
@@ -48,7 +48,7 @@ export default function HeroCard({ review }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       onClick={() => navigate(`/review/${id}`)}
-      className="md:hidden relative w-full h-[42vh] max-h-[380px] min-h-[300px] rounded-3xl overflow-hidden shadow-2xl cursor-pointer group mb-6"
+      className="relative w-full h-[42vh] max-h-[380px] min-h-[300px] md:max-h-[440px] rounded-3xl overflow-hidden shadow-2xl cursor-pointer group mb-6"
     >
       {/* Background Image */}
       {heroImage ? (
@@ -92,7 +92,7 @@ export default function HeroCard({ review }) {
         </div>
 
         {/* Title */}
-        <h2 className="text-3xl font-black font-syne text-white uppercase tracking-tighter leading-tight drop-shadow-lg line-clamp-2">
+        <h2 className="text-3xl md:text-5xl font-black font-syne text-white uppercase tracking-tighter leading-tight drop-shadow-lg line-clamp-2">
           {title}
         </h2>
 
