@@ -10,7 +10,13 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, isAd
       {/* Frosted glass background */}
       <div className="absolute inset-0 bg-[#3B4856]/95 backdrop-blur-xl border-t border-white/[0.06]" />
       
-      <div className="relative flex items-center justify-around h-[68px] px-4" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <div
+        className="relative flex items-center justify-around px-4"
+        style={{
+          height: 'calc(4.25rem + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
+      >
         
         {/* Home */}
         <button 

@@ -2,6 +2,15 @@
 
 @import "tailwindcss";
 
+/* Self-hosted display face — Nevis (SIL OFL), bold/all-caps, headings only */
+@font-face {
+  font-family: 'Nevis';
+  src: url('/fonts/nevis.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-bg-deep: #E3DAC9;
   --color-bg-surface: #F0EAD6;
@@ -35,6 +44,8 @@
   --font-ma-shan: 'Ma Shan Zheng', cursive;
   --font-wenkai: 'LXGW WenKai TC', 'Noto Serif TC', serif;
   --font-zhimang: 'Zhi Mang Xing', cursive;
+  /* Display title face for big headings (Nevis), Chinese falls back to Noto Sans TC */
+  --font-nevis: 'Nevis', 'Noto Sans TC', system-ui, sans-serif;
   /* UI default: Google Sans Flex for latin, Noto Sans TC for Chinese */
   --font-google-sans: 'Google Sans Flex', 'Noto Sans TC', 'Inter', system-ui, sans-serif;
 }
