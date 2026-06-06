@@ -118,23 +118,22 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
 
-      {/* Cinematic Projector Beam Layer */}
+      {/* Cinematic Projector Beam Layer — gentle & static (no harsh flicker) */}
       <motion.div
-        className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-90 transition-opacity"
+        className="absolute inset-0 z-10 pointer-events-none mix-blend-overlay opacity-40 transition-opacity"
         style={{
-          background: 'radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,245,225,0.7) 15%, rgba(255,255,255,0) 50%)',
+          background: 'radial-gradient(circle at center, rgba(255,250,240,0.6) 0%, rgba(255,245,225,0.3) 15%, rgba(255,255,255,0) 50%)',
           backgroundPosition: backgroundPosition,
           backgroundSize: '250% 250%',
         }}
       />
 
-      {/* 3D Gyroscope Effects Layers */}
+      {/* Floating dust drifting through the projector beam (mobile + desktop) */}
       {(gyroPermission || isHovered) && (
         <>
-          {/* DESKTOP DUST (Hidden on mobile) */}
-          <motion.div 
-            className="hidden lg:block absolute inset-0 z-10 pointer-events-none overflow-hidden"
-            style={{ 
+          <motion.div
+            className="block absolute inset-0 z-10 pointer-events-none overflow-hidden"
+            style={{
               WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0) 50%)',
               WebkitMaskPosition: backgroundPosition,
               WebkitMaskSize: '250% 250%',
@@ -151,17 +150,6 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
               }}
             />
           </motion.div>
-
-          {/* MOBILE BREATHING LIGHT BEAM (Hidden on desktop) */}
-          <motion.div
-            className="lg:hidden absolute inset-[0%] z-10 pointer-events-none mix-blend-overlay animate-projector-breath"
-            style={{
-              backgroundImage: 'radial-gradient(circle at center, rgba(255,255,255, 1) 0%, rgba(255,255,255, 0.4) 20%, rgba(255,255,255, 0) 60%)',
-              backgroundPosition,
-              backgroundSize: '250% 250%',
-              backgroundRepeat: 'no-repeat'
-            }}
-          />
         </>
       )}
 
