@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { motion, AnimatePresence, useDragControls, useMotionValue, useTransform, animate } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useNavigate } from 'react-router-dom';
@@ -70,6 +70,43 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const { lang, toggleLanguage, t } = useLanguage();
   const [mobileScoreOpen, setMobileScoreOpen] = useState(false);
   const dragControls = useDragControls();
+
+  // --- Finger-tracked mobile score sheet ---
+  const sheetRef = useRef(null);
+  const sheetY = useMotionValue(0);        // live y; the finger drives this directly
+  const closedYRef = useRef(600);          // travel distance (peek shows 85px)
+  const [closedY, setClosedY] = useState(600);
+  // Backdrop darkens progressively as the sheet is pulled up
+  const backdropOpacity = useTransform(sheetY, (v) => {
+    const c = closedYRef.current || 1;
+    return Math.max(0, Math.min(0.55, 0.55 * (1 - v / c)));
+  });
+
+  // Measure the sheet so the drag range (open=0 .. closed=closedY) is exact
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = sheetRef.current;
+      if (!el) return;
+      const c = Math.max(120, el.offsetHeight - 85);
+      closedYRef.current = c;
+      setClosedY(c);
+      if (!mobileScoreOpen) sheetY.set(c);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Snap smoothly to the target state whenever it changes
+  useEffect(() => {
+    const controls = animate(sheetY, mobileScoreOpen ? 0 : closedY, {
+      type: 'spring', damping: 40, stiffness: 360, mass: 1,
+    });
+    return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mobileScoreOpen, closedY]);
+
   const [recommendations, setRecommendations] = useState([]);
   const [translatedOverview, setTranslatedOverview] = useState(null);
 
@@ -527,42 +564,30 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
 
       {/* ===== MOBILE FLOATING SCORE BAR (UNIFIED NATIVE SHEET) ===== */}
       <div className="lg:hidden fixed inset-0 z-[90] pointer-events-none">
-        {/* Backdrop overlay when expanded */}
-        <AnimatePresence>
-          {mobileScoreOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 pointer-events-auto"
-              onClick={() => setMobileScoreOpen(false)}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Unified Bottom Sheet */}
+        {/* Backdrop — fades in progressively as the sheet is pulled up */}
         <motion.div
-          initial={false}
-          animate={{ y: mobileScoreOpen ? 0 : 'calc(100% - 85px)' }}
-          transition={{ type: 'spring', damping: 40, stiffness: 360, mass: 1 }}
+          style={{ opacity: backdropOpacity, pointerEvents: mobileScoreOpen ? 'auto' : 'none' }}
+          className="absolute inset-0 bg-black"
+          onClick={() => setMobileScoreOpen(false)}
+        />
+
+        {/* Unified Bottom Sheet — tracks the finger 1:1 across the whole range */}
+        <motion.div
+          ref={sheetRef}
+          style={{ y: sheetY }}
           drag="y"
           dragControls={dragControls}
           dragListener={false}
-          dragConstraints={{ 
-            top: mobileScoreOpen ? 0 : -600, 
-            bottom: mobileScoreOpen ? 600 : 0 
-          }}
-          dragElastic={0.08}
+          dragConstraints={{ top: 0, bottom: closedY }}
+          dragElastic={0.06}
           dragMomentum={false}
           onDragEnd={(e, info) => {
-            // Dragging down (closing)
-            if (mobileScoreOpen && (info.offset.y > 40 || info.velocity.y > 200)) {
-              setMobileScoreOpen(false);
-            }
-            // Dragging up (opening)
-            if (!mobileScoreOpen && (info.offset.y < -20 || info.velocity.y < -200)) {
-              setMobileScoreOpen(true);
-            }
+            // Snap to open/closed by flick velocity, else by nearest position
+            const open =
+              info.velocity.y < -250 ? true
+              : info.velocity.y > 250 ? false
+              : sheetY.get() < closedY / 2;
+            setMobileScoreOpen(open);
           }}
           className="absolute bottom-0 left-0 right-0 w-full bg-bg-deep/95 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col pointer-events-auto"
         >
