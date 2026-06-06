@@ -31,10 +31,15 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
 
   useEffect(() => {
     if (!gyroPermission) return;
+    // Throttle to ~30fps — deviceorientation fires 60+/s and drains battery.
+    let lastUpdate = 0;
     const handleOrientation = (e) => {
+      const now = e.timeStamp || performance.now();
+      if (now - lastUpdate < 33) return;
+      lastUpdate = now;
       // Clamp angles to prevent flipping
-      const gamma = Math.max(-30, Math.min(30, e.gamma || 0)); 
-      const beta = Math.max(-30, Math.min(30, e.beta || 0)); 
+      const gamma = Math.max(-30, Math.min(30, e.gamma || 0));
+      const beta = Math.max(-30, Math.min(30, e.beta || 0));
       x.set(gamma * 6.6); // map [-30, 30] to roughly [-200, 200]
       y.set((beta - 30) * 6.6); // Assume neutral holding angle is ~30 degrees beta
     };

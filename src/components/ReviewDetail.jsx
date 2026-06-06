@@ -92,7 +92,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const backdropUrl = review.custom_backdrop_url
     ? review.custom_backdrop_url
     : review.backdrop_path
-      ? `${TMDB_IMG_BASE}original${review.backdrop_path}`
+      ? `${TMDB_IMG_BASE}w1280${review.backdrop_path}`
       : null;
 
   const posterUrl = review.poster_path
@@ -195,7 +195,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Back Button */}
       <button
         onClick={() => navigate('/')}
-        className="group fixed top-6 left-6 z-[100] px-5 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
+        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}
+        className="group fixed left-6 z-[100] px-5 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
       >
         <span className="inline-block font-bold font-[var(--font-syne)] text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
           {t('back')}
@@ -205,7 +206,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       {/* Language Toggle Button */}
       <button
         onClick={toggleLanguage}
-        className="fixed top-6 right-6 z-[100] px-4 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all border-none font-[var(--font-syne)] font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
+        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}
+        className="fixed right-6 z-[100] px-4 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all border-none font-[var(--font-syne)] font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
       >
         <span>🌐</span>
         <span>{lang === 'en' ? '繁' : 'EN'}</span>

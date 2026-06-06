@@ -261,7 +261,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       >
         <div className="max-w-5xl mx-auto bg-bg-surface border border-border-subtle md:rounded-2xl overflow-hidden">
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-bg-surface/90 backdrop-blur-xl border-b border-border-subtle">
+          <div style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }} className="sticky top-0 z-10 flex items-center justify-between px-5 pb-4 bg-bg-surface/90 backdrop-blur-xl border-b border-border-subtle">
             <h2 className="text-lg font-bold font-[var(--font-syne)] tracking-tighter">
               {isEdit ? '✏️ 編輯影評' : '🎬 新增影評'}
             </h2>

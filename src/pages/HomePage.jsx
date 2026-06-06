@@ -164,7 +164,7 @@ export default function HomePage() {
                 value={searchInput}
                 onChange={handleSearchChange}
                 placeholder={searchMode === 'ai' ? '描述你想看的感覺...' : '搜尋電影...'}
-                className="bg-transparent border-none outline-none focus:ring-0 focus:outline-none text-xs md:text-base font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-28 sm:w-32 md:w-48 py-2 md:py-2.5"
+                className="bg-transparent border-none outline-none focus:ring-0 focus:outline-none text-base font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-28 sm:w-32 md:w-48 py-2 md:py-2.5"
               />
               <button
                 onClick={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}

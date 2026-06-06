@@ -17,7 +17,7 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, isAd
           onClick={onHomeClick}
           className="flex flex-col items-center justify-center gap-0.5 w-16 h-full active:scale-90 transition-transform"
         >
-          <svg className="w-[22px] h-[22px] text-[#E8E2D2]/70" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-[#E8E2D2]/70" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
@@ -47,7 +47,7 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, isAd
           onClick={onSearchClick}
           className="flex flex-col items-center justify-center gap-0.5 w-16 h-full active:scale-90 transition-transform"
         >
-          <svg className="w-[22px] h-[22px] text-[#E8E2D2]/70" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-[#E8E2D2]/70" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
