@@ -166,8 +166,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   useEffect(() => {
     let active = true;
     fetch(`${API_URL}/api/reviews/featured`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (active) setIsFeatured(!!data && data.id === review.id); })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => { if (active) setIsFeatured(Array.isArray(data) && data.some((r) => r.id === review.id)); })
       .catch(() => {});
     return () => { active = false; };
   }, [review.id]);

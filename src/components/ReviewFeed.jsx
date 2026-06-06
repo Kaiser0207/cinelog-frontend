@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import ReviewCard, { ReviewCardSkeleton } from './ReviewCard';
 import ReviewListRow from './ReviewListRow';
-import HeroCard from './HeroCard';
+import HeroCarousel from './HeroCarousel';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { API_URL, flattenReview, TMDB_IMG_BASE } from '../utils/constants';
 import { useLanguage } from './LanguageContext';
@@ -30,13 +30,13 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
   // The Hero "cover" is a single, manually-featured review (admin pins it on
   // the review page). Fetched independently so it isn't tied to pagination
   // or the current sort — it's a deliberate editorial pick, not "most recent".
-  const [featuredReview, setFeaturedReview] = useState(null);
+  const [featuredReviews, setFeaturedReviews] = useState([]);
 
   useEffect(() => {
     fetch(`${API_URL}/api/reviews/featured`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setFeaturedReview(data ? flattenReview(data) : null))
-      .catch((err) => console.error('Failed to fetch featured review:', err));
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setFeaturedReviews(Array.isArray(data) ? data.map(flattenReview) : []))
+      .catch((err) => console.error('Failed to fetch featured reviews:', err));
   }, []);
 
   // Initialize global mouse tracking for the portal
@@ -158,14 +158,14 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
     );
   }
 
-  const showHero = !!featuredReview && !searchQuery && viewMode === 'grid';
-  const heroReview = showHero ? featuredReview : null;
+  const showHero = featuredReviews.length > 0 && !searchQuery && viewMode === 'grid';
+  const featuredIds = new Set(featuredReviews.map((r) => r.id));
 
   return (
     <>
       {showHero && (
         <div className="w-full mb-8">
-          <HeroCard review={heroReview} />
+          <HeroCarousel reviews={featuredReviews} />
         </div>
       )}
 
@@ -176,7 +176,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
           : "flex flex-col gap-0"}
       >
         {reviews
-          .filter((review) => !(showHero && heroReview && review.id === heroReview.id))
+          .filter((review) => !(showHero && featuredIds.has(review.id)))
           .map((review, i) => {
           if (viewMode === 'grid') {
             return (
