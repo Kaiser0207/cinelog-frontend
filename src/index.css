@@ -5,7 +5,9 @@
 @font-face {
   font-family: 'Nevis';
   src: url('/fonts/nevis.ttf') format('truetype');
-  font-weight: 700;
+  /* Nevis ships a single weight; claim the full range so font-black (900) uses
+     the real face instead of the browser synthesizing a faux-bold over it. */
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
