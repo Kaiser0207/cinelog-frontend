@@ -131,7 +131,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       try {
         const res = await fetch(`${API_URL}/api/reviews/${review.id}`, {
           method: 'DELETE',
-          headers: { 'X-Admin-Password': password },
+          headers: { 'Authorization': `Bearer ${password}` },
         });
         if (res.ok || res.status === 204) {
           addToast(t('deleteSuccess'), 'success');

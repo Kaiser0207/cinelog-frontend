@@ -6,8 +6,8 @@ import { API_URL } from '../utils/constants';
 const AdminContext = createContext(null);
 
 export function AdminProvider({ children }) {
-  const [password, setPassword] = useState(() => sessionStorage.getItem('cinelog_admin_pw') || '');
-  const [isAdmin, setIsAdmin] = useState(() => !!sessionStorage.getItem('cinelog_admin_pw'));
+  const [password, setPassword] = useState(() => sessionStorage.getItem('cinelog_admin_token') || '');
+  const [isAdmin, setIsAdmin] = useState(() => !!sessionStorage.getItem('cinelog_admin_token'));
   const [showModal, setShowModal] = useState(false);
   const [showDeviceManager, setShowDeviceManager] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
@@ -28,7 +28,7 @@ export function AdminProvider({ children }) {
   const handleVerified = useCallback((pw) => {
     setPassword(pw);
     setIsAdmin(true);
-    sessionStorage.setItem('cinelog_admin_pw', pw);
+    sessionStorage.setItem('cinelog_admin_token', pw);
     setShowModal(false);
     if (pendingAction) {
       pendingAction(pw);
@@ -39,7 +39,7 @@ export function AdminProvider({ children }) {
   const logout = useCallback(() => {
     setPassword('');
     setIsAdmin(false);
-    sessionStorage.removeItem('cinelog_admin_pw');
+    sessionStorage.removeItem('cinelog_admin_token');
   }, []);
 
   return (
@@ -100,8 +100,8 @@ function AdminAuthModal({ onVerified, onClose }) {
         
         if (verifyRes.ok) {
           const data = await verifyRes.json();
-          if (data.status === 'ok' && data.admin_password) {
-            onVerified(data.admin_password);
+          if (data.status === 'ok' && data.token) {
+            onVerified(data.token);
           }
         }
       } catch (err) {
@@ -122,15 +122,13 @@ function AdminAuthModal({ onVerified, onClose }) {
     try {
       const res = await fetch(`${API_URL}/api/auth/verify`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': pw,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: pw })
       });
 
-      if (res.ok) {
-        onVerified(pw);
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success && data.token) {
+        onVerified(data.token);
       } else {
         setShake(true);
         setErrorMsg('Wrong password');
@@ -243,7 +241,7 @@ function DeviceManagerModal({ password, onClose }) {
   const fetchDevices = async () => {
     try {
       const res = await fetch(`${API_URL}/api/auth/passkey/devices`, {
-        headers: { 'X-Admin-Password': password }
+        headers: { 'Authorization': `Bearer ${password}` }
       });
       if (res.ok) {
         const data = await res.json();
@@ -262,7 +260,7 @@ function DeviceManagerModal({ password, onClose }) {
     try {
       const res = await fetch(`${API_URL}/api/auth/passkey/register-challenge`, {
         method: 'POST',
-        headers: { 'X-Admin-Password': password }
+        headers: { 'Authorization': `Bearer ${password}` }
       });
       if (!res.ok) throw new Error('Failed to get challenge');
       const options = await res.json();
@@ -271,7 +269,7 @@ function DeviceManagerModal({ password, onClose }) {
       
       const verifyRes = await fetch(`${API_URL}/api/auth/passkey/register-verify`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': password },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${password}` },
         body: JSON.stringify({ response: attResp, device_name: newDeviceName })
       });
       
@@ -295,7 +293,7 @@ function DeviceManagerModal({ password, onClose }) {
     try {
       const res = await fetch(`${API_URL}/api/auth/passkey/devices/${id}`, {
         method: 'DELETE',
-        headers: { 'X-Admin-Password': password }
+        headers: { 'Authorization': `Bearer ${password}` }
       });
       if (res.ok) fetchDevices();
     } catch (e) {

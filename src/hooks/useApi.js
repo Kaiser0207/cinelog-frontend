@@ -26,8 +26,9 @@ export function useApi() {
       }
 
       const headers = { 'Content-Type': 'application/json' };
+      // `password` now carries the admin JWT; sent as a Bearer token.
       if (password) {
-        headers['X-Admin-Password'] = password;
+        headers['Authorization'] = `Bearer ${password}`;
       }
 
       const fetchOptions = { method, headers };

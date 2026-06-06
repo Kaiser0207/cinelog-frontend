@@ -213,7 +213,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
           method,
           headers: {
             'Content-Type': 'application/json',
-            'X-Admin-Password': password,
+            'Authorization': `Bearer ${password}`,
           },
           body: JSON.stringify(body),
         });
