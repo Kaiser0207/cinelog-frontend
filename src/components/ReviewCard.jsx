@@ -165,6 +165,10 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
         </>
       )}
 
+      {/* Legibility scrim — keeps the title readable over bright backdrops,
+          and sits above the white projector glow so it can't wash out the text */}
+      <div className="absolute inset-x-0 bottom-0 h-3/4 z-[15] pointer-events-none bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6">
         {/* Top: Score Badge - Floating with some space */}
@@ -184,7 +188,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
         </div>
 
         {/* Bottom: Text Content */}
-        <div className="flex flex-col justify-end mt-auto overflow-hidden">
+        <div className="relative z-20 flex flex-col justify-end mt-auto overflow-hidden">
           {/* Genre Pills */}
           {genres.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-2 pr-14">
