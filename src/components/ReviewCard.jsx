@@ -142,10 +142,19 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
               maskSize: '250% 250%',
             }}
           >
+            {/* Far layer: large, sparse, slow, softly blurred (depth) */}
             <div
-              className="absolute -inset-[50%] opacity-80 mix-blend-color-dodge animate-dust backdrop-blur-[1px]"
+              className="absolute -inset-[50%] opacity-50 mix-blend-screen animate-dust-a blur-[1.2px]"
               style={{
-                backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='15' cy='25' r='1' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='60' cy='110' r='1.2' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='120' cy='40' r='0.8' fill='%23fff' opacity='0.8'/%3E%3Ccircle cx='30' cy='130' r='1.5' fill='%23fff' opacity='0.85'/%3E%3Ccircle cx='140' cy='90' r='0.5' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='85' cy='65' r='1.2' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='125' cy='125' r='1' fill='%23fff' opacity='0.75'/%3E%3Ccircle cx='25' cy='75' r='0.5' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='70' cy='10' r='1.5' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='95' cy='140' r='1' fill='%23fff' opacity='0.8'/%3E%3C/svg%3E\")",
+                backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='30' cy='40' r='2' fill='%23fff' opacity='0.5'/%3E%3Ccircle cx='112' cy='92' r='2.4' fill='%23fff' opacity='0.45'/%3E%3Ccircle cx='74' cy='128' r='1.8' fill='%23fff' opacity='0.55'/%3E%3Ccircle cx='132' cy='22' r='1.6' fill='%23fff' opacity='0.4'/%3E%3Ccircle cx='18' cy='108' r='2.2' fill='%23fff' opacity='0.5'/%3E%3C/svg%3E\")",
+                backgroundSize: '150px 150px'
+              }}
+            />
+            {/* Near layer: small, dense, faster, crisp specks */}
+            <div
+              className="absolute -inset-[50%] opacity-70 mix-blend-screen animate-dust-b blur-[0.4px]"
+              style={{
+                backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='15' cy='25' r='0.8' fill='%23fff' opacity='0.8'/%3E%3Ccircle cx='60' cy='110' r='1' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='120' cy='40' r='0.6' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='30' cy='130' r='0.9' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='140' cy='90' r='0.5' fill='%23fff' opacity='0.5'/%3E%3Ccircle cx='85' cy='65' r='0.9' fill='%23fff' opacity='0.75'/%3E%3Ccircle cx='125' cy='125' r='0.7' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='25' cy='75' r='0.5' fill='%23fff' opacity='0.5'/%3E%3Ccircle cx='70' cy='10' r='0.9' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='95' cy='140' r='0.7' fill='%23fff' opacity='0.65'/%3E%3Ccircle cx='50' cy='55' r='0.5' fill='%23fff' opacity='0.55'/%3E%3Ccircle cx='105' cy='80' r='0.6' fill='%23fff' opacity='0.6'/%3E%3C/svg%3E\")",
                 backgroundSize: '150px 150px'
               }}
             />

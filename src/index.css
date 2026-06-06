@@ -137,6 +137,14 @@ body {
 }
 
 /* ── Animations ── */
+/* Seamless dust drift (translate == tile size 150px → no jump on loop) */
+@keyframes dustUp {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -150px, 0); }
+}
+.animate-dust-a { animation: dustUp 26s linear infinite; }   /* far layer: large, slow */
+.animate-dust-b { animation: dustUp 15s linear infinite; }   /* near layer: small, faster */
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
