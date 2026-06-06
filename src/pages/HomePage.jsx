@@ -149,7 +149,7 @@ export default function HomePage() {
       <div className="relative pt-24 pb-12 px-5 flex flex-col items-start md:items-center justify-center min-h-[40vh]">
         <motion.h1
           style={{ y: titleY, skewX: titleSkew, opacity: titleOpacity }}
-          className="text-8xl md:text-[12rem] lg:text-[15rem] font-black font-[var(--font-nevis)] tracking-tighter text-[#1A1A1A] uppercase leading-none z-0"
+          className="text-8xl md:text-[12rem] lg:text-[15rem] font-black font-nevis tracking-tighter text-[#1A1A1A] uppercase leading-none z-0"
         >
           <span className="md:hidden">CINE<br/>ROOMS</span>
           <span className="hidden md:inline">CINEROOMS</span>
@@ -345,7 +345,7 @@ export default function HomePage() {
       <div ref={footerRef} data-theme="grey" className="w-full bg-[#3B4856] text-white py-16 pb-28 md:py-24 md:pb-24 px-5 relative z-10">
         <div className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center text-left md:text-center space-y-6 md:space-y-8">
           <div className="space-y-1">
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black font-[var(--font-nevis)] text-[#D480C0] tracking-wider leading-none">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black font-nevis text-[#D480C0] tracking-wider leading-none">
               <span className="md:hidden">CINE<br/>ROOMS</span>
               <span className="hidden md:inline">CINEROOMS</span>
             </h2>
