@@ -87,6 +87,15 @@ export const translations = {
     standardDesc: "Search by movie title, director, or cast members.",
     aiSearch: "AI Semantic Search",
     aiDesc: 'Search by vibe, mood, or concepts. Example: "a movie about space travel and love"',
+
+    // PWA install prompt
+    installTitle: "Add CineRooms to your Home Screen",
+    installDesc: "Get the full-screen, app-like experience.",
+    installBtn: "Install App",
+    iosInstallHintPre: "Tap",
+    iosInstallHintPost: "then “Add to Home Screen”",
+    openInSafari: "Tap ··· and choose “Open in Safari” to install.",
+    installDismiss: "Maybe later",
   },
   zh: {
     // Brand Statement
@@ -172,6 +181,15 @@ export const translations = {
     standardDesc: "輸入電影名稱、導演或演員名字。",
     aiSearch: "AI 語意搜尋",
     aiDesc: '描述電影氛圍、劇情或概念。例如：「關於太空旅行和愛情的電影」',
+
+    // PWA install prompt
+    installTitle: "將 CineRooms 加入主畫面",
+    installDesc: "獲得全螢幕的沉浸式 App 體驗。",
+    installBtn: "安裝 App",
+    iosInstallHintPre: "點下方",
+    iosInstallHintPost: "再選「加入主畫面」",
+    openInSafari: "點右上角 ···，選「用 Safari 開啟」即可安裝。",
+    installDismiss: "稍後再說",
   }
 };
 

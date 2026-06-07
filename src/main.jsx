@@ -3,6 +3,16 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
 
+// --- Capture the install prompt as early as possible ---
+// Chrome fires `beforeinstallprompt` on its own schedule, often before React
+// has mounted. Stash it on window so <InstallPrompt /> can trigger the native
+// dialog later instead of losing the event.
+window.__deferredInstallPrompt = window.__deferredInstallPrompt || null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  window.__deferredInstallPrompt = e;
+});
+
 // --- Lightweight auto-update (no service worker) ---
 // When the app returns to the foreground, check whether a newer build was
 // deployed and, if so, reload so you don't have to manually close/reopen.

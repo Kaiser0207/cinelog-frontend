@@ -6,6 +6,7 @@ import { AdminProvider } from './components/AdminAuth';
 import { LanguageProvider } from './components/LanguageContext';
 import SmoothScroll from './components/SmoothScroll';
 import CustomCursor from './components/CustomCursor';
+import InstallPrompt from './components/InstallPrompt';
 import HomePage from './pages/HomePage';
 
 // The review page pulls in heavy, review-only deps (recharts radar chart,
@@ -16,6 +17,7 @@ const ReviewPage = lazy(() => import('./pages/ReviewPage'));
 export default function App() {
   return (
     <LanguageProvider>
+      <InstallPrompt />
       <AdminProvider>
         <ToastProvider>
           <SmoothScroll />
