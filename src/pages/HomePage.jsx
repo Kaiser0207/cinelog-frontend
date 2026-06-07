@@ -14,6 +14,7 @@ const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
 export default function HomePage() {
   const [sort, setSort] = useState('watched');
   const [genre, setGenre] = useState('');
+  const [mediaFilter, setMediaFilter] = useState(''); // '' | 'movie' | 'tv' | 'anime'
   const [showEditor, setShowEditor] = useState(false);
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
@@ -236,6 +237,31 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Media-type filter (Film / Series / Anime) */}
+      <div className="relative z-10 w-full px-5 -mt-8 mb-10 flex justify-center">
+        <div className="inline-flex bg-[#E8E2D2] rounded-full p-1 border border-border-subtle shadow-sm">
+          {[
+            { key: '', zh: '全部', en: 'All' },
+            { key: 'movie', zh: '🎬 電影', en: '🎬 Film' },
+            { key: 'tv', zh: '📺 影集', en: '📺 Series' },
+            { key: 'anime', zh: '🌸 動漫', en: '🌸 Anime' },
+          ].map((opt) => (
+            <button
+              key={opt.key || 'all'}
+              type="button"
+              onClick={() => setMediaFilter(opt.key)}
+              className={`px-3.5 md:px-4 py-2 rounded-full text-xs font-bold tracking-wider transition-all whitespace-nowrap ${
+                mediaFilter === opt.key
+                  ? 'bg-[#FE494A] text-white shadow-sm'
+                  : 'text-[#1A1A1A]/55 hover:text-[#1A1A1A]'
+              }`}
+            >
+              {lang === 'en' ? opt.en : opt.zh}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Feed */}
       <main className="max-w-7xl mx-auto px-5 pb-24" key={refreshKey}>
         {/* Sort Dropdown aligned to the right */}
@@ -346,6 +372,7 @@ export default function HomePage() {
         <ReviewFeed
           sort={sort}
           genre={genre}
+          media={mediaFilter}
           searchQuery={showSearchOverlay ? '' : searchQuery}
           searchMode={searchMode}
           viewMode={viewMode} 
