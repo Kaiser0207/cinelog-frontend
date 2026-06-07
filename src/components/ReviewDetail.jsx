@@ -243,12 +243,12 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             {cinematic.toFixed(1)}
           </span>
         </div>
-        <ScoreSlider label={t('acting')} value={review.acting || 0} readOnly />
-        <ScoreSlider label={t('cinematography')} value={review.cinematography || 0} readOnly />
-        <ScoreSlider label={t('soundtrackLabel')} value={review.soundtrack || 0} readOnly />
         {review.story != null && (
           <ScoreSlider label={t('story')} value={review.story} readOnly />
         )}
+        <ScoreSlider label={t('acting')} value={review.acting || 0} readOnly />
+        <ScoreSlider label={t('cinematography')} value={review.cinematography || 0} readOnly />
+        <ScoreSlider label={t('soundtrackLabel')} value={review.soundtrack || 0} readOnly />
       </div>
     </div>
   );

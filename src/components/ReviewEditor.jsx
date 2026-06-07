@@ -240,7 +240,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
   };
 
   const entertainment = computeEntertainment(form.emotion, form.pacing);
-  const cinematicScore = computeCinematic(form.acting, form.cinematography, form.soundtrack);
+  const cinematicScore = computeCinematic(form.acting, form.cinematography, form.soundtrack, form.story);
   const total = computeTotal(entertainment, cinematicScore);
 
   // Lock body scroll
@@ -456,6 +456,12 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                 </div>
 
                 <ScoreSlider
+                  label="故事劇本"
+                  value={form.story}
+                  onChange={(v) => update('story', v)}
+                  animated={animated}
+                />
+                <ScoreSlider
                   label="演員表現"
                   value={form.acting}
                   onChange={(v) => update('acting', v)}
@@ -471,12 +477,6 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                   label="配樂音效"
                   value={form.soundtrack}
                   onChange={(v) => update('soundtrack', v)}
-                  animated={animated}
-                />
-                <ScoreSlider
-                  label="故事劇本"
-                  value={form.story}
-                  onChange={(v) => update('story', v)}
                   animated={animated}
                 />
               </div>
