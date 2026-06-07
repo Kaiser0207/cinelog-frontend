@@ -237,38 +237,41 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Media-type filter (Film / Series / Anime) — same pill design as genres */}
-      <div className="relative z-10 w-full px-5 -mt-10 mb-14 flex flex-wrap gap-3 items-center justify-start md:justify-center overflow-x-auto scrollbar-none">
-        {[
-          { key: '', zh: '全部', en: 'All', icon: '' },
-          { key: 'movie', zh: '電影', en: 'Film', icon: '🎬' },
-          { key: 'tv', zh: '影集', en: 'Series', icon: '📺' },
-          { key: 'anime', zh: '動漫', en: 'Anime', icon: '🌸' },
-        ].map((opt) => {
-          const isActive = mediaFilter === opt.key;
-          return (
-            <motion.button
-              key={opt.key || 'all'}
-              type="button"
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setMediaFilter(opt.key)}
-              className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
-                isActive
-                  ? 'bg-[#FE494A] shadow-none border-transparent'
-                  : 'bg-[#E8E2D2] border border-border-subtle'
-              }`}
-            >
-              <span
-                className={`inline-block text-sm font-bold font-jetbrains uppercase transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
-                  isActive ? 'text-white' : 'text-[#1A1A1A]/70'
+      {/* Media-type filter — an iOS-style segmented control, visually distinct
+          from the genre pills so the two filter axes don't read as one row. */}
+      <div className="relative z-10 w-full px-5 -mt-10 mb-14 flex justify-start md:justify-center">
+        <div className="inline-flex items-center gap-0.5 bg-[#E8E2D2] rounded-full p-1 border border-border-subtle shadow-sm max-w-full overflow-x-auto scrollbar-none">
+          {[
+            { key: '', zh: '全部', en: 'All', icon: '' },
+            { key: 'movie', zh: '電影', en: 'Film', icon: '🎬' },
+            { key: 'tv', zh: '影集', en: 'Series', icon: '📺' },
+            { key: 'anime', zh: '動漫', en: 'Anime', icon: '🌸' },
+          ].map((opt) => {
+            const isActive = mediaFilter === opt.key;
+            return (
+              <button
+                key={opt.key || 'all'}
+                type="button"
+                onClick={() => setMediaFilter(opt.key)}
+                className={`relative flex-shrink-0 px-3.5 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold font-jetbrains uppercase tracking-wider whitespace-nowrap transition-colors duration-200 ${
+                  isActive ? 'text-white' : 'text-[#1A1A1A]/55 hover:text-[#1A1A1A]'
                 }`}
               >
-                {opt.icon && <span className="mr-1">{opt.icon}</span>}
-                {lang === 'en' ? opt.en : opt.zh}
-              </span>
-            </motion.button>
-          );
-        })}
+                {isActive && (
+                  <motion.div
+                    layoutId="media-filter-active"
+                    className="absolute inset-0 bg-[#FE494A] rounded-full"
+                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  />
+                )}
+                <span className="relative z-10">
+                  {opt.icon && <span className="mr-1">{opt.icon}</span>}
+                  {lang === 'en' ? opt.en : opt.zh}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Feed */}
