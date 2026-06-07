@@ -274,7 +274,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       <button
         onClick={() => navigate('/')}
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}
-        className="group fixed left-6 z-[100] px-5 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
+        className="group fixed left-6 z-[130] px-5 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
       >
         <span className="inline-block font-bold font-syne text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
           {t('back')}
@@ -285,7 +285,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       <button
         onClick={toggleLanguage}
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}
-        className="fixed right-6 z-[100] px-4 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all border-none font-syne font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
+        className="fixed right-6 z-[130] px-4 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all border-none font-syne font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
       >
         <span>🌐</span>
         <span>{lang === 'en' ? '繁' : 'EN'}</span>

@@ -116,9 +116,7 @@ export default function InstallPrompt() {
     return null;
   })();
 
-  // Only on the home feed — on a review page this fixed top banner would cover
-  // the back/language buttons and block their taps.
-  const show = ready && !!mode && pathname === '/';
+  const show = ready && !!mode;
 
   const handleInstall = async () => {
     if (!deferred) return;
@@ -137,6 +135,12 @@ export default function InstallPrompt() {
     snooze(SNOOZE_MS);
     setDismissed(true);
   };
+
+  // Render NOTHING off the home feed. Gating only `show` still let AnimatePresence
+  // play the exit animation when leaving home, so the z-[120] banner lingered for
+  // ~0.4s over a review page's back/language buttons and ate their taps. Returning
+  // null unmounts it instantly on navigation — no exit, no overlay on other routes.
+  if (pathname !== '/') return null;
 
   return (
     <AnimatePresence>
