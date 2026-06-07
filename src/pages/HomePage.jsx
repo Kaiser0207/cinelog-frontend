@@ -208,10 +208,10 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Genre Filter (類型) — primary filter row. Sits BELOW the title (no longer
-          floated over it) and sinks the whole filter cluster down toward the
-          grid/list controls, so the two filter rows read as one tidy group. */}
-      <div className="relative z-10 w-full px-5 mt-1 mb-5 overflow-hidden">
+      {/* Genre Filter (類型) — primary filter row. Floats up tight under the title
+          (original design) via the negative top margin; everything below sits in
+          normal flow after it, so the whole cluster rides up with it. */}
+      <div className="relative z-10 w-full px-5 -mt-12 mb-5 overflow-hidden">
         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full">
           {GENRE_PILLS.map((g) => {
             const isActive = genre === g || (g === '全部' && genre === '');
