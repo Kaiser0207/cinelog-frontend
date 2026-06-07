@@ -111,7 +111,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const [translatedOverview, setTranslatedOverview] = useState(null);
 
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
-  const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
+  const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0, review.story);
   const total = computeTotal(entertainment, cinematic);
 
   const genres = review.genres
@@ -246,6 +246,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         <ScoreSlider label={t('acting')} value={review.acting || 0} readOnly />
         <ScoreSlider label={t('cinematography')} value={review.cinematography || 0} readOnly />
         <ScoreSlider label={t('soundtrackLabel')} value={review.soundtrack || 0} readOnly />
+        {review.story != null && (
+          <ScoreSlider label={t('story')} value={review.story} readOnly />
+        )}
       </div>
     </div>
   );

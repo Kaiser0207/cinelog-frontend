@@ -44,6 +44,7 @@ export const SCORE_LABELS = {
   acting: 'Acting',
   cinematography: 'Cinematography',
   soundtrack: 'Soundtrack',
+  story: 'Story',
 };
 
 export const SORT_OPTIONS = [
@@ -53,16 +54,29 @@ export const SORT_OPTIONS = [
   { value: 'title', label: 'Title A → Z' },
 ];
 
-export function computeEntertainment(emotion, pacing) {
-  return Math.round(((emotion + pacing) / 2) * 10) / 10;
+function avgDefined(values) {
+  const nums = values.filter((v) => typeof v === 'number' && !Number.isNaN(v));
+  if (nums.length === 0) return null;
+  return nums.reduce((a, b) => a + b, 0) / nums.length;
 }
 
-export function computeCinematic(acting, cinematography, soundtrack) {
-  return Math.round(((acting + cinematography + soundtrack) / 3) * 10) / 10;
+export function computeEntertainment(emotion, pacing) {
+  const v = avgDefined([emotion, pacing]);
+  return v == null ? null : Math.round(v * 10) / 10;
+}
+
+// Story (6th dimension) joins the cinematic group; it's averaged in only when
+// present, so older reviews without a story score degrade gracefully.
+export function computeCinematic(acting, cinematography, soundtrack, story) {
+  const v = avgDefined([acting, cinematography, soundtrack, story]);
+  return v == null ? null : Math.round(v * 10) / 10;
 }
 
 export function computeTotal(entertainment, cinematic) {
-  return Math.round(((entertainment + cinematic) / 2) * 10) / 10;
+  if (entertainment == null || cinematic == null) return null;
+  // 1/3 entertainment + 2/3 cinematic → each of the 6 sub-dimensions carries
+  // an equal 1/6 weight in the total.
+  return Math.round(((entertainment + 2 * cinematic) / 3) * 10) / 10;
 }
 
 export function getScoreColor(score) {

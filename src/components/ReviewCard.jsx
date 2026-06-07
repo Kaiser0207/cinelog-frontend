@@ -12,7 +12,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
   const reduce = useReducedMotion();
 
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
-  const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0);
+  const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0, review.story);
   const total = computeTotal(entertainment, cinematic);
 
   // 3D Tilt Effect

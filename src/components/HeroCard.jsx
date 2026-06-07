@@ -30,7 +30,7 @@ export default function HeroCard({ review }) {
     : [];
 
   const entertainment = computeEntertainment(emotion, pacing);
-  const cinematic = computeCinematic(acting, cinematography, soundtrack);
+  const cinematic = computeCinematic(acting, cinematography, soundtrack, review.story);
   const score = computeTotal(entertainment, cinematic);
 
   const heroImage = review.custom_backdrop_url 

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MovieSearch from './MovieSearch';
 import FontSelector from './FontSelector';
 import ScoreSlider from './ScoreSlider';
-import RadarChart from './RadarChart';
 import SpotifySearch from './SpotifySearch';
 import WatchHistory from './WatchHistory';
 import AIPredictButton from './AIPredictButton';
@@ -33,6 +32,7 @@ const EMPTY_STATE = {
   acting: 5,
   cinematography: 5,
   soundtrack: 5,
+  story: 5,
   // Spotify
   spotify_track_id: '',
   spotify_track_name: '',
@@ -67,6 +67,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
         acting: review.acting ?? 5,
         cinematography: review.cinematography ?? 5,
         soundtrack: review.soundtrack ?? 5,
+        story: review.story ?? 5,
         spotify_track_id: review.spotify_track_id || '',
         spotify_track_name: review.spotify_track_name || '',
         watch_dates: review.watch_dates || [],
@@ -111,6 +112,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       acting: scores.acting ?? prev.acting,
       cinematography: scores.cinematography ?? prev.cinematography,
       soundtrack: scores.soundtrack ?? prev.soundtrack,
+      story: scores.story ?? prev.story,
       ai_recommendation: scores.recommendation ?? prev.ai_recommendation,
       ai_related_movies: scores.related_movies ?? prev.ai_related_movies,
     }));
@@ -185,6 +187,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               acting: form.acting,
               cinematography: form.cinematography,
               soundtrack: form.soundtrack,
+              story: form.story,
               custom_backdrop_url: form.custom_backdrop_url || null,
               ai_recommendation: form.ai_recommendation || null,
               ai_related_movies: form.ai_related_movies || [],
@@ -202,6 +205,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               acting: form.acting,
               cinematography: form.cinematography,
               soundtrack: form.soundtrack,
+              story: form.story,
               watch_dates: form.watch_dates,
               custom_backdrop_url: form.custom_backdrop_url || null,
               ai_recommendation: form.ai_recommendation || null,
@@ -451,13 +455,6 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                   </span>
                 </div>
 
-                <RadarChart
-                  acting={form.acting}
-                  cinematography={form.cinematography}
-                  soundtrack={form.soundtrack}
-                  animated={animated}
-                />
-
                 <ScoreSlider
                   label="演員表現"
                   value={form.acting}
@@ -474,6 +471,12 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                   label="配樂音效"
                   value={form.soundtrack}
                   onChange={(v) => update('soundtrack', v)}
+                  animated={animated}
+                />
+                <ScoreSlider
+                  label="故事劇本"
+                  value={form.story}
+                  onChange={(v) => update('story', v)}
                   animated={animated}
                 />
               </div>

@@ -19,7 +19,7 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
 
     reviews.forEach(r => {
       const ent = computeEntertainment(r.emotion || 0, r.pacing || 0);
-      const cin = computeCinematic(r.acting || 0, r.cinematography || 0, r.soundtrack || 0);
+      const cin = computeCinematic(r.acting || 0, r.cinematography || 0, r.soundtrack || 0, r.story);
       totalScoreSum += computeTotal(ent, cin);
 
       let gList = [];
