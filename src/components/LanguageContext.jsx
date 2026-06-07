@@ -108,7 +108,7 @@ export const translations = {
     disclaimer: "免責聲明：本站所有影評、評分與相關媒體資源僅限於教育與學術評論用途。",
     
     // HomePage
-    filterAll: "全部電影",
+    filterAll: "全部類型",
     watched: "最近觀看",
     newest: "最新發表",
     rating: "評分最高",
@@ -116,7 +116,7 @@ export const translations = {
     addReview: "新增影評",
 
     // Genres
-    All: "全部電影",
+    All: "全部類型",
     Action: "動作",
     Comedy: "喜劇",
     Drama: "劇情",
