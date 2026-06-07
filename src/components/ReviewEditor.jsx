@@ -294,6 +294,33 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
   const cinematicScore = computeCinematic(form.acting, form.cinematography, form.soundtrack, form.story);
   const total = computeTotal(entertainment, cinematicScore);
 
+  // When editing, the form was hydrated from the saved record (no TMDB backdrop
+  // list), so the cover-image picker had nothing to show. Re-fetch details once
+  // to populate backdrops (and backfill season structure for older TV reviews).
+  useEffect(() => {
+    if (!isEdit || !form.tmdb_id) return undefined;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/movies/${form.tmdb_id}?media_type=${form.media_type || 'movie'}`);
+        if (!res.ok) return;
+        const d = await res.json();
+        if (cancelled) return;
+        setForm((prev) => ({
+          ...prev,
+          backdrops: d.backdrops && d.backdrops.length ? d.backdrops : prev.backdrops,
+          seasons: prev.seasons && prev.seasons.length ? prev.seasons : (d.seasons || []),
+          number_of_seasons: prev.number_of_seasons ?? d.number_of_seasons ?? null,
+          number_of_episodes: prev.number_of_episodes ?? d.number_of_episodes ?? null,
+        }));
+      } catch {
+        /* ignore — picker just stays as-is */
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = 'hidden';

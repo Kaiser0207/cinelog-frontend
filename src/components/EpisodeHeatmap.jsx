@@ -144,20 +144,30 @@ export default function EpisodeHeatmap({
             </div>
 
             {editable ? (
-              <div className="space-y-3">
-                <input
-                  type="range"
-                  min={0}
-                  max={10}
-                  step={0.5}
-                  value={activeScore ?? 7}
-                  onChange={(e) => {
-                    writeScore(active.season, active.episode, parseFloat(e.target.value));
-                    if (navigator.vibrate) navigator.vibrate(2);
-                  }}
-                  className="w-full"
-                />
-                <div className="flex items-center justify-between">
+              <div>
+                {/* extra vertical room so the 28px thumb never overlaps the
+                    labels below, and an explicit track so it stays visible */}
+                <div className="relative py-2.5">
+                  <input
+                    type="range"
+                    min={0}
+                    max={10}
+                    step={0.5}
+                    value={activeScore ?? 7}
+                    onChange={(e) => {
+                      writeScore(active.season, active.episode, parseFloat(e.target.value));
+                      if (navigator.vibrate) navigator.vibrate(2);
+                    }}
+                    className="relative z-10 w-full cursor-pointer"
+                    style={{
+                      background: getEpisodeColor(activeScore ?? 7) || 'var(--color-text-primary)',
+                      backgroundSize: `${((activeScore ?? 7) / 10) * 100}% 100%`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundColor: 'var(--color-border-subtle)',
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-2">
                   <span className="text-xs text-text-dim">拖曳設定分數</span>
                   <button
                     type="button"
