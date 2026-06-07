@@ -143,6 +143,7 @@ export default function HomePage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       className="min-h-screen relative overflow-hidden"
     >
       {/* Massive Hero Section */}
@@ -202,9 +203,10 @@ export default function HomePage() {
           {GENRE_PILLS.map((g) => {
             const isActive = genre === g || (g === '全部' && genre === '');
             return (
-              <button
+              <motion.button
                 key={g}
                 ref={isActive ? activeGenreRef : null}
+                whileTap={{ scale: 0.9 }}
                 data-cursor={isActive ? '' : 'FILTER'}
                 onClick={() => setGenre(g === '全部' ? '' : g)}
                 className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
@@ -218,7 +220,7 @@ export default function HomePage() {
                 }`}>
                   {t(genreToKey[g]) || g}
                 </span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -344,7 +346,12 @@ export default function HomePage() {
 
       {/* Cool Grey Neo-brutalist Footer */}
       <div ref={footerRef} data-theme="grey" className="w-full bg-[#3B4856] text-white py-16 pb-28 md:py-24 md:pb-24 px-5 relative z-10">
-        <div className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center text-left md:text-center space-y-6 md:space-y-8">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center text-left md:text-center space-y-6 md:space-y-8">
           <div className="space-y-1">
             <h2 className="text-5xl md:text-6xl lg:text-7xl font-black font-nevis text-[#D480C0] tracking-wider leading-none">
               <span className="md:hidden">CINE<br/>ROOMS</span>
@@ -384,7 +391,7 @@ export default function HomePage() {
             </p>
             <p className="text-white/40">{t('disclaimer')}</p>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* FAB */}
