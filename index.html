@@ -54,11 +54,11 @@
     <style>
       /* Inline so the launch screen is FULLY styled at first paint, before
          index.css (bundled with the JS) loads — kills the unstyled/white/font-swap
-         flash. The @font-face is duplicated here (nevis.ttf is preloaded above) so
-         the wordmark is in Nevis from the first frame, matching the baked native
-         splash exactly. The icon + static wordmark mirror the splash PNG, so the
-         hand-off shows no icon shift and no late wordmark. Literal colors because
-         the CSS variables aren't defined yet at this point. */
+         flash. The native splash is a plain cream fill (no icon), so the icon +
+         wordmark animate in HERE exactly once, at their final spot — the icon can
+         never mismatch/shift against the native splash. The @font-face is duplicated
+         here (nevis.ttf is preloaded above) so the wordmark renders in Nevis.
+         Literal colors because the CSS variables aren't defined yet here. */
       @font-face {
         font-family: 'Nevis';
         src: url('/fonts/nevis.ttf') format('truetype');
@@ -72,12 +72,28 @@
         position: fixed; inset: 0; z-index: 3000;
         background: #E3DAC9; transition: opacity 0.5s ease;
       }
-      #launch-screen img { width: 32vmin; height: 32vmin; }
+      #launch-screen img {
+        width: 32vmin; height: 32vmin;
+        opacity: 0;
+        animation: launchIcon 0.55s ease 0.05s forwards;
+      }
+      @keyframes launchIcon {
+        from { opacity: 0; transform: scale(0.92); }
+        to { opacity: 1; transform: scale(1); }
+      }
       #launch-screen .launch-wordmark {
         position: absolute; top: calc(50% + 19vmin);
         font-family: 'Nevis', 'Noto Sans TC', system-ui, sans-serif;
         font-size: clamp(2rem, 9vmin, 3rem); letter-spacing: -0.02em;
-        color: #1A1A1A;
+        color: #1A1A1A; opacity: 0;
+        animation: launchWordmark 0.6s ease 0.3s forwards;
+      }
+      @keyframes launchWordmark {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #launch-screen img, #launch-screen .launch-wordmark { animation: none; opacity: 1; }
       }
       #launch-screen.launch-hide { opacity: 0; pointer-events: none; }
     </style>
