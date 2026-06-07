@@ -52,10 +52,19 @@
          splash. The inline check tags <html> so a normal browser tab never shows it. -->
     <link rel="preload" as="image" href="/icons/icon-512.png" />
     <style>
-      /* Inline so the launch screen + page background are styled at first paint,
-         before index.css (bundled with the JS) loads — this kills the brief
-         unstyled/white flash between the native splash and the app. Literal
-         colors because the CSS variables aren't defined yet at this point. */
+      /* Inline so the launch screen is FULLY styled at first paint, before
+         index.css (bundled with the JS) loads — kills the unstyled/white/font-swap
+         flash. The @font-face is duplicated here (nevis.ttf is preloaded above) so
+         the wordmark is in Nevis from the first frame, matching the baked native
+         splash exactly. The icon + static wordmark mirror the splash PNG, so the
+         hand-off shows no icon shift and no late wordmark. Literal colors because
+         the CSS variables aren't defined yet at this point. */
+      @font-face {
+        font-family: 'Nevis';
+        src: url('/fonts/nevis.ttf') format('truetype');
+        font-weight: 100 900;
+        font-display: swap;
+      }
       html, body { background: #E3DAC9; }
       #launch-screen { display: none; }
       html.pwa-standalone #launch-screen {
@@ -68,12 +77,7 @@
         position: absolute; top: calc(50% + 19vmin);
         font-family: 'Nevis', 'Noto Sans TC', system-ui, sans-serif;
         font-size: clamp(2rem, 9vmin, 3rem); letter-spacing: -0.02em;
-        color: #1A1A1A; opacity: 0;
-        animation: launchWordmark 0.6s ease 0.3s forwards;
-      }
-      @keyframes launchWordmark {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        color: #1A1A1A;
       }
       #launch-screen.launch-hide { opacity: 0; pointer-events: none; }
     </style>
