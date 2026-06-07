@@ -7,6 +7,7 @@ import { LanguageProvider } from './components/LanguageContext';
 import SmoothScroll from './components/SmoothScroll';
 import CustomCursor from './components/CustomCursor';
 import InstallPrompt from './components/InstallPrompt';
+import LaunchScreen from './components/LaunchScreen';
 import HomePage from './pages/HomePage';
 
 // The review page pulls in heavy, review-only deps (recharts radar chart,
@@ -33,6 +34,7 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <LanguageProvider>
+      <LaunchScreen />
       <InstallPrompt />
       <AdminProvider>
         <ToastProvider>
