@@ -84,7 +84,9 @@ export function computeTotal(entertainment, cinematic) {
 export function getReviewTotal(review) {
   if (!review) return null;
   if (review.media_type === 'tv') {
-    return typeof review.overall_score === 'number' ? review.overall_score : null;
+    // Hybrid: a manual overall_score wins; otherwise auto from season averages.
+    if (typeof review.overall_score === 'number') return review.overall_score;
+    return autoSeriesTotal(review.episode_scores, review.seasons);
   }
   const ent = computeEntertainment(review.emotion, review.pacing);
   const cine = computeCinematic(review.acting, review.cinematography, review.soundtrack, review.story);
@@ -131,6 +133,16 @@ export function seasonAverage(episodeScores, seasonNumber) {
     .map((e) => e.score);
   if (vals.length === 0) return null;
   return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+}
+
+// Auto series score = the mean of each season's average (seasons with no rated
+// episode are skipped). null if nothing is rated yet.
+export function autoSeriesTotal(episodeScores, seasons) {
+  const avgs = (seasons || [])
+    .map((s) => seasonAverage(episodeScores, s.season_number))
+    .filter((v) => v != null);
+  if (avgs.length === 0) return null;
+  return Math.round((avgs.reduce((a, b) => a + b, 0) / avgs.length) * 10) / 10;
 }
 
 export function formatDate(dateStr) {

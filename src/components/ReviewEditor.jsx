@@ -9,7 +9,7 @@ import WatchHistory from './WatchHistory';
 import AIPredictButton from './AIPredictButton';
 import { useAdmin } from './AdminAuth';
 import { useToast } from './Toast';
-import { API_URL, TMDB_IMG_BASE, FONT_MAP, computeEntertainment, computeCinematic, computeTotal, getScoreColor } from '../utils/constants';
+import { API_URL, TMDB_IMG_BASE, FONT_MAP, computeEntertainment, computeCinematic, computeTotal, autoSeriesTotal, getScoreColor } from '../utils/constants';
 
 const EMPTY_STATE = {
   // Movie info
@@ -233,8 +233,8 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       return;
     }
     if (isSeries) {
-      if (form.overall_score == null) {
-        addToast('請先給整體評分。', 'error');
+      if (form.overall_score == null && autoTotal == null) {
+        addToast('請給整體評分，或先到各季點幾集分數。', 'error');
         return;
       }
     } else if (!form.review_text.trim()) {
@@ -331,7 +331,8 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
   const cinematicScore = computeCinematic(form.acting, form.cinematography, form.soundtrack, form.story);
   const total = computeTotal(entertainment, cinematicScore);
   const isSeries = form.media_type === 'tv';
-  const displayTotal = isSeries ? (form.overall_score ?? 0) : (total ?? 0);
+  const autoTotal = autoSeriesTotal(form.episode_scores, form.seasons);
+  const displayTotal = isSeries ? (form.overall_score ?? autoTotal ?? 0) : (total ?? 0);
 
   // When editing, the form was hydrated from the saved record (no TMDB backdrop
   // list), so the cover-image picker had nothing to show. Re-fetch details once
@@ -554,20 +555,50 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
 
               {isSeries ? (
                 <>
-                  {/* Series/anime: one overall score replaces the 6 dimensions */}
+                  {/* Series/anime: one overall score (hybrid: auto from season
+                      averages, or a manual override) replaces the 6 dimensions */}
                   <div className="glass p-5 space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-semibold text-text-primary">⭐ 整體評分</h4>
                       <span className="text-sm font-bold text-[#1A1A1A] tabular-nums">
-                        {(form.overall_score ?? 0).toFixed(1)}
+                        {(form.overall_score ?? autoTotal ?? 0).toFixed(1)}
+                        {form.overall_score == null && (
+                          <span className="text-[10px] text-text-dim font-medium ml-1">自動</span>
+                        )}
                       </span>
                     </div>
-                    <ScoreSlider
-                      label="整部總評"
-                      value={form.overall_score ?? 5}
-                      onChange={(v) => update('overall_score', v)}
-                      animated={animated}
-                    />
+                    {form.overall_score == null ? (
+                      <div className="space-y-2">
+                        <p className="text-xs text-text-dim leading-relaxed">
+                          {autoTotal != null
+                            ? `自動 = 各季平均的平均（${autoTotal.toFixed(1)}）。`
+                            : '自動模式：到下面各季點每集分數，總分會自動算出。'}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => update('overall_score', autoTotal ?? 7)}
+                          className="text-xs font-bold text-[#FE494A] active:scale-95 transition-transform"
+                        >
+                          改為手動覆蓋
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <ScoreSlider
+                          label="手動總評"
+                          value={form.overall_score}
+                          onChange={(v) => update('overall_score', v)}
+                          animated={animated}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => update('overall_score', null)}
+                          className="text-xs font-bold text-[#FE494A] active:scale-95 transition-transform"
+                        >
+                          🔄 改回自動（依每季平均）
+                        </button>
+                      </>
+                    )}
                   </div>
 
                   {/* Per-season blocks: review text + soundtrack + episode heatmap */}
