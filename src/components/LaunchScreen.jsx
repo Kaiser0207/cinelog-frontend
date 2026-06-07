@@ -62,23 +62,27 @@ export default function LaunchScreen() {
           key="launch"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: 'easeInOut' }}
-          className="fixed inset-0 z-[2000] flex flex-col items-center justify-center bg-bg-deep"
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          className="fixed inset-0 z-[2000] flex items-center justify-center bg-bg-deep"
         >
-          <motion.img
+          {/* Icon centered at exactly 32vmin — same size + position as the native
+              iOS splash, with no box/shadow and no entrance animation — so the
+              hand-off from the native splash is seamless instead of a visible jump.
+              (The icon already carries its own cream background, so a shadow would
+              just outline the square.) */}
+          <img
             src="/icons/icon-512.png"
             alt=""
             aria-hidden="true"
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="w-28 h-28 rounded-[22%] shadow-lg"
+            className="w-[32vmin] h-[32vmin]"
           />
+          {/* Wordmark sits just below the centered icon without shifting it. */}
           <motion.h1
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-6 font-nevis text-4xl md:text-5xl tracking-tight text-text-primary"
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute left-0 right-0 text-center font-nevis text-4xl md:text-5xl tracking-tight text-text-primary"
+            style={{ top: 'calc(50% + 19vmin)' }}
           >
             CINEROOMS
           </motion.h1>
