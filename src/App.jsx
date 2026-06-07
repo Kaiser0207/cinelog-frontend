@@ -9,6 +9,13 @@ import CustomCursor from './components/CustomCursor';
 import InstallPrompt from './components/InstallPrompt';
 import HomePage from './pages/HomePage';
 
+// We manage scroll ourselves (top-of-feed on mount, top-of-detail on open), so
+// stop the browser from also restoring old offsets on back/forward — that race
+// is what dropped you onto a random middle card after a swipe-back.
+if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 // The review page pulls in heavy, review-only deps (recharts radar chart,
 // react-markdown, html2canvas share card). Lazy-load it so the homepage's
 // initial bundle stays small and loads fast; the chunk fetches on navigation.
@@ -33,12 +40,15 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <LanguageProvider>
-      <InstallPrompt />
       <AdminProvider>
         <ToastProvider>
           <SmoothScroll />
           <CustomCursor />
           <BrowserRouter>
+            {/* Inside the router so it can hide itself off the home feed — its
+                fixed top banner otherwise covers the review page's back/lang
+                buttons (higher z-index) and silently swallows their taps. */}
+            <InstallPrompt />
             <Suspense fallback={<div className="min-h-dvh bg-bg-deep" />}>
               <AnimatedRoutes />
             </Suspense>

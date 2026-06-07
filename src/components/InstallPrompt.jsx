@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import { useLanguage } from './LanguageContext';
 
 /*
@@ -71,6 +72,7 @@ function ShareIcon({ className }) {
 
 export default function InstallPrompt() {
   const { t } = useLanguage();
+  const { pathname } = useLocation();
   const [env] = useState(detectEnv);
   const [deferred, setDeferred] = useState(() => window.__deferredInstallPrompt || null);
   const [ready, setReady] = useState(false);
@@ -114,7 +116,9 @@ export default function InstallPrompt() {
     return null;
   })();
 
-  const show = ready && !!mode;
+  // Only on the home feed — on a review page this fixed top banner would cover
+  // the back/language buttons and block their taps.
+  const show = ready && !!mode && pathname === '/';
 
   const handleInstall = async () => {
     if (!deferred) return;

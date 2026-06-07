@@ -34,6 +34,16 @@ export default function HomePage() {
   
   const activeGenreRef = useRef(null);
 
+  // Land at the top of the feed on mount. Without this, returning from a review
+  // keeps the document scrolled to wherever the *detail page* was, which then
+  // maps to a random middle card here. Two frames so it wins over the route
+  // crossfade / browser scroll-restoration that would otherwise re-apply.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const raf = requestAnimationFrame(() => window.scrollTo(0, 0));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('cinelog_view_mode', viewMode);
   }, [viewMode]);
