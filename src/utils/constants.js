@@ -79,6 +79,18 @@ export function computeTotal(entertainment, cinematic) {
   return Math.round(((entertainment + 2 * cinematic) / 3) * 10) / 10;
 }
 
+// The one place to get a review's headline score: series/anime use a single
+// manual overall_score (no 6-dim); movies use the computed 6-dim total.
+export function getReviewTotal(review) {
+  if (!review) return null;
+  if (review.media_type === 'tv') {
+    return typeof review.overall_score === 'number' ? review.overall_score : null;
+  }
+  const ent = computeEntertainment(review.emotion, review.pacing);
+  const cine = computeCinematic(review.acting, review.cinematography, review.soundtrack, review.story);
+  return computeTotal(ent, cine);
+}
+
 export function getScoreColor(score) {
   if (score >= 8) return '#1db954';
   if (score >= 6) return '#f5c518';

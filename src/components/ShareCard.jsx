@@ -1,12 +1,10 @@
 import { useRef, useCallback } from 'react';
-import { FONT_MAP, computeEntertainment, computeCinematic, computeTotal, TMDB_IMG_BASE } from '../utils/constants';
+import { FONT_MAP, getReviewTotal, TMDB_IMG_BASE } from '../utils/constants';
 
 export default function ShareCard({ review, className }) {
   const cardRef = useRef(null);
 
-  const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
-  const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0, review.story);
-  const total = computeTotal(entertainment, cinematic);
+  const total = getReviewTotal(review) ?? 0;
   
   const getScoreColor = (score) => {
     if (score >= 9) return '#1db954'; // Green

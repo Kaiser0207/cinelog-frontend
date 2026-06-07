@@ -47,6 +47,8 @@ const EMPTY_STATE = {
   number_of_episodes: null,
   seasons: [],
   episode_scores: [],
+  overall_score: null,
+  season_reviews: [],
 };
 
 export default function ReviewEditor({ review = null, onClose, onSaved }) {
@@ -86,6 +88,8 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
         number_of_episodes: review.number_of_episodes ?? null,
         seasons: review.seasons || [],
         episode_scores: review.episode_scores || [],
+        overall_score: review.overall_score ?? null,
+        season_reviews: review.season_reviews || [],
       };
     }
     return { ...EMPTY_STATE };
@@ -173,6 +177,24 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
     update('spotify_artist_name', track.artist || '');
   };
 
+  // Per-season block helpers (series/anime)
+  const getSeasonReview = (sNum) =>
+    (form.season_reviews || []).find((s) => s.season_number === sNum) || { season_number: sNum };
+
+  const updateSeasonReview = (sNum, patch) => {
+    setForm((prev) => {
+      const list = prev.season_reviews || [];
+      const existing = list.find((s) => s.season_number === sNum) || { season_number: sNum };
+      const others = list.filter((s) => s.season_number !== sNum);
+      return {
+        ...prev,
+        season_reviews: [...others, { ...existing, ...patch }].sort(
+          (a, b) => a.season_number - b.season_number,
+        ),
+      };
+    });
+  };
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -210,7 +232,12 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       addToast('Please select a movie first.', 'error');
       return;
     }
-    if (!form.review_text.trim()) {
+    if (isSeries) {
+      if (form.overall_score == null) {
+        addToast('請先給整體評分。', 'error');
+        return;
+      }
+    } else if (!form.review_text.trim()) {
       addToast('Please write a review.', 'error');
       return;
     }
@@ -223,19 +250,36 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
           : `${API_URL}/api/reviews`;
         const method = isEdit ? 'PUT' : 'POST';
 
-        const body = isEdit
+        // Series/anime: no 6-dim, one overall score + per-season blocks; the
+        // global review text + soundtrack don't apply.
+        const scoreFields = isSeries
           ? {
-              review_text: form.review_text,
-              review_font: form.review_font,
+              emotion: null, pacing: null, acting: null,
+              cinematography: null, soundtrack: null, story: null,
+              overall_score: form.overall_score,
+              season_reviews: form.season_reviews || [],
+            }
+          : {
+              emotion: form.emotion, pacing: form.pacing, acting: form.acting,
+              cinematography: form.cinematography, soundtrack: form.soundtrack, story: form.story,
+              overall_score: null,
+              season_reviews: [],
+            };
+        const reviewText = isSeries ? null : form.review_text;
+        const spotifyFields = isSeries
+          ? { spotify_track_id: null, spotify_track_name: null, spotify_artist_name: null }
+          : {
               spotify_track_id: form.spotify_track_id || null,
               spotify_track_name: form.spotify_track_name || null,
               spotify_artist_name: form.spotify_artist_name || null,
-              emotion: form.emotion,
-              pacing: form.pacing,
-              acting: form.acting,
-              cinematography: form.cinematography,
-              soundtrack: form.soundtrack,
-              story: form.story,
+            };
+
+        const body = isEdit
+          ? {
+              review_text: reviewText,
+              review_font: form.review_font,
+              ...spotifyFields,
+              ...scoreFields,
               custom_backdrop_url: form.custom_backdrop_url || null,
               ai_recommendation: form.ai_recommendation || null,
               ai_related_movies: form.ai_related_movies || [],
@@ -245,17 +289,10 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
           : {
               tmdb_id: form.tmdb_id,
               media_type: form.media_type || 'movie',
-              review_text: form.review_text,
+              review_text: reviewText,
               review_font: form.review_font,
-              spotify_track_id: form.spotify_track_id || null,
-              spotify_track_name: form.spotify_track_name || null,
-              spotify_artist_name: form.spotify_artist_name || null,
-              emotion: form.emotion,
-              pacing: form.pacing,
-              acting: form.acting,
-              cinematography: form.cinematography,
-              soundtrack: form.soundtrack,
-              story: form.story,
+              ...spotifyFields,
+              ...scoreFields,
               watch_dates: form.watch_dates,
               custom_backdrop_url: form.custom_backdrop_url || null,
               ai_recommendation: form.ai_recommendation || null,
@@ -293,6 +330,8 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
   const entertainment = computeEntertainment(form.emotion, form.pacing);
   const cinematicScore = computeCinematic(form.acting, form.cinematography, form.soundtrack, form.story);
   const total = computeTotal(entertainment, cinematicScore);
+  const isSeries = form.media_type === 'tv';
+  const displayTotal = isSeries ? (form.overall_score ?? 0) : (total ?? 0);
 
   // When editing, the form was hydrated from the saved record (no TMDB backdrop
   // list), so the cover-image picker had nothing to show. Re-fetch details once
@@ -445,35 +484,44 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               {/* Font Selector */}
               <FontSelector value={form.review_font} onChange={(v) => update('review_font', v)} />
 
-              {/* Review Text */}
-              <div>
-                <label className="block text-sm text-text-muted mb-1.5 font-medium">
-                  影評內容 (支援 Markdown)
-                </label>
-                <textarea
-                  value={form.review_text}
-                  onChange={(e) => update('review_text', e.target.value)}
-                  placeholder="寫下你的觀影心得..."
-                  rows={10}
-                  className="w-full resize-y min-h-[200px]"
-                  style={{ fontFamily: FONT_MAP[form.review_font] }}
-                />
-              </div>
+              {/* Review Text + Soundtrack — movies only; series do these per season */}
+              {!isSeries && (
+                <>
+                  <div>
+                    <label className="block text-sm text-text-muted mb-1.5 font-medium">
+                      影評內容 (支援 Markdown)
+                    </label>
+                    <textarea
+                      value={form.review_text}
+                      onChange={(e) => update('review_text', e.target.value)}
+                      placeholder="寫下你的觀影心得..."
+                      rows={10}
+                      className="w-full resize-y min-h-[200px]"
+                      style={{ fontFamily: FONT_MAP[form.review_font] }}
+                    />
+                  </div>
 
-              {/* Spotify */}
-              <SpotifySearch onSelect={handleSpotifySelect} />
-              {form.spotify_track_name && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-card border border-border-subtle">
-                  <span className="text-green-400">🎵</span>
-                  <span className="text-sm text-text-primary truncate">{form.spotify_track_name}</span>
-                  <button
-                    type="button"
-                    onClick={() => { update('spotify_track_id', ''); update('spotify_track_name', ''); }}
-                    className="ml-auto text-text-muted hover:text-red-400 text-xs"
-                  >
-                    ✕
-                  </button>
-                </div>
+                  <SpotifySearch onSelect={handleSpotifySelect} />
+                  {form.spotify_track_name && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-card border border-border-subtle">
+                      <span className="text-green-400">🎵</span>
+                      <span className="text-sm text-text-primary truncate">{form.spotify_track_name}</span>
+                      <button
+                        type="button"
+                        onClick={() => { update('spotify_track_id', ''); update('spotify_track_name', ''); }}
+                        className="ml-auto text-text-muted hover:text-red-400 text-xs"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {isSeries && (
+                <p className="text-xs text-text-dim leading-relaxed border border-border-subtle rounded-lg p-3 bg-bg-card">
+                  📺 影集／動漫：在右側設定「整體評分」，每一季各自寫影評、選配樂、點每集分數。
+                </p>
               )}
 
               {/* Watch History */}
@@ -482,97 +530,162 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
 
             {/* Right Column: Scores */}
             <div className="space-y-6 min-w-0">
-              {/* AI Predict */}
-              <AIPredictButton
-                reviewText={form.review_text}
-                onPredict={handleAIPredict}
-                disabled={!form.review_text.trim()}
-              />
+              {/* AI Predict (movies only — predicts the 6 dimensions) */}
+              {!isSeries && (
+                <AIPredictButton
+                  reviewText={form.review_text}
+                  onPredict={handleAIPredict}
+                  disabled={!form.review_text.trim()}
+                />
+              )}
 
               {/* Total Score Display */}
               <div className="text-center py-4">
                 <p className="text-xs uppercase tracking-widest text-text-muted mb-1">總分</p>
                 <motion.span
-                  key={total}
+                  key={displayTotal}
                   initial={animated ? { scale: 1.3 } : false}
                   animate={{ scale: 1 }}
-                  className="text-5xl font-black font-syne tracking-tightertabular-nums text-[#1A1A1A]"
+                  className="text-5xl font-black font-syne tracking-tighter tabular-nums text-[#1A1A1A]"
                 >
-                  {total.toFixed(1)}
+                  {displayTotal.toFixed(1)}
                 </motion.span>
               </div>
 
-              {/* Entertainment Scores */}
-              <div className="glass p-5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-text-primary">🎭 娛樂性</h4>
-                  <span className="text-sm font-bold text-[#1A1A1A] tabular-nums">
-                    {entertainment.toFixed(1)}
-                  </span>
-                </div>
-                <ScoreSlider
-                  label="情感渲染"
-                  value={form.emotion}
-                  onChange={(v) => update('emotion', v)}
-                  animated={animated}
-                />
-                <ScoreSlider
-                  label="節奏流暢"
-                  value={form.pacing}
-                  onChange={(v) => update('pacing', v)}
-                  animated={animated}
-                />
-              </div>
-
-              {/* Cinematic Scores */}
-              <div className="glass p-5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-text-primary">🎬 藝術性</h4>
-                  <span className="text-sm font-bold text-[#1A1A1A] tabular-nums">
-                    {cinematicScore.toFixed(1)}
-                  </span>
-                </div>
-
-                <ScoreSlider
-                  label="故事劇本"
-                  value={form.story}
-                  onChange={(v) => update('story', v)}
-                  animated={animated}
-                />
-                <ScoreSlider
-                  label="演員表現"
-                  value={form.acting}
-                  onChange={(v) => update('acting', v)}
-                  animated={animated}
-                />
-                <ScoreSlider
-                  label="攝影畫面"
-                  value={form.cinematography}
-                  onChange={(v) => update('cinematography', v)}
-                  animated={animated}
-                />
-                <ScoreSlider
-                  label="配樂音效"
-                  value={form.soundtrack}
-                  onChange={(v) => update('soundtrack', v)}
-                  animated={animated}
-                />
-              </div>
-
-              {/* Episode Heatmap (TV / anime only) */}
-              {form.media_type === 'tv' && form.seasons && form.seasons.length > 0 && (
-                <div className="glass p-5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold text-text-primary">📺 每集評分</h4>
-                    <span className="text-xs text-text-dim">點格子設定・選填</span>
+              {isSeries ? (
+                <>
+                  {/* Series/anime: one overall score replaces the 6 dimensions */}
+                  <div className="glass p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-text-primary">⭐ 整體評分</h4>
+                      <span className="text-sm font-bold text-[#1A1A1A] tabular-nums">
+                        {(form.overall_score ?? 0).toFixed(1)}
+                      </span>
+                    </div>
+                    <ScoreSlider
+                      label="整部總評"
+                      value={form.overall_score ?? 5}
+                      onChange={(v) => update('overall_score', v)}
+                      animated={animated}
+                    />
                   </div>
-                  <EpisodeHeatmap
-                    seasons={form.seasons}
-                    episodeScores={form.episode_scores}
-                    editable
-                    onChange={(next) => update('episode_scores', next)}
-                  />
-                </div>
+
+                  {/* Per-season blocks: review text + soundtrack + episode heatmap */}
+                  {form.seasons && form.seasons.length > 0 ? (
+                    form.seasons.map((season) => {
+                      const sr = getSeasonReview(season.season_number);
+                      return (
+                        <div key={season.season_number} className="glass p-5 space-y-4">
+                          <h4 className="text-sm font-bold text-text-primary border-l-4 border-[#FE494A] pl-2">
+                            第 {season.season_number} 季
+                          </h4>
+                          <textarea
+                            value={sr.review_text || ''}
+                            onChange={(e) => updateSeasonReview(season.season_number, { review_text: e.target.value })}
+                            placeholder="這一季的影評（選填，支援 Markdown）..."
+                            rows={4}
+                            className="w-full resize-y min-h-[100px]"
+                            style={{ fontFamily: FONT_MAP[form.review_font] }}
+                          />
+                          <div>
+                            <SpotifySearch
+                              onSelect={(track) => updateSeasonReview(season.season_number, {
+                                spotify_track_id: track.track_id || track.id || '',
+                                spotify_track_name: track.name || '',
+                                spotify_artist_name: track.artist || '',
+                              })}
+                            />
+                            {sr.spotify_track_name && (
+                              <div className="flex items-center gap-2 px-3 py-2 mt-2 rounded-lg bg-bg-card border border-border-subtle">
+                                <span className="text-green-400">🎵</span>
+                                <span className="text-sm text-text-primary truncate">{sr.spotify_track_name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => updateSeasonReview(season.season_number, { spotify_track_id: '', spotify_track_name: '', spotify_artist_name: '' })}
+                                  className="ml-auto text-text-muted hover:text-red-400 text-xs"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-xs text-text-dim mb-2">每集評分・點格子設定（選填）</p>
+                            <EpisodeHeatmap
+                              seasons={[season]}
+                              episodeScores={form.episode_scores}
+                              editable
+                              onChange={(next) => update('episode_scores', next)}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-xs text-text-dim text-center py-2">
+                      載入每季資訊中…若沒出現，請重新選擇此影集。
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* Entertainment Scores */}
+                  <div className="glass p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-text-primary">🎭 娛樂性</h4>
+                      <span className="text-sm font-bold text-[#1A1A1A] tabular-nums">
+                        {entertainment.toFixed(1)}
+                      </span>
+                    </div>
+                    <ScoreSlider
+                      label="情感渲染"
+                      value={form.emotion}
+                      onChange={(v) => update('emotion', v)}
+                      animated={animated}
+                    />
+                    <ScoreSlider
+                      label="節奏流暢"
+                      value={form.pacing}
+                      onChange={(v) => update('pacing', v)}
+                      animated={animated}
+                    />
+                  </div>
+
+                  {/* Cinematic Scores */}
+                  <div className="glass p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-text-primary">🎬 藝術性</h4>
+                      <span className="text-sm font-bold text-[#1A1A1A] tabular-nums">
+                        {cinematicScore.toFixed(1)}
+                      </span>
+                    </div>
+
+                    <ScoreSlider
+                      label="故事劇本"
+                      value={form.story}
+                      onChange={(v) => update('story', v)}
+                      animated={animated}
+                    />
+                    <ScoreSlider
+                      label="演員表現"
+                      value={form.acting}
+                      onChange={(v) => update('acting', v)}
+                      animated={animated}
+                    />
+                    <ScoreSlider
+                      label="攝影畫面"
+                      value={form.cinematography}
+                      onChange={(v) => update('cinematography', v)}
+                      animated={animated}
+                    />
+                    <ScoreSlider
+                      label="配樂音效"
+                      value={form.soundtrack}
+                      onChange={(v) => update('soundtrack', v)}
+                      animated={animated}
+                    />
+                  </div>
+                </>
               )}
 
               {/* Save Button */}

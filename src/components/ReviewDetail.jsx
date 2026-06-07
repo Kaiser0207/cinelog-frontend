@@ -17,6 +17,9 @@ import {
   computeEntertainment,
   computeCinematic,
   computeTotal,
+  getReviewTotal,
+  getEpisodeColor,
+  seasonAverage,
   getScoreColor,
   formatDate,
   API_URL,
@@ -111,9 +114,10 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const [recommendations, setRecommendations] = useState([]);
   const [translatedOverview, setTranslatedOverview] = useState(null);
 
+  const isSeries = review.media_type === 'tv';
   const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
   const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0, review.story);
-  const total = computeTotal(entertainment, cinematic);
+  const total = getReviewTotal(review) ?? 0;
 
   const genres = review.genres
     ? (typeof review.genres === 'string' ? JSON.parse(review.genres) : review.genres)
@@ -224,33 +228,38 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         <p className="text-sm font-bold text-text-dim mt-2">/ 10.0</p>
       </div>
 
-      {/* Entertainment */}
-      <div className="glass p-6 space-y-4 rounded-lg border border-border-subtle">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-text-primary">🎭 {t('entertainment')}</h3>
-          <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
-            {entertainment.toFixed(1)}
-          </span>
-        </div>
-        <ScoreSlider label={t('emotion')} value={review.emotion || 0} readOnly />
-        <ScoreSlider label={t('pacing')} value={review.pacing || 0} readOnly />
-      </div>
+      {/* 6-dimension breakdown — movies only; series use the overall score */}
+      {!isSeries && (
+        <>
+          {/* Entertainment */}
+          <div className="glass p-6 space-y-4 rounded-lg border border-border-subtle">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-text-primary">🎭 {t('entertainment')}</h3>
+              <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
+                {entertainment.toFixed(1)}
+              </span>
+            </div>
+            <ScoreSlider label={t('emotion')} value={review.emotion || 0} readOnly />
+            <ScoreSlider label={t('pacing')} value={review.pacing || 0} readOnly />
+          </div>
 
-      {/* Cinematic */}
-      <div className="glass p-6 space-y-4 rounded-lg border border-border-subtle">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-text-primary">🎬 {t('cinematic')}</h3>
-          <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
-            {cinematic.toFixed(1)}
-          </span>
-        </div>
-        {review.story != null && (
-          <ScoreSlider label={t('story')} value={review.story} readOnly />
-        )}
-        <ScoreSlider label={t('acting')} value={review.acting || 0} readOnly />
-        <ScoreSlider label={t('cinematography')} value={review.cinematography || 0} readOnly />
-        <ScoreSlider label={t('soundtrackLabel')} value={review.soundtrack || 0} readOnly />
-      </div>
+          {/* Cinematic */}
+          <div className="glass p-6 space-y-4 rounded-lg border border-border-subtle">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-text-primary">🎬 {t('cinematic')}</h3>
+              <span className="text-lg font-bold text-[#1A1A1A] tabular-nums">
+                {cinematic.toFixed(1)}
+              </span>
+            </div>
+            {review.story != null && (
+              <ScoreSlider label={t('story')} value={review.story} readOnly />
+            )}
+            <ScoreSlider label={t('acting')} value={review.acting || 0} readOnly />
+            <ScoreSlider label={t('cinematography')} value={review.cinematography || 0} readOnly />
+            <ScoreSlider label={t('soundtrackLabel')} value={review.soundtrack || 0} readOnly />
+          </div>
+        </>
+      )}
     </div>
   );
 
@@ -467,40 +476,67 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               </motion.div>
             )}
 
-            {/* Review Text */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.65 }}
-            >
-              <h3 className="text-2xl font-bold font-syne text-[#FE494A] uppercase tracking-wider mb-4 border-b-4 border-[#FE494A] pb-2">
-                {t('review')}
-              </h3>
-              <div
-                className="prose-cinelog"
-                style={{ fontFamily }}
-              >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {(review.review_text || '').replace(/\n/g, '  \n')}
-                </ReactMarkdown>
-              </div>
-            </motion.div>
-
-            {/* Episode Heatmap (TV / anime) */}
-            {review.media_type === 'tv' && review.seasons && review.seasons.length > 0 && (
+            {/* Review — movies: one write-up; series: per-season blocks */}
+            {!isSeries ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
+                transition={{ delay: 0.65 }}
               >
                 <h3 className="text-2xl font-bold font-syne text-[#FE494A] uppercase tracking-wider mb-4 border-b-4 border-[#FE494A] pb-2">
-                  📺 每集評分
+                  {t('review')}
                 </h3>
-                <EpisodeHeatmap
-                  seasons={review.seasons}
-                  episodeScores={review.episode_scores || []}
-                />
+                <div className="prose-cinelog" style={{ fontFamily }}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {(review.review_text || '').replace(/\n/g, '  \n')}
+                  </ReactMarkdown>
+                </div>
               </motion.div>
+            ) : (
+              review.seasons && review.seasons.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.65 }}
+                  className="space-y-10"
+                >
+                  {review.seasons.map((season) => {
+                    const sr = (review.season_reviews || []).find(
+                      (s) => s.season_number === season.season_number,
+                    ) || {};
+                    const avg = seasonAverage(review.episode_scores, season.season_number);
+                    return (
+                      <div key={season.season_number} className="space-y-4">
+                        <div className="flex items-center justify-between border-b-4 border-[#FE494A] pb-2">
+                          <h3 className="text-2xl font-bold font-syne text-[#FE494A] uppercase tracking-wider">
+                            第 {season.season_number} 季
+                          </h3>
+                          {avg != null && (
+                            <span
+                              className="text-sm font-black tabular-nums px-2.5 py-1 rounded-full text-white"
+                              style={{ backgroundColor: getEpisodeColor(avg) }}
+                            >
+                              平均 {avg.toFixed(1)}
+                            </span>
+                          )}
+                        </div>
+                        {sr.review_text && (
+                          <div className="prose-cinelog" style={{ fontFamily }}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {sr.review_text.replace(/\n/g, '  \n')}
+                            </ReactMarkdown>
+                          </div>
+                        )}
+                        {sr.spotify_track_id && <SpotifyEmbed trackId={sr.spotify_track_id} />}
+                        <EpisodeHeatmap
+                          seasons={[season]}
+                          episodeScores={review.episode_scores || []}
+                        />
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              )
             )}
 
             {/* AI Recommendation & Related Movies */}
@@ -661,16 +697,26 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                   </span>
                   <span className="text-xs text-text-dim font-bold mt-1">/10</span>
                 </div>
-                <div className="w-px h-8 bg-white/10" />
-                <div className="flex items-center gap-2">
-                  <span className="text-base text-text-muted">🎭</span>
-                  <span className="text-lg font-bold text-text-primary tabular-nums">{entertainment.toFixed(1)}</span>
-                </div>
-                <div className="w-px h-8 bg-white/10" />
-                <div className="flex items-center gap-2">
-                  <span className="text-base text-text-muted">🎬</span>
-                  <span className="text-lg font-bold text-text-primary tabular-nums">{cinematic.toFixed(1)}</span>
-                </div>
+                {!isSeries && (
+                  <>
+                    <div className="w-px h-8 bg-white/10" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-base text-text-muted">🎭</span>
+                      <span className="text-lg font-bold text-text-primary tabular-nums">{entertainment.toFixed(1)}</span>
+                    </div>
+                    <div className="w-px h-8 bg-white/10" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-base text-text-muted">🎬</span>
+                      <span className="text-lg font-bold text-text-primary tabular-nums">{cinematic.toFixed(1)}</span>
+                    </div>
+                  </>
+                )}
+                {isSeries && (
+                  <>
+                    <div className="w-px h-8 bg-white/10" />
+                    <span className="text-sm font-bold text-text-muted">📺 影集</span>
+                  </>
+                )}
                 <span className="text-text-dim text-sm ml-2 animate-bounce">▲</span>
               </>
             )}

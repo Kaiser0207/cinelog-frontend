@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, formatDate } from '../utils/constants';
+import { TMDB_IMG_BASE, getReviewTotal, formatDate } from '../utils/constants';
 import { useLanguage } from './LanguageContext';
 
 export default function HeroCard({ review }) {
@@ -29,9 +29,7 @@ export default function HeroCard({ review }) {
     ? (typeof review.watch_dates === 'string' ? JSON.parse(review.watch_dates) : review.watch_dates)
     : [];
 
-  const entertainment = computeEntertainment(emotion, pacing);
-  const cinematic = computeCinematic(acting, cinematography, soundtrack, review.story);
-  const score = computeTotal(entertainment, cinematic);
+  const score = getReviewTotal(review) ?? 0;
 
   const heroImage = review.custom_backdrop_url 
     ? review.custom_backdrop_url

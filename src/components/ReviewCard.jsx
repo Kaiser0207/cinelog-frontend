@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform, useSpring, useMotionTemplate, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, getScoreColor, mediaCategory, MEDIA_BADGES } from '../utils/constants';
+import { TMDB_IMG_BASE, getReviewTotal, getScoreColor, mediaCategory, MEDIA_BADGES } from '../utils/constants';
 import { useLanguage } from './LanguageContext';
 
 export default function ReviewCard({ review, index = 0, gyroPermission = false }) {
@@ -11,9 +11,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
   const [imgLoaded, setImgLoaded] = useState(false);
   const reduce = useReducedMotion();
 
-  const entertainment = computeEntertainment(review.emotion || 0, review.pacing || 0);
-  const cinematic = computeCinematic(review.acting || 0, review.cinematography || 0, review.soundtrack || 0, review.story);
-  const total = computeTotal(entertainment, cinematic);
+  const total = getReviewTotal(review) ?? 0;
 
   // 3D Tilt Effect
   const x = useMotionValue(0);
