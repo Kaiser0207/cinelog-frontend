@@ -410,8 +410,8 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                           key={idx}
                           src={`${TMDB_IMG_BASE}w300${path}`}
                           alt="Backdrop"
-                          className={`w-32 h-20 object-cover cursor-pointer border-2 ${form.backdrop_path === path ? 'border-accent-red' : 'border-transparent'} hover:border-accent-red transition-all`}
-                          onClick={() => { update('backdrop_path', path); update('custom_backdrop_url', ''); }}
+                          className={`w-32 h-20 object-cover cursor-pointer border-2 ${form.custom_backdrop_url === `${TMDB_IMG_BASE}w1280${path}` ? 'border-accent-red' : 'border-transparent'} hover:border-accent-red transition-all`}
+                          onClick={() => { update('backdrop_path', path); update('custom_backdrop_url', `${TMDB_IMG_BASE}w1280${path}`); }}
                         />
                       ))}
                     </div>
