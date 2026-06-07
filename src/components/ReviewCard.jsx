@@ -115,6 +115,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
             onLoad={() => setImgLoaded(true)}
             className={`absolute inset-0 w-full h-full object-cover transition-[transform,opacity] duration-700 group-hover:scale-105 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
             loading="lazy"
+            decoding="async"
           />
         </>
       ) : (

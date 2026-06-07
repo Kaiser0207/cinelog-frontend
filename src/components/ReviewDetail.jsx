@@ -291,12 +291,16 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         <span>{lang === 'en' ? '繁' : 'EN'}</span>
       </button>
 
-      {/* Hero */}
-      <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
+      {/* Hero — placeholder gradient shows under the image while it decodes; the
+          backdrop is the detail page's LCP so load it eagerly with high priority. */}
+      <div className="relative h-[50vh] md:h-[60vh] overflow-hidden bg-gradient-to-br from-bg-card to-bg-deep">
         {backdropUrl ? (
           <motion.img
             src={backdropUrl}
             alt={review.title}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
             initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}
@@ -316,6 +320,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
             <motion.img
               src={posterUrl}
               alt={review.title}
+              loading="lazy"
+              decoding="async"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}

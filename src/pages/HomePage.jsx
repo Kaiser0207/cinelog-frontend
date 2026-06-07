@@ -208,9 +208,11 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Genre Filter - Floating overlapping the title */}
-      <div className="relative z-10 w-full px-5 -mt-12 mb-16 overflow-hidden">
-        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none items-center justify-start md:justify-center px-4 w-full">
+      {/* Genre Filter (類型) — primary filter row. Sits BELOW the title (no longer
+          floated over it) and sinks the whole filter cluster down toward the
+          grid/list controls, so the two filter rows read as one tidy group. */}
+      <div className="relative z-10 w-full px-5 mt-1 mb-5 overflow-hidden">
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full">
           {GENRE_PILLS.map((g) => {
             const isActive = genre === g || (g === '全部' && genre === '');
             return (
@@ -237,10 +239,12 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Media-type filter — an iOS-style segmented control, visually distinct
-          from the genre pills so the two filter axes don't read as one row. */}
-      <div className="relative z-10 w-full px-5 -mt-10 mb-14 flex justify-start md:justify-center">
-        <div className="inline-flex items-center gap-0.5 bg-[#E8E2D2] rounded-full p-1 border border-border-subtle shadow-sm max-w-full overflow-x-auto scrollbar-none">
+      {/* Media-type filter (影視) — secondary filter row. Same pill style and the
+          exact same flex structure as the genre row above, so both rows share a
+          left edge and read as one consistent control group. The 🎬📺🌸 icons keep
+          it distinguishable from the genre row without a separate visual language. */}
+      <div className="relative z-10 w-full px-5 mb-7 overflow-hidden">
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full">
           {[
             { key: '', zh: '全部', en: 'All', icon: '' },
             { key: 'movie', zh: '電影', en: 'Film', icon: '🎬' },
@@ -249,26 +253,25 @@ export default function HomePage() {
           ].map((opt) => {
             const isActive = mediaFilter === opt.key;
             return (
-              <button
+              <motion.button
                 key={opt.key || 'all'}
                 type="button"
+                whileTap={{ scale: 0.9 }}
+                data-cursor={isActive ? '' : 'FILTER'}
                 onClick={() => setMediaFilter(opt.key)}
-                className={`relative flex-shrink-0 px-3.5 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold font-jetbrains uppercase tracking-wider whitespace-nowrap transition-colors duration-200 ${
-                  isActive ? 'text-white' : 'text-[#1A1A1A]/55 hover:text-[#1A1A1A]'
+                className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
+                  isActive
+                    ? 'bg-[#FE494A] shadow-none border-transparent'
+                    : 'bg-[#E8E2D2] border border-border-subtle'
                 }`}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="media-filter-active"
-                    className="absolute inset-0 bg-[#FE494A] rounded-full"
-                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                  />
-                )}
-                <span className="relative z-10">
+                <span className={`inline-block text-sm font-bold font-jetbrains uppercase whitespace-nowrap transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
+                  isActive ? 'text-white' : 'text-[#1A1A1A]/70'
+                }`}>
                   {opt.icon && <span className="mr-1">{opt.icon}</span>}
                   {lang === 'en' ? opt.en : opt.zh}
                 </span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
