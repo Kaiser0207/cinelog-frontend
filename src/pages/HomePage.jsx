@@ -14,6 +14,7 @@ const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
 export default function HomePage() {
   const [sort, setSort] = useState('watched');
   const [genre, setGenre] = useState('');
+  const [mediaFilter, setMediaFilter] = useState('movie'); // 'movie' | 'tv' | 'anime' — always one media type, defaults to 電影 (no 'all')
   const [showEditor, setShowEditor] = useState(false);
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
@@ -33,6 +34,16 @@ export default function HomePage() {
   const { permissionGranted, requestPermission } = useGyroscope();
   
   const activeGenreRef = useRef(null);
+
+  // Land at the top of the feed on mount. Without this, returning from a review
+  // keeps the document scrolled to wherever the *detail page* was, which then
+  // maps to a random middle card here. Two frames so it wins over the route
+  // crossfade / browser scroll-restoration that would otherwise re-apply.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const raf = requestAnimationFrame(() => window.scrollTo(0, 0));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('cinelog_view_mode', viewMode);
@@ -143,6 +154,7 @@ export default function HomePage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       className="min-h-screen relative overflow-hidden"
     >
       {/* Massive Hero Section */}
@@ -196,15 +208,18 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Genre Filter - Floating overlapping the title */}
-      <div className="relative z-10 w-full px-5 -mt-12 mb-16 overflow-hidden">
-        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none items-center justify-start md:justify-center px-4 w-full">
+      {/* Genre Filter (類型) — primary filter row. Floats up tight under the title
+          (original design) via the negative top margin; everything below sits in
+          normal flow after it, so the whole cluster rides up with it. */}
+      <div className="relative z-10 w-full px-5 -mt-12 mb-5 overflow-hidden">
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full">
           {GENRE_PILLS.map((g) => {
             const isActive = genre === g || (g === '全部' && genre === '');
             return (
-              <button
+              <motion.button
                 key={g}
                 ref={isActive ? activeGenreRef : null}
+                whileTap={{ scale: 0.9 }}
                 data-cursor={isActive ? '' : 'FILTER'}
                 onClick={() => setGenre(g === '全部' ? '' : g)}
                 className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
@@ -218,7 +233,43 @@ export default function HomePage() {
                 }`}>
                   {t(genreToKey[g]) || g}
                 </span>
-              </button>
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Media-type filter (影視) — three exclusive tabs (電影/影集/動漫), no '全部'
+          option: exactly one is always active and it defaults to 電影. Same pill
+          style and flex structure as the genre row above, so both share a left
+          edge and read as one consistent control group. */}
+      <div className="relative z-10 w-full px-5 mb-7 overflow-hidden">
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full">
+          {[
+            { key: 'movie', zh: '電影', en: 'Film' },
+            { key: 'tv', zh: '影集', en: 'Series' },
+            { key: 'anime', zh: '動漫', en: 'Anime' },
+          ].map((opt) => {
+            const isActive = mediaFilter === opt.key;
+            return (
+              <motion.button
+                key={opt.key}
+                type="button"
+                whileTap={{ scale: 0.9 }}
+                data-cursor={isActive ? '' : 'FILTER'}
+                onClick={() => setMediaFilter(opt.key)}
+                className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
+                  isActive
+                    ? 'bg-[#FE494A] shadow-none border-transparent'
+                    : 'bg-[#E8E2D2] border border-border-subtle'
+                }`}
+              >
+                <span className={`inline-block text-sm font-bold font-jetbrains uppercase whitespace-nowrap transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
+                  isActive ? 'text-white' : 'text-[#1A1A1A]/70'
+                }`}>
+                  {lang === 'en' ? opt.en : opt.zh}
+                </span>
+              </motion.button>
             );
           })}
         </div>
@@ -334,6 +385,7 @@ export default function HomePage() {
         <ReviewFeed
           sort={sort}
           genre={genre}
+          media={mediaFilter}
           searchQuery={showSearchOverlay ? '' : searchQuery}
           searchMode={searchMode}
           viewMode={viewMode} 
@@ -344,7 +396,12 @@ export default function HomePage() {
 
       {/* Cool Grey Neo-brutalist Footer */}
       <div ref={footerRef} data-theme="grey" className="w-full bg-[#3B4856] text-white py-16 pb-28 md:py-24 md:pb-24 px-5 relative z-10">
-        <div className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center text-left md:text-center space-y-6 md:space-y-8">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center text-left md:text-center space-y-6 md:space-y-8">
           <div className="space-y-1">
             <h2 className="text-5xl md:text-6xl lg:text-7xl font-black font-nevis text-[#D480C0] tracking-wider leading-none">
               <span className="md:hidden">CINE<br/>ROOMS</span>
@@ -384,7 +441,7 @@ export default function HomePage() {
             </p>
             <p className="text-white/40">{t('disclaimer')}</p>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* FAB */}

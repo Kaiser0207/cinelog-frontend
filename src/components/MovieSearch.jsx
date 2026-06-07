@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { API_URL, TMDB_IMG_BASE } from '../utils/constants';
+import { API_URL, TMDB_IMG_BASE, mediaCategory, MEDIA_BADGES } from '../utils/constants';
 
 export default function MovieSearch({ onSelect, disabled = false }) {
   const [query, setQuery] = useState('');
@@ -59,7 +59,7 @@ export default function MovieSearch({ onSelect, disabled = false }) {
 
   return (
     <div className="relative" ref={containerRef}>
-      <label className="block text-sm text-text-muted mb-1.5 font-medium">搜尋電影 (TMDB)</label>
+      <label className="block text-sm text-text-muted mb-1.5 font-medium">搜尋電影 / 影集 / 動漫 (TMDB)</label>
       <div className="relative">
         <input
           type="text"
@@ -116,8 +116,16 @@ export default function MovieSearch({ onSelect, disabled = false }) {
                   <p className="text-text-primary font-semibold text-sm truncate">
                     {movie.title}
                   </p>
-                  <p className="text-text-muted text-xs mt-0.5">
-                    {movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown'}
+                  <p className="text-text-muted text-xs mt-0.5 flex items-center gap-1.5">
+                    {(() => {
+                      const badge = MEDIA_BADGES[mediaCategory(movie)];
+                      return (
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#1A1A1A]/8 text-[#1A1A1A] font-bold text-[10px]">
+                          {badge.icon} {badge.zh}
+                        </span>
+                      );
+                    })()}
+                    <span>{movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown'}</span>
                   </p>
                   {movie.overview && (
                     <p className="text-text-dim text-xs mt-1 line-clamp-2">

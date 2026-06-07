@@ -11,7 +11,7 @@ import { useLanguage } from './LanguageContext';
 
 const LIMIT = 12;
 
-export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = '', searchMode = 'standard', viewMode = 'grid', gyroPermission, onReviewsLoaded }) {
+export default function ReviewFeed({ sort = 'newest', genre = '', media = '', searchQuery = '', searchMode = 'standard', viewMode = 'grid', gyroPermission, onReviewsLoaded }) {
   const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -75,6 +75,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
         params.append('limit', LIMIT.toString());
         params.append('sort', sort);
         if (genre) params.append('genre', genre);
+        if (media) params.append('media', media);
       }
 
       const res = await fetch(`${url}?${params}`);
@@ -109,15 +110,15 @@ export default function ReviewFeed({ sort = 'newest', genre = '', searchQuery = 
       setLoading(false);
       setInitialLoad(false);
     }
-  }, [sort, genre, loading]);
+  }, [sort, genre, media, loading]);
 
-  // Reset on sort/genre/search change
+  // Reset on sort/genre/media/search change
   useEffect(() => {
     setReviews([]);
     setHasMore(true);
     setInitialLoad(true);
     fetchReviews(0, true);
-  }, [sort, genre, searchQuery, searchMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sort, genre, media, searchQuery, searchMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {

@@ -58,6 +58,7 @@ export const translations = {
     acting: "Acting",
     cinematography: "Cinematography",
     soundtrackLabel: "Soundtrack",
+    story: "Story",
     created: "Created:",
     updated: "Updated:",
     confirmDelete: "Delete this review permanently?",
@@ -87,7 +88,6 @@ export const translations = {
     standardDesc: "Search by movie title, director, or cast members.",
     aiSearch: "AI Semantic Search",
     aiDesc: 'Search by vibe, mood, or concepts. Example: "a movie about space travel and love"',
-    
     // New Features
     aiTldr: "AI TL;DR",
     aiTldrLoading: "Generating Summary...",
@@ -96,6 +96,15 @@ export const translations = {
     aiTldrRetry: "Regenerate Summary",
     watchingTimeline: "Watching Timeline",
     genreBreakdown: "Genre Breakdown",
+
+    // PWA install prompt
+    installTitle: "Add CineRooms to your Home Screen",
+    installDesc: "Get the full-screen, app-like experience.",
+    installBtn: "Install App",
+    iosInstallHintPre: "Tap",
+    iosInstallHintPost: "then “Add to Home Screen”",
+    openInSafari: "Tap ··· and choose “Open in Safari” to install.",
+    installDismiss: "Maybe later",
   },
   zh: {
     // Brand Statement
@@ -107,7 +116,7 @@ export const translations = {
     disclaimer: "免責聲明：本站所有影評、評分與相關媒體資源僅限於教育與學術評論用途。",
     
     // HomePage
-    filterAll: "全部電影",
+    filterAll: "全部類型",
     watched: "最近觀看",
     newest: "最新發表",
     rating: "評分最高",
@@ -115,7 +124,7 @@ export const translations = {
     addReview: "新增影評",
 
     // Genres
-    All: "全部電影",
+    All: "全部類型",
     Action: "動作",
     Comedy: "喜劇",
     Drama: "劇情",
@@ -152,6 +161,7 @@ export const translations = {
     acting: "演員表現",
     cinematography: "攝影與視覺",
     soundtrackLabel: "配樂與音效",
+    story: "故事劇本",
     created: "發表於：",
     updated: "更新於：",
     confirmDelete: "確定要永久刪除此篇影評嗎？",
@@ -190,6 +200,15 @@ export const translations = {
     aiTldrRetry: "重新生成摘要",
     watchingTimeline: "觀影時間線",
     genreBreakdown: "類型佔比",
+
+    // PWA install prompt
+    installTitle: "將 CineRooms 加入主畫面",
+    installDesc: "獲得全螢幕的沉浸式 App 體驗。",
+    installBtn: "安裝 App",
+    iosInstallHintPre: "點下方",
+    iosInstallHintPost: "再選「加入主畫面」",
+    openInSafari: "點右上角 ···，選「用 Safari 開啟」即可安裝。",
+    installDismiss: "稍後再說",
   }
 };
 

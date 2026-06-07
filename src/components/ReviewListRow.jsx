@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TMDB_IMG_BASE } from '../utils/constants';
+import { TMDB_IMG_BASE, getReviewTotal } from '../utils/constants';
 
 export default function ReviewListRow({ review, index, onHover, onLeave, onClick, isExpanded, hasAnyExpanded, onToggleExpand }) {
-  const { title, release_date, runtime, poster_path, backdrop_path, created_at, emotion, pacing, acting, cinematography, soundtrack, color_palette, custom_backdrop_url, directors_info, cast_info, review_text } = review;
-  const rating = ((emotion + pacing + acting + cinematography + soundtrack) / 5).toFixed(1);
+  const { title, release_date, runtime, poster_path, backdrop_path, created_at, color_palette, custom_backdrop_url, directors_info, cast_info, review_text } = review;
+  const rating = (getReviewTotal(review) ?? 0).toFixed(1);
 
   const palette = color_palette 
     ? (typeof color_palette === 'string' ? JSON.parse(color_palette) : color_palette)

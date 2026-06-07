@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
-import { computeEntertainment, computeCinematic, computeTotal } from '../utils/constants';
+import { getReviewTotal } from '../utils/constants';
 
 function getLast12Months() {
   const months = [];
@@ -28,9 +28,7 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
     let genreCounts = {};
 
     reviews.forEach(r => {
-      const ent = computeEntertainment(r.emotion || 0, r.pacing || 0);
-      const cin = computeCinematic(r.acting || 0, r.cinematography || 0, r.soundtrack || 0);
-      totalScoreSum += computeTotal(ent, cin);
+      totalScoreSum += getReviewTotal(r) ?? 0;
 
       let gList = [];
       if (typeof r.genres === 'string') {

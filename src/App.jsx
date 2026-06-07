@@ -1,17 +1,41 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { ToastProvider } from './components/Toast';
 import { AdminProvider } from './components/AdminAuth';
 import { LanguageProvider } from './components/LanguageContext';
 import SmoothScroll from './components/SmoothScroll';
 import CustomCursor from './components/CustomCursor';
+import InstallPrompt from './components/InstallPrompt';
 import HomePage from './pages/HomePage';
+
+// We manage scroll ourselves (top-of-feed on mount, top-of-detail on open), so
+// stop the browser from also restoring old offsets on back/forward — that race
+// is what dropped you onto a random middle card after a swipe-back.
+if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
 
 // The review page pulls in heavy, review-only deps (recharts radar chart,
 // react-markdown, html2canvas share card). Lazy-load it so the homepage's
 // initial bundle stays small and loads fast; the chunk fetches on navigation.
 const ReviewPage = lazy(() => import('./pages/ReviewPage'));
+
+// Keyed by pathname so <AnimatePresence mode="wait"> actually runs each page's
+// exit animation before the next mounts — a smooth crossfade between the feed
+// and a review, instead of an abrupt swap. (Without the location key the exit
+// never fires.)
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/review/:id" element={<ReviewPage />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
 
 export default function App() {
   return (
@@ -21,13 +45,12 @@ export default function App() {
           <SmoothScroll />
           <CustomCursor />
           <BrowserRouter>
+            {/* Inside the router so it can hide itself off the home feed — its
+                fixed top banner otherwise covers the review page's back/lang
+                buttons (higher z-index) and silently swallows their taps. */}
+            <InstallPrompt />
             <Suspense fallback={<div className="min-h-dvh bg-bg-deep" />}>
-              <AnimatePresence mode="wait">
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/review/:id" element={<ReviewPage />} />
-                </Routes>
-              </AnimatePresence>
+              <AnimatedRoutes />
             </Suspense>
           </BrowserRouter>
         </ToastProvider>

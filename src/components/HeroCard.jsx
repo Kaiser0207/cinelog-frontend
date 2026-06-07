@@ -1,12 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, formatDate } from '../utils/constants';
+import { TMDB_IMG_BASE, getReviewTotal, formatDate } from '../utils/constants';
 import { useLanguage } from './LanguageContext';
 
 export default function HeroCard({ review }) {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const [heroLoaded, setHeroLoaded] = React.useState(false);
 
   if (!review) return null;
 
@@ -29,9 +30,7 @@ export default function HeroCard({ review }) {
     ? (typeof review.watch_dates === 'string' ? JSON.parse(review.watch_dates) : review.watch_dates)
     : [];
 
-  const entertainment = computeEntertainment(emotion, pacing);
-  const cinematic = computeCinematic(acting, cinematography, soundtrack);
-  const score = computeTotal(entertainment, cinematic);
+  const score = getReviewTotal(review) ?? 0;
 
   const heroImage = review.custom_backdrop_url 
     ? review.custom_backdrop_url
@@ -48,15 +47,20 @@ export default function HeroCard({ review }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       onClick={() => navigate(`/review/${id}`)}
-      className="relative w-full h-[42vh] max-h-[380px] min-h-[300px] md:max-h-[440px] rounded-3xl overflow-hidden shadow-2xl cursor-pointer group"
+      className="relative w-full h-[42vh] max-h-[380px] min-h-[300px] md:max-h-[440px] rounded-3xl overflow-hidden shadow-2xl cursor-pointer group bg-[#1A1A1A]"
     >
-      {/* Background Image */}
+      {/* Background Image — above the fold, so load it eagerly with high priority
+          (was lazy, which needlessly delayed the LCP). Fades in over the dark
+          placeholder once decoded to avoid a blank→pop flash. */}
       {heroImage ? (
         <img
           src={heroImage}
           alt={title}
-          loading="lazy"
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-active:scale-105"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          onLoad={() => setHeroLoaded(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-[transform,opacity] duration-700 group-active:scale-105 ${heroLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
       ) : (
         <div className="absolute inset-0 w-full h-full bg-[#1A1A1A]" />
