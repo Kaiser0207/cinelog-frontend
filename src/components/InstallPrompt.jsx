@@ -21,7 +21,7 @@ import { useLanguage } from './LanguageContext';
 
 const DISMISS_KEY = 'cineroom_install_dismissed_until';
 const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
-const REVEAL_DELAY_MS = 3000;
+const REVEAL_DELAY_MS = 2000;
 
 function detectEnv() {
   const ua = navigator.userAgent || '';
