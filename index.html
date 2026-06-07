@@ -51,6 +51,32 @@
          it loads, before React boots, so there's no blank gap after the native
          splash. The inline check tags <html> so a normal browser tab never shows it. -->
     <link rel="preload" as="image" href="/icons/icon-512.png" />
+    <style>
+      /* Inline so the launch screen + page background are styled at first paint,
+         before index.css (bundled with the JS) loads — this kills the brief
+         unstyled/white flash between the native splash and the app. Literal
+         colors because the CSS variables aren't defined yet at this point. */
+      html, body { background: #E3DAC9; }
+      #launch-screen { display: none; }
+      html.pwa-standalone #launch-screen {
+        display: flex; align-items: center; justify-content: center;
+        position: fixed; inset: 0; z-index: 3000;
+        background: #E3DAC9; transition: opacity 0.5s ease;
+      }
+      #launch-screen img { width: 32vmin; height: 32vmin; }
+      #launch-screen .launch-wordmark {
+        position: absolute; top: calc(50% + 19vmin);
+        font-family: 'Nevis', 'Noto Sans TC', system-ui, sans-serif;
+        font-size: clamp(2rem, 9vmin, 3rem); letter-spacing: -0.02em;
+        color: #1A1A1A; opacity: 0;
+        animation: launchWordmark 0.6s ease 0.3s forwards;
+      }
+      @keyframes launchWordmark {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      #launch-screen.launch-hide { opacity: 0; pointer-events: none; }
+    </style>
     <script>
       (function () {
         try {
