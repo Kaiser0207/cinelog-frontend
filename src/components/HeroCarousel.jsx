@@ -18,39 +18,65 @@ export default function HeroCarousel({ reviews = [], interval = 8000 }) {
   const x = useMotionValue(0);
   const n = reviews.length;
 
-  // Measure one slide's width (== container width) and realign on resize.
+  // Keep the latest index reachable from listeners/timers without stale closures.
+  indexRef.current = index;
+
+  // Measure one slide's width and keep `x` aligned through ANY layout change —
+  // web-font load, mobile address-bar collapse, sidebar, late images. A plain
+  // window 'resize' listener misses all of those, which is what let the slide
+  // spring from a stale width and "drift" to a wrong offset. ResizeObserver
+  // catches every reflow of the actual container.
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return undefined;
     const measure = () => {
-      const w = containerRef.current?.offsetWidth || 0;
+      const w = el.offsetWidth || 0;
+      if (!w) return; // ignore 0-width (hidden/not-laid-out) so we never snap from 0
       setWidth(w);
-      x.set(-indexRef.current * w);
+      x.set(-indexRef.current * w); // hard re-align, no animation
     };
     measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [n]);
 
-  // Snap to the active slide whenever it changes.
+  // Snap to the active slide whenever it (or the measured width) changes.
+  // Cancel any in-flight spring first so rapid index changes can't stack.
   useEffect(() => {
-    indexRef.current = index;
-    if (width) {
-      animate(x, -index * width, { type: 'spring', stiffness: 260, damping: 30 });
-    }
+    if (!width) return undefined;
+    const controls = animate(x, -index * width, { type: 'spring', stiffness: 260, damping: 30 });
+    return () => controls.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, width]);
 
+  const stop = () => {
+    if (timer.current) {
+      clearInterval(timer.current);
+      timer.current = null;
+    }
+  };
   const start = () => {
     stop();
-    if (n > 1) timer.current = setInterval(() => setIndex((i) => (i + 1) % n), interval);
-  };
-  const stop = () => {
-    if (timer.current) clearInterval(timer.current);
+    if (n > 1) {
+      timer.current = setInterval(() => {
+        // A backgrounded tab queues intervals and fires a burst on return,
+        // jumping the carousel off-grid — skip ticks while hidden.
+        if (document.hidden) return;
+        setIndex((i) => (i + 1) % n);
+      }, interval);
+    }
   };
 
   useEffect(() => {
     start();
-    return stop;
+    const onVisibility = () => (document.hidden ? stop() : start());
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [n, interval]);
 
@@ -84,6 +110,7 @@ export default function HeroCarousel({ reviews = [], interval = 8000 }) {
           drag="x"
           dragConstraints={{ left: -(n - 1) * width, right: 0 }}
           dragElastic={0.12}
+          dragMomentum={false}
           onDragStart={stop}
           onDragEnd={handleDragEnd}
         >
