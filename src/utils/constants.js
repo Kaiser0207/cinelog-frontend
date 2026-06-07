@@ -86,6 +86,41 @@ export function getScoreColor(score) {
   return '#e50914';
 }
 
+// Finer 0-10 scale for the per-episode heatmap cells (red → amber → green).
+export function getEpisodeColor(score) {
+  if (score == null || Number.isNaN(score)) return null;
+  if (score >= 9) return '#16a34a';
+  if (score >= 8) return '#22c55e';
+  if (score >= 7) return '#84cc16';
+  if (score >= 6) return '#eab308';
+  if (score >= 5) return '#f59e0b';
+  if (score >= 4) return '#f97316';
+  if (score >= 3) return '#ef4444';
+  return '#dc2626';
+}
+
+// 'movie' | 'tv' | 'anime' — anime (動漫) wins over the movie/tv split.
+export function mediaCategory(review) {
+  if (!review) return 'movie';
+  if (review.is_anime) return 'anime';
+  return review.media_type === 'tv' ? 'tv' : 'movie';
+}
+
+export const MEDIA_BADGES = {
+  movie: { en: 'Film', zh: '電影', icon: '🎬' },
+  tv: { en: 'Series', zh: '影集', icon: '📺' },
+  anime: { en: 'Anime', zh: '動漫', icon: '🌸' },
+};
+
+// Average of the rated episodes within one season (null if none rated).
+export function seasonAverage(episodeScores, seasonNumber) {
+  const vals = (episodeScores || [])
+    .filter((e) => e.season_number === seasonNumber && typeof e.score === 'number')
+    .map((e) => e.score);
+  if (vals.length === 0) return null;
+  return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+}
+
 export function formatDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -113,5 +148,12 @@ export function flattenReview(review) {
     overview: movie.overview,
     genres: (movie.genres || []).map(g => typeof g === 'object' ? g.name : g),
     color_palette: movie.color_palette || [],
+    // TV / anime
+    media_type: movie.media_type || 'movie',
+    is_anime: !!movie.is_anime,
+    number_of_seasons: movie.number_of_seasons ?? null,
+    number_of_episodes: movie.number_of_episodes ?? null,
+    seasons: movie.seasons || [],
+    // episode_scores rides along in ...rest (top-level on the API response)
   };
 }

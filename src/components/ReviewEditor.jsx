@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MovieSearch from './MovieSearch';
 import FontSelector from './FontSelector';
 import ScoreSlider from './ScoreSlider';
+import EpisodeHeatmap from './EpisodeHeatmap';
 import SpotifySearch from './SpotifySearch';
 import WatchHistory from './WatchHistory';
 import AIPredictButton from './AIPredictButton';
@@ -39,6 +40,13 @@ const EMPTY_STATE = {
   // Watch dates
   watch_dates: [],
   cast_info: [],
+  // TV / anime
+  media_type: 'movie',
+  is_anime: false,
+  number_of_seasons: null,
+  number_of_episodes: null,
+  seasons: [],
+  episode_scores: [],
 };
 
 export default function ReviewEditor({ review = null, onClose, onSaved }) {
@@ -72,6 +80,12 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
         spotify_track_name: review.spotify_track_name || '',
         watch_dates: review.watch_dates || [],
         cast_info: review.cast_info || [],
+        media_type: review.media_type || 'movie',
+        is_anime: !!review.is_anime,
+        number_of_seasons: review.number_of_seasons ?? null,
+        number_of_episodes: review.number_of_episodes ?? null,
+        seasons: review.seasons || [],
+        episode_scores: review.episode_scores || [],
       };
     }
     return { ...EMPTY_STATE };
@@ -85,7 +99,8 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleMovieSelect = (movie) => {
+  const handleMovieSelect = async (movie) => {
+    const mediaType = movie.media_type || 'movie';
     setForm((prev) => ({
       ...prev,
       tmdb_id: movie.tmdb_id || movie.id,
@@ -100,7 +115,40 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
       overview: movie.overview || '',
       backdrops: movie.backdrops || [],
       cast_info: movie.cast || [],
+      media_type: mediaType,
+      is_anime: !!movie.is_anime,
+      // Reset any series structure from a previous pick; refilled below for TV.
+      seasons: [],
+      number_of_seasons: null,
+      number_of_episodes: null,
+      episode_scores: [],
     }));
+
+    // TV/anime: pull full details so we know the per-season episode counts the
+    // heatmap needs (search results don't include them).
+    if (mediaType === 'tv') {
+      try {
+        const res = await fetch(`${API_URL}/api/movies/${movie.tmdb_id || movie.id}?media_type=tv`);
+        if (res.ok) {
+          const d = await res.json();
+          setForm((prev) => ({
+            ...prev,
+            seasons: d.seasons || [],
+            number_of_seasons: d.number_of_seasons ?? null,
+            number_of_episodes: d.number_of_episodes ?? null,
+            is_anime: !!d.is_anime,
+            runtime: d.runtime ?? prev.runtime,
+            release_date: d.release_date || prev.release_date,
+            overview: d.overview || prev.overview,
+            backdrops: d.backdrops && d.backdrops.length ? d.backdrops : prev.backdrops,
+            cast_info: d.cast && d.cast.length ? d.cast : prev.cast_info,
+            genres: (d.genres || []).map((g) => (typeof g === 'object' ? g.name : g)),
+          }));
+        }
+      } catch {
+        /* network hiccup — heatmap just won't show until re-selected */
+      }
+    }
   };
 
   const handleAIPredict = (scores) => {
@@ -192,9 +240,11 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               ai_recommendation: form.ai_recommendation || null,
               ai_related_movies: form.ai_related_movies || [],
               watch_dates: form.watch_dates,
+              episode_scores: form.episode_scores || [],
             }
           : {
               tmdb_id: form.tmdb_id,
+              media_type: form.media_type || 'movie',
               review_text: form.review_text,
               review_font: form.review_font,
               spotify_track_id: form.spotify_track_id || null,
@@ -211,6 +261,7 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
               ai_recommendation: form.ai_recommendation || null,
               ai_related_movies: form.ai_related_movies || [],
               cast_info: form.cast_info || [],
+              episode_scores: form.episode_scores || [],
             };
 
         const res = await fetch(endpoint, {
@@ -480,6 +531,22 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                   animated={animated}
                 />
               </div>
+
+              {/* Episode Heatmap (TV / anime only) */}
+              {form.media_type === 'tv' && form.seasons && form.seasons.length > 0 && (
+                <div className="glass p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-text-primary">📺 每集評分</h4>
+                    <span className="text-xs text-text-dim">點格子設定・選填</span>
+                  </div>
+                  <EpisodeHeatmap
+                    seasons={form.seasons}
+                    episodeScores={form.episode_scores}
+                    editable
+                    onChange={(next) => update('episode_scores', next)}
+                  />
+                </div>
+              )}
 
               {/* Save Button */}
               <motion.button

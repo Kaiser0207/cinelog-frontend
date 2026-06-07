@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform, useSpring, useMotionTemplate, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, getScoreColor } from '../utils/constants';
+import { TMDB_IMG_BASE, computeEntertainment, computeCinematic, computeTotal, getScoreColor, mediaCategory, MEDIA_BADGES } from '../utils/constants';
 import { useLanguage } from './LanguageContext';
 
 export default function ReviewCard({ review, index = 0, gyroPermission = false }) {
@@ -177,6 +177,16 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-6">
+        {/* Top-left: media-type badge (only for series/anime) */}
+        {mediaCategory(review) !== 'movie' && (
+          <div className="absolute top-3 left-3 z-20">
+            <div className="px-2.5 py-1 rounded-lg bg-black/65 backdrop-blur-md border border-white/10 text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-lg">
+              <span>{MEDIA_BADGES[mediaCategory(review)].icon}</span>
+              <span>{MEDIA_BADGES[mediaCategory(review)].zh}</span>
+            </div>
+          </div>
+        )}
+
         {/* Top: Score Badge - Floating with some space */}
         <div className="absolute top-3 right-3 z-20">
           <div

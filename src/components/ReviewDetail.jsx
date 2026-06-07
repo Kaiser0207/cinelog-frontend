@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useNavigate } from 'react-router-dom';
 import ScoreSlider from './ScoreSlider';
+import EpisodeHeatmap from './EpisodeHeatmap';
 import RadarChart from './RadarChart';
 import SpotifyEmbed from './SpotifyEmbed';
 import ShareCard from './ShareCard';
@@ -484,6 +485,23 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 </ReactMarkdown>
               </div>
             </motion.div>
+
+            {/* Episode Heatmap (TV / anime) */}
+            {review.media_type === 'tv' && review.seasons && review.seasons.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <h3 className="text-2xl font-bold font-syne text-[#FE494A] uppercase tracking-wider mb-4 border-b-4 border-[#FE494A] pb-2">
+                  📺 每集評分
+                </h3>
+                <EpisodeHeatmap
+                  seasons={review.seasons}
+                  episodeScores={review.episode_scores || []}
+                />
+              </motion.div>
+            )}
 
             {/* AI Recommendation & Related Movies */}
             {(review.ai_recommendation || (review.ai_related_movies && review.ai_related_movies.length > 0)) && (
