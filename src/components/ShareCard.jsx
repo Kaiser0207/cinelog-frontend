@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { FONT_MAP, getReviewTotal, TMDB_IMG_BASE } from '../utils/constants';
 
 export default function ShareCard({ review, className }) {
@@ -30,17 +30,41 @@ export default function ShareCard({ review, className }) {
     ? `${TMDB_IMG_BASE}w780${review.poster_path}`
     : null;
 
-  const handleShare = useCallback(async () => {
-    const html2canvas = (await import('html2canvas')).default;
-    const canvas = await html2canvas(cardRef.current, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: null,
-      logging: false,
-    });
+  const [sharing, setSharing] = useState(false);
+  const bgRef = useRef(null);
 
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
+  const handleShare = useCallback(async () => {
+    if (sharing) return;
+    setSharing(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+
+      let canvas;
+      try {
+        canvas = await html2canvas(cardRef.current, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: null,
+          logging: false,
+        });
+      } catch {
+        // Cross-origin image likely tainted the canvas — retry without the BG
+        if (bgRef.current) bgRef.current.style.display = 'none';
+        canvas = await html2canvas(cardRef.current, {
+          scale: 2,
+          useCORS: false,
+          allowTaint: false,
+          backgroundColor: '#1a1a1a',
+          logging: false,
+        });
+        if (bgRef.current) bgRef.current.style.display = '';
+      }
+
+      const blob = await new Promise((resolve) =>
+        canvas.toBlob((b) => resolve(b), 'image/png')
+      );
+      if (!blob) { setSharing(false); return; }
 
       const file = new File([blob], `cinerooms-${review.title || 'review'}.png`, {
         type: 'image/png',
@@ -59,8 +83,13 @@ export default function ShareCard({ review, className }) {
       } else {
         downloadBlob(blob, file.name);
       }
-    }, 'image/png');
-  }, [review]);
+    } catch (err) {
+      console.error('ShareCard error:', err);
+      alert('分享圖片產生失敗，請稍後再試');
+    } finally {
+      setSharing(false);
+    }
+  }, [review, sharing]);
 
   return (
     <div>
@@ -88,6 +117,7 @@ export default function ShareCard({ review, className }) {
           {/* Background Image */}
           {(backdropUrl || posterUrl) && (
             <div
+              ref={bgRef}
               style={{
                 position: 'absolute',
                 top: 0, left: 0, width: '100%', height: '100%',
@@ -200,10 +230,11 @@ export default function ShareCard({ review, className }) {
 
       <button
         onClick={handleShare}
+        disabled={sharing}
         className={className || "group flex items-center gap-2 px-8 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"}
       >
         <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
-          📱 Share to Story
+          {sharing ? '⏳ 產生中...' : '📱 Share to Story'}
         </span>
       </button>
     </div>

@@ -871,8 +871,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         </div>
       </div>
 
-      {/* Bottom padding for mobile floating bar */}
-      <div className="lg:hidden h-14" />
+      {/* Bottom padding for mobile floating bar (85px bar + safe-area) */}
+      <div className="lg:hidden h-28" />
     </motion.div>
   );
 }
