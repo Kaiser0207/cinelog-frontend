@@ -276,7 +276,7 @@ export default function HomePage() {
       </div>
 
       {/* Feed */}
-      <main className="max-w-7xl mx-auto px-5 pb-24" key={refreshKey}>
+      <main className="max-w-7xl mx-auto px-5 pb-32 md:pb-24" key={refreshKey}>
         {/* Sort Dropdown aligned to the right */}
         <div className="flex justify-between items-center mb-6">
           {/* View Mode Toggle */}
@@ -450,7 +450,7 @@ export default function HomePage() {
             onClick={() => setShowEditor(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="group fixed bottom-24 md:bottom-6 right-5 md:right-6 z-[110] w-14 h-14 rounded-lg cursor-pointer shadow-lg overflow-hidden"
+            className="group fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px)+1.5rem)] md:bottom-6 right-5 md:right-6 z-[110] w-14 h-14 rounded-lg cursor-pointer shadow-lg overflow-hidden"
           >
             {/* Bottom Layer: Beige background -> Dark Pink */}
             <div className="absolute inset-0 flex items-center justify-center text-3xl font-black bg-[#FE494A] group-hover:bg-[#D480C0] group-hover:text-black text-white transition-all duration-300 pointer-events-none">
