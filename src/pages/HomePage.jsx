@@ -58,10 +58,10 @@ export default function HomePage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (!footerRef.current || !greenBtnRef.current) return;
+      if (!footerRef.current || !greenBtnRef.current || !greenBtnRef.current.parentElement) return;
       const footerRect = footerRef.current.getBoundingClientRect();
-      const buttonTop = window.innerHeight - 24 - 56; // bottom-6 (24px) + h-14 (56px)
-      let clip = footerRect.top - buttonTop;
+      const buttonRect = greenBtnRef.current.parentElement.getBoundingClientRect();
+      let clip = footerRect.top - buttonRect.top;
       clip = Math.max(0, Math.min(56, clip));
       greenBtnRef.current.style.clipPath = `inset(${clip}px 0 0 0)`;
     };
@@ -450,7 +450,7 @@ export default function HomePage() {
             onClick={() => setShowEditor(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="hidden md:block group fixed bottom-6 right-6 z-[110] w-14 h-14 rounded-lg cursor-pointer shadow-lg overflow-hidden"
+            className="group fixed bottom-24 md:bottom-6 right-5 md:right-6 z-[110] w-14 h-14 rounded-lg cursor-pointer shadow-lg overflow-hidden"
           >
             {/* Bottom Layer: Beige background -> Dark Pink */}
             <div className="absolute inset-0 flex items-center justify-center text-3xl font-black bg-[#FE494A] group-hover:bg-[#D480C0] group-hover:text-black text-white transition-all duration-300 pointer-events-none">
@@ -498,9 +498,7 @@ export default function HomePage() {
       <BottomNav 
         onHomeClick={handleHomeClick}
         onSearchClick={() => setShowSearchOverlay(true)}
-        onAddClick={() => setShowEditor(true)}
         onStatsClick={() => setShowStatsModal(true)}
-        isAdmin={isAdmin}
       />
     </motion.div>
   );

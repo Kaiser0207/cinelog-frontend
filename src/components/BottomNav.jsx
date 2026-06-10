@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
 
-export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, onStatsClick, isAdmin }) {
+export default function BottomNav({ onHomeClick, onSearchClick, onStatsClick }) {
   const { t } = useLanguage();
 
   return (
@@ -32,21 +32,7 @@ export default function BottomNav({ onHomeClick, onSearchClick, onAddClick, onSt
           </span>
         </button>
 
-        {/* Add Review (Center - elevated) */}
-        {isAdmin && (
-          <div className="relative -top-4">
-            <motion.button
-              whileTap={{ scale: 0.88 }}
-              onClick={onAddClick}
-              className="w-[52px] h-[52px] rounded-2xl bg-[#FE494A] flex items-center justify-center shadow-lg shadow-[#FE494A]/25 border-[3px] border-[#3B4856]"
-            >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </motion.button>
-          </div>
-        )}
+
 
         {/* Search */}
         <button 
