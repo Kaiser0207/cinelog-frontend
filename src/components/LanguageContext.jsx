@@ -104,6 +104,7 @@ export const translations = {
     genreScores: "Genre Scores",
     highest: "Highest",
     lowest: "Lowest",
+    mostWatched: "Most Rewatched",
 
     // Reactions + Suggestion box
     reactLabel: "Your take",
@@ -245,6 +246,7 @@ export const translations = {
     genreScores: "類型評分",
     highest: "最高分",
     lowest: "最低分",
+    mostWatched: "重複觀看最多",
 
     // Reactions + Suggestion box
     reactLabel: "留個感想",

@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
-import { getReviewTotal } from '../utils/constants';
+import { API_URL, getReviewTotal, flattenReview } from '../utils/constants';
 
 function getLast12Months() {
   const months = [];
@@ -40,6 +40,38 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
   const [year, setYear] = useState('all');
   const [month, setMonth] = useState('all');
 
+  // The home feed only loads reviews 12-at-a-time via infinite scroll, so the
+  // `reviews` prop is just whatever's been scrolled into view — stats computed
+  // off it silently miss older films (e.g. a 2024 watch sitting on page 2).
+  // On open we fetch the COMPLETE set ourselves so every year/film is counted.
+  const [allReviews, setAllReviews] = useState(null);
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    let cancelled = false;
+    (async () => {
+      try {
+        const acc = [];
+        const PAGE = 100; // backend caps limit at 100; paginate for the rest
+        for (let guard = 0; guard < 50; guard++) {
+          const res = await fetch(`${API_URL}/api/reviews?limit=${PAGE}&offset=${acc.length}&sort=newest`);
+          if (!res.ok) break;
+          const data = await res.json();
+          const items = data.reviews || (Array.isArray(data) ? data : []);
+          acc.push(...items);
+          const total = data.total ?? acc.length;
+          if (items.length === 0 || acc.length >= total) break;
+        }
+        if (!cancelled) setAllReviews(acc.map(flattenReview));
+      } catch {
+        if (!cancelled) setAllReviews(null); // fall back to the prop
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isOpen]);
+
+  // Prefer the full fetched set; fall back to the prop while it loads / on error.
+  const data = (allReviews && allReviews.length) ? allReviews : reviews;
+
   // Lock background scroll while open (otherwise the page scrolls behind it).
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -51,12 +83,12 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
   // Years are derived from the data — 2027 etc. appears automatically.
   const allYears = useMemo(() => {
     const ys = new Set();
-    reviews.forEach((r) => parseDates(r).forEach((d) => {
+    data.forEach((r) => parseDates(r).forEach((d) => {
       const y = String(d).slice(0, 4);
       if (/^\d{4}$/.test(y)) ys.add(y);
     }));
     return Array.from(ys).sort((a, b) => b.localeCompare(a));
-  }, [reviews]);
+  }, [data]);
 
   const stats = useMemo(() => {
     // Timeline always shows the year's 12 months (or a rolling last-12 for "all"),
@@ -68,13 +100,13 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
 
     const base = {
       totalReviews: 0, avgScore: '—', watchCount: 0,
-      topGenres: [], genreAvg: [], highest: null, lowest: null,
+      topGenres: [], genreAvg: [], highest: null, lowest: null, rewatch: [],
       timeline: months.map(() => 0), monthLabels, maxCount: 1, hasTimeline: false,
     };
-    if (!reviews || reviews.length === 0) return base;
+    if (!data || data.length === 0) return base;
 
     // Scope = reviews with at least one watch matching the year + month filter.
-    const inScope = reviews.filter((r) => parseDates(r).some((d) => matchDate(d, year, month)));
+    const inScope = data.filter((r) => parseDates(r).some((d) => matchDate(d, year, month)));
 
     let scoreSum = 0;
     let scoredCount = 0;
@@ -101,11 +133,22 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
 
     scored.sort((a, b) => b.score - a.score);
 
+    // Most-rewatched: count each film's watch dates that fall in the current
+    // scope; >1 means a genuine rewatch (e.g. seen in 2024 AND 2026).
+    const rewatch = inScope
+      .map((r) => ({
+        title: r.title || '—',
+        count: parseDates(r).filter((d) => matchDate(d, year, month)).length,
+      }))
+      .filter((x) => x.count > 1)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
     // Timeline counts ignore the month filter (they show the whole year context).
     const timeline = months.map((m) =>
-      reviews.reduce((acc, r) => acc + parseDates(r).filter((d) => String(d).startsWith(m)).length, 0)
+      data.reduce((acc, r) => acc + parseDates(r).filter((d) => String(d).startsWith(m)).length, 0)
     );
-    const watchCount = reviews.reduce(
+    const watchCount = data.reduce(
       (acc, r) => acc + parseDates(r).filter((d) => matchDate(d, year, month)).length, 0
     );
 
@@ -120,12 +163,13 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
         .slice(0, 6),
       highest: scored[0] || null,
       lowest: scored.length > 1 ? scored[scored.length - 1] : null,
+      rewatch,
       timeline,
       monthLabels,
       maxCount: Math.max(...timeline, 1),
       hasTimeline: timeline.some((c) => c > 0),
     };
-  }, [reviews, year, month]);
+  }, [data, year, month]);
 
   if (!isOpen) return null;
 
@@ -216,6 +260,31 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Most-rewatched films (only films watched 2+ times in scope) */}
+          {stats.rewatch.length > 0 && (
+            <div className="bg-[#1A1A1A] rounded-2xl p-5 flex flex-col gap-3 shrink-0">
+              <span className="text-xs font-bold font-[var(--font-jetbrains)] text-white/80 uppercase">
+                {t('mostWatched') || '重複觀看最多'}
+              </span>
+              <div className="flex flex-col gap-2.5">
+                {stats.rewatch.map((m, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <span className="w-5 text-sm font-black font-[var(--font-bebas)] text-white/30 shrink-0">
+                      {idx + 1}
+                    </span>
+                    <span className="flex-1 text-[12px] font-bold text-white/85 truncate">{m.title}</span>
+                    <span className="flex items-baseline gap-0.5 shrink-0">
+                      <span className="text-[10px] text-white/40">×</span>
+                      <span className="text-lg font-black font-[var(--font-bebas)] text-[#FFD15C] tabular-nums leading-none">
+                        {m.count}
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
