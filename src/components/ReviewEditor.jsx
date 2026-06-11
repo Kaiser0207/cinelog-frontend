@@ -140,30 +140,28 @@ export default function ReviewEditor({ review = null, onClose, onSaved, initialM
       episode_scores: [],
     }));
 
-    // TV/anime: pull full details so we know the per-season episode counts the
-    // heatmap needs (search results don't include them).
-    if (mediaType === 'tv') {
-      try {
-        const res = await fetch(`${API_URL}/api/movies/${movie.tmdb_id || movie.id}?media_type=tv`);
-        if (res.ok) {
-          const d = await res.json();
-          setForm((prev) => ({
-            ...prev,
-            seasons: d.seasons || [],
-            number_of_seasons: d.number_of_seasons ?? null,
-            number_of_episodes: d.number_of_episodes ?? null,
-            is_anime: !!d.is_anime,
-            runtime: d.runtime ?? prev.runtime,
-            release_date: d.release_date || prev.release_date,
-            overview: d.overview || prev.overview,
-            backdrops: d.backdrops && d.backdrops.length ? d.backdrops : prev.backdrops,
-            cast_info: d.cast && d.cast.length ? d.cast : prev.cast_info,
-            genres: (d.genres || []).map((g) => (typeof g === 'object' ? g.name : g)),
-          }));
-        }
-      } catch {
-        /* network hiccup — heatmap just won't show until re-selected */
+    // Search results omit the backdrop gallery (and TV episode counts), so pull
+    // full details — for movies AND TV — to feed the cover-image picker + heatmap.
+    try {
+      const res = await fetch(`${API_URL}/api/movies/${movie.tmdb_id || movie.id}?media_type=${mediaType}`);
+      if (res.ok) {
+        const d = await res.json();
+        setForm((prev) => ({
+          ...prev,
+          seasons: d.seasons || [],
+          number_of_seasons: d.number_of_seasons ?? null,
+          number_of_episodes: d.number_of_episodes ?? null,
+          is_anime: !!d.is_anime,
+          runtime: d.runtime ?? prev.runtime,
+          release_date: d.release_date || prev.release_date,
+          overview: d.overview || prev.overview,
+          backdrops: d.backdrops && d.backdrops.length ? d.backdrops : prev.backdrops,
+          cast_info: d.cast && d.cast.length ? d.cast : prev.cast_info,
+          genres: (d.genres || []).map((g) => (typeof g === 'object' ? g.name : g)),
+        }));
       }
+    } catch {
+      /* network hiccup — picker/heatmap just won't show until re-selected */
     }
   };
 
@@ -350,7 +348,9 @@ export default function ReviewEditor({ review = null, onClose, onSaved, initialM
   // list), so the cover-image picker had nothing to show. Re-fetch details once
   // to populate backdrops (and backfill season structure for older TV reviews).
   useEffect(() => {
-    if (!isEdit || !form.tmdb_id) return undefined;
+    // Runs for edit mode AND adopted-from-suggestion prefill (anything that
+    // mounts with a movie already chosen but no backdrop gallery yet).
+    if (!form.tmdb_id) return undefined;
     let cancelled = false;
     (async () => {
       try {
