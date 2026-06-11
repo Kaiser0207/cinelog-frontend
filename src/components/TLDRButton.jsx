@@ -35,10 +35,12 @@ export default function TLDRButton({ reviewText, movieTitle }) {
 
   return (
     <div className="mt-3 mb-6">
-      <button
+      <motion.button
         onClick={fetchTldr}
         disabled={loading}
-        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1A1A1A] text-[#D480C0] border border-[#D480C0]/30 text-xs font-bold font-[var(--font-jetbrains)] uppercase tracking-wider hover:bg-[#D480C0]/10 transition-all disabled:opacity-50 cursor-pointer"
+        whileHover={!loading ? { scale: 1.02 } : {}}
+        whileTap={!loading ? { scale: 0.98 } : {}}
+        className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#FE494A] text-black text-sm font-bold shadow-sm hover:bg-[#ff5e5f] transition-all disabled:opacity-50 cursor-pointer border-none"
       >
         {loading ? (
           <motion.span 
@@ -50,7 +52,7 @@ export default function TLDRButton({ reviewText, movieTitle }) {
           </motion.span>
         ) : '✦'}
         {loading ? t('aiTldrLoading') : tldr ? t('aiTldrRetry') : t('aiTldr')}
-      </button>
+      </motion.button>
 
       <AnimatePresence>
         {isOpen && tldr && (
@@ -61,7 +63,7 @@ export default function TLDRButton({ reviewText, movieTitle }) {
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden mt-3"
           >
-            <div className="p-4 bg-[#1A1A1A] rounded-xl border-l-4 border-[#D480C0]">
+            <div className="p-4 bg-[#1A1A1A] rounded-xl border-l-4 border-[#FE494A]">
               <p className="text-sm text-white/90 font-[var(--font-syne)] leading-relaxed">
                 {tldr}
               </p>

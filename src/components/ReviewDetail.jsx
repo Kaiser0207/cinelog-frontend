@@ -9,6 +9,7 @@ import RadarChart from './RadarChart';
 import SpotifyEmbed from './SpotifyEmbed';
 import ShareCard from './ShareCard';
 import TLDRButton from './TLDRButton';
+import ReactionBar from './ReactionBar';
 import { useAdmin } from './AdminAuth';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
@@ -553,6 +554,8 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 </motion.div>
               )
             )}
+
+            <ReactionBar reviewId={review.id} />
 
             {/* AI Recommendation & Related Movies */}
             {(review.ai_recommendation || (review.ai_related_movies && review.ai_related_movies.length > 0)) && (

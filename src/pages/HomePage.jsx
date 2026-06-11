@@ -7,6 +7,7 @@ import StatsModal from '../components/StatsModal';
 import { SORT_OPTIONS } from '../utils/constants';
 import { useLanguage } from '../components/LanguageContext';
 import { useAdmin } from '../components/AdminAuth';
+import SuggestionBox from '../components/SuggestionBox';
 import { useGyroscope } from '../hooks/useGyroscope';
 
 const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
@@ -431,6 +432,8 @@ export default function HomePage() {
               {t('followIg')}
             </span>
           </a>
+
+          <SuggestionBox />
 
           <div className="text-[10px] md:text-xs font-bold font-jetbrains text-white/50 border-t border-white/10 pt-8 w-full space-y-1">
             <p 
