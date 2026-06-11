@@ -1,9 +1,13 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
+import { useAdmin } from './AdminAuth';
+import { SuggestionModal } from './SuggestionBox';
 
 export default function BottomNav({ onHomeClick, onSearchClick, onStatsClick }) {
   const { t } = useLanguage();
+  const { isAdmin } = useAdmin();
+  const [suggestOpen, setSuggestOpen] = useState(false);
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-[110]">
@@ -63,7 +67,24 @@ export default function BottomNav({ onHomeClick, onSearchClick, onStatsClick }) 
           </span>
         </button>
 
+        {/* Suggestion box (visitor) / Inbox (admin) */}
+        <button
+          onClick={() => setSuggestOpen(true)}
+          className="flex flex-col items-center justify-center gap-0.5 w-16 h-full active:scale-90 transition-transform cursor-pointer"
+        >
+          <span className="text-[22px] leading-none h-6 flex items-center">{isAdmin ? '📥' : '🎬'}</span>
+          <span className="text-[9px] font-bold font-[var(--font-jetbrains)] text-[#E8E2D2]/50 uppercase tracking-widest">
+            {isAdmin ? t('navInbox') : t('navSuggest')}
+          </span>
+        </button>
+
       </div>
+
+      <AnimatePresence>
+        {suggestOpen && (
+          <SuggestionModal mode={isAdmin ? 'inbox' : 'form'} onClose={() => setSuggestOpen(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

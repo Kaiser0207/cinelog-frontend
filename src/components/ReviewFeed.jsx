@@ -196,7 +196,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
                   isExpanded={expandedRowId === review.id}
                   hasAnyExpanded={expandedRowId !== null}
                   onToggleExpand={() => setExpandedRowId(expandedRowId === review.id ? null : review.id)}
-                  onClick={() => navigate(`/review/${review.id}`)}
+                  onClick={() => navigate(`/review/${review.id}`, { state: { review } })}
                 />
               </div>
             );

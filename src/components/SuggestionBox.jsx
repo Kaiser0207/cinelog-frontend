@@ -7,42 +7,42 @@ import { useAdmin } from './AdminAuth';
 import MovieSearch from './MovieSearch';
 
 /**
- * 電影推薦箱 — a public "suggestion box". Any visitor can recommend a title
- * for Kaiser to watch/review; submissions land in an admin-only inbox and
- * ping Discord. Self-contained: renders its own trigger button(s) + modals,
- * so the host page only needs to drop in <SuggestionBox />.
+ * 電影推薦箱 — a public "suggestion box". Visitors recommend a title for Kaiser
+ * to watch/review; submissions land in an admin-only inbox and ping Discord.
+ *
+ * - SuggestionModal: controlled modal host, opened from the BottomNav trigger.
+ * - SuggestionBox (default): self-contained trigger + modal, for the desktop footer.
+ *
+ * The site is a light/cream theme (bg ~#F0EAD6, text #1A1A1A), so all copy uses
+ * the dark text tokens and inputs inherit the global cream input style.
  */
+
+export function SuggestionModal({ mode, onClose }) {
+  const { password } = useAdmin();
+  return mode === 'inbox' ? (
+    <Inbox password={password} onClose={onClose} />
+  ) : (
+    <SuggestForm onClose={onClose} />
+  );
+}
+
 export default function SuggestionBox() {
   const { t } = useLanguage();
-  const { isAdmin, password } = useAdmin();
-  const [showForm, setShowForm] = useState(false);
-  const [showInbox, setShowInbox] = useState(false);
+  const { isAdmin } = useAdmin();
+  const [open, setOpen] = useState(false);
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <button
-          onClick={() => setShowForm(true)}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold text-xs md:text-sm uppercase tracking-wider transition-all duration-300 border-none shadow-sm active:scale-95 cursor-pointer"
-        >
-          <span className="text-lg">🎬</span>
-          {t('suggestBox')}
-        </button>
-
-        {isAdmin && (
-          <button
-            onClick={() => setShowInbox(true)}
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs md:text-sm uppercase tracking-wider transition-all border border-white/15 cursor-pointer"
-          >
-            <span className="text-base">📥</span>
-            {t('inbox')}
-          </button>
-        )}
-      </div>
+      <button
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold text-xs md:text-sm uppercase tracking-wider transition-all duration-300 border-none shadow-sm active:scale-95 cursor-pointer"
+      >
+        <span className="text-lg">{isAdmin ? '📥' : '🎬'}</span>
+        {isAdmin ? t('inbox') : t('suggestBox')}
+      </button>
 
       <AnimatePresence>
-        {showForm && <SuggestForm key="form" onClose={() => setShowForm(false)} />}
-        {showInbox && <Inbox key="inbox" password={password} onClose={() => setShowInbox(false)} />}
+        {open && <SuggestionModal mode={isAdmin ? 'inbox' : 'form'} onClose={() => setOpen(false)} />}
       </AnimatePresence>
     </>
   );
@@ -98,7 +98,7 @@ function SuggestForm({ onClose }) {
 
   return (
     <Backdrop onClose={onClose}>
-      <h2 className="text-xl font-bold text-white mb-1 flex items-center gap-2">🎬 {t('suggestTitle')}</h2>
+      <h2 className="text-xl font-bold text-text-primary mb-1 flex items-center gap-2">🎬 {t('suggestTitle')}</h2>
       <p className="text-text-muted text-sm mb-5">{t('suggestSubtitle')}</p>
 
       <div className="space-y-4">
@@ -111,7 +111,7 @@ function SuggestForm({ onClose }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('suggestTitlePlaceholder')}
-            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+            className="w-full"
           />
         </div>
 
@@ -123,7 +123,7 @@ function SuggestForm({ onClose }) {
             rows={3}
             maxLength={1000}
             placeholder={t('suggestNotePlaceholder')}
-            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-sm resize-none"
+            className="w-full resize-none"
           />
         </div>
 
@@ -135,7 +135,7 @@ function SuggestForm({ onClose }) {
             onChange={(e) => setName(e.target.value)}
             maxLength={60}
             placeholder={t('suggestNamePlaceholder')}
-            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+            className="w-full"
           />
         </div>
 
@@ -208,15 +208,15 @@ function Inbox({ password, onClose }) {
 
   const STATUS_STYLE = {
     new: 'bg-[#FE494A]/15 text-[#FE494A]',
-    adopted: 'bg-emerald-500/15 text-emerald-400',
-    dismissed: 'bg-white/10 text-white/40',
+    adopted: 'bg-emerald-500/15 text-emerald-600',
+    dismissed: 'bg-black/10 text-text-dim',
   };
 
   return (
     <Backdrop onClose={onClose} wide>
-      <div className="flex justify-between items-center mb-5 border-b border-white/10 pb-4">
-        <h2 className="text-xl font-bold text-white">📥 {t('inbox')}</h2>
-        <button onClick={onClose} className="text-text-muted hover:text-white bg-transparent border-none cursor-pointer">✕</button>
+      <div className="flex justify-between items-center mb-5 border-b border-border-subtle pb-4">
+        <h2 className="text-xl font-bold text-text-primary">📥 {t('inbox')}</h2>
+        <button onClick={onClose} className="text-text-muted hover:text-text-primary bg-transparent border-none cursor-pointer text-lg">✕</button>
       </div>
 
       {loading ? (
@@ -228,7 +228,7 @@ function Inbox({ password, onClose }) {
           {items.map((it) => (
             <li
               key={it.id}
-              className={`flex gap-3 bg-black/30 px-4 py-3 rounded-xl border border-white/5 ${
+              className={`flex gap-3 bg-bg-card px-4 py-3 rounded-xl border border-border-subtle ${
                 it.status === 'dismissed' ? 'opacity-50' : ''
               }`}
             >
@@ -245,7 +245,7 @@ function Inbox({ password, onClose }) {
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-white font-semibold text-sm">{it.title}</p>
+                  <p className="text-text-primary font-semibold text-sm">{it.title}</p>
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${STATUS_STYLE[it.status] || ''}`}>
                     {it.status}
                   </span>
@@ -254,14 +254,14 @@ function Inbox({ password, onClose }) {
                 <p className="text-text-dim text-[11px] mt-1">
                   {it.submitter_name || '匿名'} · {it.created_at ? new Date(it.created_at).toLocaleString() : ''}
                 </p>
-                <div className="flex gap-2 mt-2">
-                  <button onClick={() => setStatus(it.id, 'adopted')} className="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 bg-transparent border-none cursor-pointer p-0">
+                <div className="flex gap-3 mt-2">
+                  <button onClick={() => setStatus(it.id, 'adopted')} className="text-[11px] font-bold text-emerald-600 hover:text-emerald-500 bg-transparent border-none cursor-pointer p-0">
                     ✓ {t('inboxAdopt')}
                   </button>
-                  <button onClick={() => setStatus(it.id, 'dismissed')} className="text-[11px] font-bold text-white/40 hover:text-white/70 bg-transparent border-none cursor-pointer p-0">
+                  <button onClick={() => setStatus(it.id, 'dismissed')} className="text-[11px] font-bold text-text-dim hover:text-text-muted bg-transparent border-none cursor-pointer p-0">
                     {t('inboxDismiss')}
                   </button>
-                  <button onClick={() => remove(it.id)} className="text-[11px] font-bold text-red-400 hover:text-red-300 bg-transparent border-none cursor-pointer p-0 ml-auto">
+                  <button onClick={() => remove(it.id)} className="text-[11px] font-bold text-[#FE494A] hover:opacity-70 bg-transparent border-none cursor-pointer p-0 ml-auto">
                     🗑 {t('inboxDelete')}
                   </button>
                 </div>
@@ -275,7 +275,7 @@ function Inbox({ password, onClose }) {
 }
 
 // --------------------------------------------------------------------------
-// Shared modal shell
+// Shared modal shell (light/cream theme)
 // --------------------------------------------------------------------------
 
 function Backdrop({ children, onClose, wide = false }) {
@@ -284,7 +284,7 @@ function Backdrop({ children, onClose, wide = false }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
@@ -292,7 +292,7 @@ function Backdrop({ children, onClose, wide = false }) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-        className={`bg-bg-card border border-white/10 p-6 rounded-2xl w-full shadow-2xl text-left ${wide ? 'max-w-lg' : 'max-w-md'}`}
+        className={`bg-bg-surface border border-border-subtle p-6 rounded-2xl w-full shadow-2xl text-left text-text-primary ${wide ? 'max-w-lg' : 'max-w-md'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

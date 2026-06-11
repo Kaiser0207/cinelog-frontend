@@ -82,7 +82,7 @@ export default function ReactionBar({ reviewId }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2 mt-3 mb-6">
-      <span className="text-[11px] font-bold uppercase tracking-wider text-white/40 mr-1">
+      <span className="text-[11px] font-bold uppercase tracking-wider text-text-muted mr-1">
         {t('reactLabel')}
       </span>
       {EMOJIS.map((e) => {
@@ -96,8 +96,8 @@ export default function ReactionBar({ reviewId }) {
             whileTap={{ scale: 0.85 }}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-all cursor-pointer ${
               active
-                ? 'bg-[#FE494A]/15 border-[#FE494A] text-[#FE494A]'
-                : 'bg-[#1A1A1A] border-white/10 text-white/70 hover:border-white/30'
+                ? 'bg-[#FE494A]/15 border-[#FE494A] text-[#FE494A] font-bold'
+                : 'bg-bg-card border-border-subtle text-text-primary hover:border-text-dim'
             }`}
           >
             <span className="text-base leading-none">{e}</span>

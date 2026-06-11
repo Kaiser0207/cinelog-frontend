@@ -46,7 +46,7 @@ export default function HeroCard({ review }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      onClick={() => navigate(`/review/${id}`)}
+      onClick={() => navigate(`/review/${id}`, { state: { review } })}
       className="relative w-full h-[42vh] max-h-[380px] min-h-[300px] md:max-h-[440px] rounded-3xl overflow-hidden shadow-2xl cursor-pointer group bg-[#1A1A1A]"
     >
       {/* Background Image — above the fold, so load it eagerly with high priority

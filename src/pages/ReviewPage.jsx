@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReviewDetail from '../components/ReviewDetail';
 import { API_URL, flattenReview } from '../utils/constants';
@@ -9,35 +9,56 @@ const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
 export default function ReviewPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [review, setReview] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  // When arriving from the feed we already have the full review object — render
+  // it instantly and only fall back to a skeleton on a cold/direct load.
+  const preloaded =
+    location.state?.review && String(location.state.review.id) === String(id)
+      ? location.state.review
+      : null;
+  const [review, setReview] = useState(preloaded ? flattenReview(preloaded) : null);
+  const [loading, setLoading] = useState(!preloaded);
   const [error, setError] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetchReview();
-  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+    let cancelled = false;
 
-  const fetchReview = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`${API_URL}/api/reviews/${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setReview(flattenReview(data));
-      } else if (res.status === 404) {
-        setError('not_found');
-      } else {
-        throw new Error('Failed to load review');
-      }
-    } catch (err) {
-      if (!error) setError(err.message);
-    } finally {
+    const hasPreload =
+      location.state?.review && String(location.state.review.id) === String(id);
+    if (hasPreload) {
+      // Show the cached review immediately; refresh silently below.
+      setReview(flattenReview(location.state.review));
       setLoading(false);
+    } else {
+      setReview(null);
+      setLoading(true);
     }
-  };
+    setError(null);
+
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/reviews/${id}`);
+        if (cancelled) return;
+        if (res.ok) {
+          setReview(flattenReview(await res.json()));
+        } else if (res.status === 404) {
+          if (!hasPreload) setError('not_found');
+        } else {
+          throw new Error('Failed to load review');
+        }
+      } catch (err) {
+        if (!cancelled && !hasPreload) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSaved = (updated) => {
     setReview(flattenReview(updated));

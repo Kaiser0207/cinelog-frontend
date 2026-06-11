@@ -91,7 +91,7 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      onClick={() => navigate(`/review/${review.id}`)}
+      onClick={() => navigate(`/review/${review.id}`, { state: { review } })}
       whileHover={gyroPermission ? {} : { y: -4, transition: { duration: 0.3, ease: "easeOut" } }}
       whileTap={!gyroPermission && window.innerWidth <= 768 ? { scale: 0.97, rotateX: 2, rotateY: 2 } : { scale: 0.95, filter: "brightness(0.9)" }}
       className="group relative flex flex-col glass rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 shadow-lg hover:shadow-[#FE494A]/20 hover:shadow-2xl max-w-full transform-gpu [content-visibility:auto] [contain-intrinsic-size:auto_460px]"

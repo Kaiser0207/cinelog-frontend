@@ -433,7 +433,10 @@ export default function HomePage() {
             </span>
           </a>
 
-          <SuggestionBox />
+          {/* Mobile uses the BottomNav entry; keep a footer entry for desktop. */}
+          <div className="hidden md:block">
+            <SuggestionBox />
+          </div>
 
           <div className="text-[10px] md:text-xs font-bold font-jetbrains text-white/50 border-t border-white/10 pt-8 w-full space-y-1">
             <p 
