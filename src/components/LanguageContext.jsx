@@ -98,6 +98,11 @@ export const translations = {
     genreBreakdown: "Genre Breakdown",
     thisYear: "This Year",
     noRecords: "No watch records yet",
+    allYears: "All",
+    watches: "Watches",
+    genreScores: "Genre Scores",
+    highest: "Highest",
+    lowest: "Lowest",
 
     // Reactions + Suggestion box
     reactLabel: "Your take",
@@ -233,6 +238,11 @@ export const translations = {
     genreBreakdown: "類型佔比",
     thisYear: "本年觀影",
     noRecords: "尚無觀影紀錄",
+    allYears: "全部",
+    watches: "觀影次數",
+    genreScores: "類型評分",
+    highest: "最高分",
+    lowest: "最低分",
 
     // Reactions + Suggestion box
     reactLabel: "留個感想",
