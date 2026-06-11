@@ -4,16 +4,14 @@ import { API_URL } from '../utils/constants';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
 
-// Label + emoji. The emoji is the stored key (must match ALLOWED_EMOJI in the
-// backend reactions router); the label is display-only. Rendered 3-per-row.
-const REACTIONS = [
-  { emoji: '😍', label: '好愛' },
-  { emoji: '😂', label: '笑死' },
-  { emoji: '🥵', label: '很色' },
-  { emoji: '😑', label: '超普' },
-  { emoji: '😭', label: '哭爛' },
-  { emoji: '💩', label: '超糞' },
-];
+// Display-only labels per emoji. The emoji itself is the stored key; which
+// emoji are *allowed* now comes from the backend (GET /reactions/palette) so
+// the two can't drift out of sync. This list is only the fallback set used
+// until/if that fetch fails, and the source of the human labels.
+const LABELS = {
+  '😍': '好愛', '😂': '笑死', '🥵': '很色', '😑': '超普', '😭': '哭爛', '💩': '超糞',
+};
+const DEFAULT_EMOJI = ['😍', '😂', '🥵', '😑', '😭', '💩'];
 
 // A stable anonymous id per browser so "one reaction per person per review"
 // can be enforced without any login. This is deduplication, not security.
@@ -30,8 +28,22 @@ export default function ReactionBar({ reviewId }) {
   const [counts, setCounts] = useState({});
   const [mine, setMine] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [emojis, setEmojis] = useState(DEFAULT_EMOJI);
   const { addToast } = useToast();
   const { t } = useLanguage();
+
+  // The accepted emoji set is owned by the backend — fetch it so the buttons
+  // can never offer an emoji the API would reject. Falls back to DEFAULT_EMOJI.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_URL}/api/reviews/reactions/palette`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && Array.isArray(data?.emoji) && data.emoji.length) setEmojis(data.emoji);
+      })
+      .catch(() => { /* keep the fallback set */ });
+    return () => { cancelled = true; };
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -94,7 +106,8 @@ export default function ReactionBar({ reviewId }) {
         {t('reactLabel')}
       </span>
       <div className="grid grid-cols-3 gap-2.5 max-w-md">
-        {REACTIONS.map(({ emoji, label }) => {
+        {emojis.map((emoji) => {
+          const label = LABELS[emoji] || '';
           const active = mine === emoji;
           const n = counts[emoji] || 0;
           return (

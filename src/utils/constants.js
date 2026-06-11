@@ -151,6 +151,17 @@ export function formatDate(dateStr) {
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+// Postgres TIMESTAMPTZ serializes as "2026-06-10 15:23:18.506250+00:00"
+// (space-separated, 6-digit microseconds) which Safari/iOS refuses to parse
+// (→ "Invalid Date"). Normalize to ISO — 'T' separator, ≤3 fractional digits —
+// before building the Date. Returns '' for null/garbage instead of "Invalid Date".
+export function formatDateTime(value) {
+  if (!value) return '';
+  const iso = String(value).replace(' ', 'T').replace(/\.(\d{3})\d+/, '.$1');
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
+}
+
 /**
  * Flatten the nested API response into a flat review object for components.
  * API returns: { id, movie: { title, poster_path, ... }, emotion, ... }

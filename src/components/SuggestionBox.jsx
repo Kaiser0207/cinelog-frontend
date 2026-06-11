@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { API_URL, TMDB_IMG_BASE } from '../utils/constants';
+import { API_URL, TMDB_IMG_BASE, formatDateTime } from '../utils/constants';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
 import { useAdmin } from './AdminAuth';
@@ -163,6 +163,7 @@ function SuggestForm({ onClose }) {
 
 function Inbox({ password, onClose }) {
   const { t } = useLanguage();
+  const { addToast } = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('new');
@@ -196,21 +197,21 @@ function Inbox({ password, onClose }) {
         headers: auth({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ status }),
       });
-      if (res.ok) {
-        const updated = await res.json();
-        setItems((prev) => prev.map((it) => (it.id === id ? updated : it)));
-      }
+      if (!res.ok) throw new Error('PATCH failed');
+      const updated = await res.json();
+      setItems((prev) => prev.map((it) => (it.id === id ? updated : it)));
     } catch {
-      /* ignore */
+      addToast(t('inboxError'), 'error');
     }
   };
 
   const remove = async (id) => {
     try {
       const res = await fetch(`${API_URL}/api/suggestions/${id}`, { method: 'DELETE', headers: auth() });
-      if (res.ok || res.status === 204) setItems((prev) => prev.filter((it) => it.id !== id));
+      if (!res.ok && res.status !== 204) throw new Error('DELETE failed');
+      setItems((prev) => prev.filter((it) => it.id !== id));
     } catch {
-      /* ignore */
+      addToast(t('inboxError'), 'error');
     }
   };
 
@@ -299,7 +300,7 @@ function Inbox({ password, onClose }) {
                 <p className="text-text-primary font-semibold text-base">{it.title}</p>
                 {it.note && <p className="text-text-muted text-sm mt-1 whitespace-pre-wrap">{it.note}</p>}
                 <p className="text-text-dim text-xs mt-1">
-                  {it.submitter_name || '匿名'} · {it.created_at ? new Date(it.created_at).toLocaleString() : ''}
+                  {it.submitter_name || '匿名'} · {formatDateTime(it.created_at)}
                 </p>
                 <div className="flex gap-4 mt-2 items-center">
                   {it.status === 'adopted' ? (
@@ -334,6 +335,14 @@ function Inbox({ password, onClose }) {
 // --------------------------------------------------------------------------
 
 function Backdrop({ children, onClose, wide = false }) {
+  // Lock background scroll while the modal is open, otherwise touch-dragging
+  // over the overlay scrolls the page behind it (mobile).
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
