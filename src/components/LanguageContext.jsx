@@ -96,6 +96,8 @@ export const translations = {
     aiTldrRetry: "Regenerate Summary",
     watchingTimeline: "Watching Timeline",
     genreBreakdown: "Genre Breakdown",
+    thisYear: "This Year",
+    noRecords: "No watch records yet",
 
     // Reactions + Suggestion box
     reactLabel: "React",
@@ -104,6 +106,7 @@ export const translations = {
     inbox: "Suggestion Inbox",
     navSuggest: "Suggest",
     navInbox: "Inbox",
+    sentLabel: "Sent",
     suggestTitle: "Recommend a movie to Kaiser",
     suggestSubtitle: "Found something I'd love? Drop it in the box.",
     suggestTitleLabel: "Title",
@@ -224,6 +227,8 @@ export const translations = {
     aiTldrRetry: "重新生成摘要",
     watchingTimeline: "觀影時間線",
     genreBreakdown: "類型佔比",
+    thisYear: "本年觀影",
+    noRecords: "尚無觀影紀錄",
 
     // Reactions + Suggestion box
     reactLabel: "留個表情",
@@ -232,6 +237,7 @@ export const translations = {
     inbox: "推薦箱收件匣",
     navSuggest: "推薦箱",
     navInbox: "收件匣",
+    sentLabel: "已送出",
     suggestTitle: "推薦一部電影給 Kaiser",
     suggestSubtitle: "看到我可能會喜歡的片？丟進推薦箱吧。",
     suggestTitleLabel: "片名",

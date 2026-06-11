@@ -425,9 +425,9 @@ export default function HomePage() {
             target="_blank"
             rel="noopener noreferrer"
             data-cursor="INSTAGRAM"
-            className="group inline-flex items-center gap-3 px-6 md:px-8 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer mb-6 border-none shadow-sm active:scale-95 text-xs md:text-sm"
+            className="fx-btn group inline-flex items-center gap-3 px-6 md:px-8 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer mb-6 border-none shadow-sm active:scale-95 text-xs md:text-sm"
           >
-            <span className="text-lg md:text-xl">📸</span>
+            <span className="btn-ico text-lg md:text-xl">📸</span>
             <span className="font-black uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
               {t('followIg')}
             </span>

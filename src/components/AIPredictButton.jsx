@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { API_URL } from '../utils/constants';
 import { useToast } from './Toast';
+import { pressFx } from '../utils/motion';
 
 export default function AIPredictButton({ reviewText, onPredict, disabled = false }) {
   const [loading, setLoading] = useState(false);
+  const [ok, setOk] = useState(false);
   const { addToast } = useToast();
 
   const handlePredict = async () => {
@@ -25,6 +27,8 @@ export default function AIPredictButton({ reviewText, onPredict, disabled = fals
         const scores = await res.json();
         onPredict(scores);
         addToast('AI 預測成功！你可以再手動微調。', 'success');
+        setOk(true);
+        setTimeout(() => setOk(false), 1400);
       } else {
         throw new Error('API error');
       }
@@ -40,12 +44,11 @@ export default function AIPredictButton({ reviewText, onPredict, disabled = fals
       type="button"
       onClick={handlePredict}
       disabled={disabled || loading}
-      whileHover={!disabled && !loading ? { scale: 1.01 } : {}}
-      whileTap={!disabled && !loading ? { scale: 0.99 } : {}}
+      {...pressFx}
       className={`
-        relative w-full py-3 px-5 rounded-full font-bold text-sm
-        bg-[#FE494A] hover:bg-[#FE494A] text-black shadow-sm
-        transition-all duration-300
+        fx-btn relative w-full py-3 px-5 rounded-full font-bold text-sm shadow-sm
+        ${ok ? 'bg-emerald-500 text-white' : 'bg-[#FE494A] text-black'}
+        transition-colors duration-300
         disabled:opacity-40 disabled:cursor-not-allowed
         overflow-hidden border-none cursor-pointer
         ${loading ? 'animate-pulse' : ''}
@@ -70,9 +73,11 @@ export default function AIPredictButton({ reviewText, onPredict, disabled = fals
             </motion.span>
             分析影評中...
           </>
+        ) : ok ? (
+          <>✓ 評分完成！</>
         ) : (
           <>
-            ✨ 讓 AI 幫我評分
+            <span className="btn-ico">✨</span> 讓 AI 幫我評分
           </>
         )}
       </span>

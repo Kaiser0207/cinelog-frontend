@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { API_URL } from '../utils/constants';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
+import { pressFx } from '../utils/motion';
 
 export default function TLDRButton({ reviewText, movieTitle }) {
   const [tldr, setTldr] = useState(null);
@@ -38,19 +39,20 @@ export default function TLDRButton({ reviewText, movieTitle }) {
       <motion.button
         onClick={fetchTldr}
         disabled={loading}
-        whileHover={!loading ? { scale: 1.02 } : {}}
-        whileTap={!loading ? { scale: 0.98 } : {}}
-        className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#FE494A] text-black text-sm font-bold shadow-sm hover:bg-[#ff5e5f] transition-all disabled:opacity-50 cursor-pointer border-none"
+        {...pressFx}
+        className="fx-btn inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#FE494A] text-black text-sm font-bold shadow-sm hover:bg-[#ff5e5f] transition-colors disabled:opacity-50 cursor-pointer border-none"
       >
         {loading ? (
-          <motion.span 
+          <motion.span
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
             className="inline-block"
           >
             ✦
           </motion.span>
-        ) : '✦'}
+        ) : (
+          <span className="btn-ico">✦</span>
+        )}
         {loading ? t('aiTldrLoading') : tldr ? t('aiTldrRetry') : t('aiTldr')}
       </motion.button>
 

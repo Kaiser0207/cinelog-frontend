@@ -5,6 +5,7 @@ import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
 import { useAdmin } from './AdminAuth';
 import MovieSearch from './MovieSearch';
+import { pressFx } from '../utils/motion';
 
 /**
  * 電影推薦箱 — a public "suggestion box". Visitors recommend a title for Kaiser
@@ -35,9 +36,9 @@ export default function SuggestionBox() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold text-xs md:text-sm uppercase tracking-wider transition-all duration-300 border-none shadow-sm active:scale-95 cursor-pointer"
+        className="fx-btn inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold text-xs md:text-sm uppercase tracking-wider transition-all duration-300 border-none shadow-sm active:scale-95 cursor-pointer"
       >
-        <span className="text-lg">{isAdmin ? '📥' : '🎬'}</span>
+        <span className="btn-ico text-lg">{isAdmin ? '📥' : '🎬'}</span>
         {isAdmin ? t('inbox') : t('suggestBox')}
       </button>
 
@@ -60,6 +61,7 @@ function SuggestForm({ onClose }) {
   const [note, setNote] = useState('');
   const [name, setName] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
 
   const handlePick = (movie) => {
     setPicked(movie);
@@ -88,7 +90,8 @@ function SuggestForm({ onClose }) {
       });
       if (!res.ok) throw new Error('API error');
       addToast(t('suggestSuccess'), 'success');
-      onClose();
+      setDone(true);
+      setTimeout(onClose, 900);
     } catch {
       addToast(t('suggestError'), 'error');
     } finally {
@@ -139,13 +142,16 @@ function SuggestForm({ onClose }) {
           />
         </div>
 
-        <button
+        <motion.button
+          {...pressFx}
           onClick={submit}
-          disabled={submitting}
-          className="w-full py-3 rounded-full bg-[#FE494A] hover:bg-[#ff5e5f] text-black font-bold transition-all disabled:opacity-50 border-none shadow-sm cursor-pointer"
+          disabled={submitting || done}
+          className={`fx-btn w-full py-3 rounded-full font-bold transition-colors disabled:opacity-60 border-none shadow-sm cursor-pointer ${
+            done ? 'bg-emerald-500 text-white' : 'bg-[#FE494A] hover:bg-[#ff5e5f] text-black'
+          }`}
         >
-          {submitting ? '...' : t('suggestSubmit')}
-        </button>
+          {done ? `✓ ${t('sentLabel')}` : submitting ? '...' : t('suggestSubmit')}
+        </motion.button>
       </div>
     </Backdrop>
   );
@@ -245,23 +251,23 @@ function Inbox({ password, onClose }) {
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-text-primary font-semibold text-sm">{it.title}</p>
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${STATUS_STYLE[it.status] || ''}`}>
+                  <p className="text-text-primary font-semibold text-base">{it.title}</p>
+                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${STATUS_STYLE[it.status] || ''}`}>
                     {it.status}
                   </span>
                 </div>
-                {it.note && <p className="text-text-muted text-xs mt-1 whitespace-pre-wrap">{it.note}</p>}
-                <p className="text-text-dim text-[11px] mt-1">
+                {it.note && <p className="text-text-muted text-sm mt-1 whitespace-pre-wrap">{it.note}</p>}
+                <p className="text-text-dim text-xs mt-1">
                   {it.submitter_name || '匿名'} · {it.created_at ? new Date(it.created_at).toLocaleString() : ''}
                 </p>
                 <div className="flex gap-3 mt-2">
-                  <button onClick={() => setStatus(it.id, 'adopted')} className="text-[11px] font-bold text-emerald-600 hover:text-emerald-500 bg-transparent border-none cursor-pointer p-0">
+                  <button onClick={() => setStatus(it.id, 'adopted')} className="text-sm font-bold text-emerald-600 hover:text-emerald-500 bg-transparent border-none cursor-pointer p-0">
                     ✓ {t('inboxAdopt')}
                   </button>
-                  <button onClick={() => setStatus(it.id, 'dismissed')} className="text-[11px] font-bold text-text-dim hover:text-text-muted bg-transparent border-none cursor-pointer p-0">
+                  <button onClick={() => setStatus(it.id, 'dismissed')} className="text-sm font-bold text-text-dim hover:text-text-muted bg-transparent border-none cursor-pointer p-0">
                     {t('inboxDismiss')}
                   </button>
-                  <button onClick={() => remove(it.id)} className="text-[11px] font-bold text-[#FE494A] hover:opacity-70 bg-transparent border-none cursor-pointer p-0 ml-auto">
+                  <button onClick={() => remove(it.id)} className="text-sm font-bold text-[#FE494A] hover:opacity-70 bg-transparent border-none cursor-pointer p-0 ml-auto">
                     🗑 {t('inboxDelete')}
                   </button>
                 </div>

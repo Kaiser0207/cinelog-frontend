@@ -10,6 +10,7 @@ import AIPredictButton from './AIPredictButton';
 import { useAdmin } from './AdminAuth';
 import { useToast } from './Toast';
 import { API_URL, TMDB_IMG_BASE, FONT_MAP, computeEntertainment, computeCinematic, computeTotal, autoSeriesTotal, getScoreColor } from '../utils/constants';
+import { pressFx } from '../utils/motion';
 
 const EMPTY_STATE = {
   // Movie info
@@ -724,9 +725,8 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                className="w-full py-4 rounded-full bg-[#FE494A] hover:bg-[#FE494A] text-black font-bold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-none shadow-sm cursor-pointer"
+                {...pressFx}
+                className="fx-btn w-full py-4 rounded-full bg-[#FE494A] hover:bg-[#ff5e5f] text-black font-bold text-base transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-none shadow-sm cursor-pointer"
               >
                 {saving ? (
                   <span className="flex items-center justify-center gap-2">
