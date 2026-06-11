@@ -82,7 +82,7 @@ export default function StatsModal({ isOpen, onClose, reviews = [] }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center pointer-events-none pb-20 md:pb-0">
+    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center pointer-events-none pb-[calc(4.25rem+env(safe-area-inset-bottom,0px)+1rem)] md:pb-0">
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}

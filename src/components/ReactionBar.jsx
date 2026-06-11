@@ -4,8 +4,16 @@ import { API_URL } from '../utils/constants';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
 
-// Must match ALLOWED_EMOJI in the backend reactions router.
-const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
+// Label + emoji. The emoji is the stored key (must match ALLOWED_EMOJI in the
+// backend reactions router); the label is display-only. Rendered 3-per-row.
+const REACTIONS = [
+  { emoji: '😍', label: '好愛' },
+  { emoji: '😂', label: '笑死' },
+  { emoji: '🥵', label: '很色' },
+  { emoji: '😑', label: '超普' },
+  { emoji: '😭', label: '哭爛' },
+  { emoji: '💩', label: '超糞' },
+];
 
 // A stable anonymous id per browser so "one reaction per person per review"
 // can be enforced without any login. This is deduplication, not security.
@@ -85,36 +93,39 @@ export default function ReactionBar({ reviewId }) {
       <span className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-3">
         {t('reactLabel')}
       </span>
-      <div className="flex flex-wrap items-center gap-3">
-        {EMOJIS.map((e) => {
-          const active = mine === e;
-          const n = counts[e] || 0;
+      <div className="grid grid-cols-3 gap-2.5 max-w-md">
+        {REACTIONS.map(({ emoji, label }) => {
+          const active = mine === emoji;
+          const n = counts[emoji] || 0;
           return (
             <motion.button
-              key={e}
+              key={emoji}
               type="button"
-              onClick={() => react(e)}
-              whileHover={{ y: -3, scale: 1.06 }}
-              whileTap={{ scale: 0.88 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 cursor-pointer ${
+              onClick={() => react(emoji)}
+              whileHover={{ y: -3, scale: 1.04 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 16 }}
+              className={`flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-2xl border-2 cursor-pointer ${
                 active
                   ? 'bg-[#FE494A]/15 border-[#FE494A] shadow-sm shadow-[#FE494A]/20'
                   : 'bg-bg-card border-border-subtle hover:border-text-dim'
               }`}
             >
+              <span className={`text-sm font-bold ${active ? 'text-[#FE494A]' : 'text-text-primary'}`}>
+                {label}
+              </span>
               {/* Re-mounts on toggle so the emoji springs/pops when (de)selected */}
               <motion.span
                 key={active ? 'on' : 'off'}
                 initial={{ scale: active ? 0.4 : 1 }}
-                animate={{ scale: active ? 1.15 : 1 }}
+                animate={{ scale: active ? 1.2 : 1 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 14 }}
-                className="text-2xl leading-none"
+                className="text-xl leading-none"
               >
-                {e}
+                {emoji}
               </motion.span>
               {n > 0 && (
-                <span className={`font-bold tabular-nums text-sm ${active ? 'text-[#FE494A]' : 'text-text-primary'}`}>
+                <span className={`text-xs font-bold tabular-nums ${active ? 'text-[#FE494A]' : 'text-text-dim'}`}>
                   {n}
                 </span>
               )}

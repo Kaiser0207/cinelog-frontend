@@ -100,7 +100,7 @@ export const translations = {
     noRecords: "No watch records yet",
 
     // Reactions + Suggestion box
-    reactLabel: "React",
+    reactLabel: "Your take",
     reactError: "Reaction failed. Try again.",
     suggestBox: "Recommend a Movie",
     inbox: "Suggestion Inbox",
@@ -121,8 +121,12 @@ export const translations = {
     suggestEmptyTitle: "Please pick or type a title first.",
     inboxEmpty: "No suggestions yet.",
     inboxAdopt: "Adopt",
+    inboxWrite: "Write review",
     inboxDismiss: "Dismiss",
     inboxDelete: "Delete",
+    tabNew: "Pending",
+    tabAdopted: "Adopted",
+    tabDismissed: "Dismissed",
 
     // PWA install prompt
     installTitle: "Add CineRooms to your Home Screen",
@@ -231,7 +235,7 @@ export const translations = {
     noRecords: "尚無觀影紀錄",
 
     // Reactions + Suggestion box
-    reactLabel: "留個表情",
+    reactLabel: "留個感想",
     reactError: "表情送出失敗，請再試一次。",
     suggestBox: "電影推薦箱",
     inbox: "推薦箱收件匣",
@@ -252,8 +256,12 @@ export const translations = {
     suggestEmptyTitle: "請先挑選或輸入片名。",
     inboxEmpty: "目前還沒有推薦。",
     inboxAdopt: "採納",
+    inboxWrite: "寫影評",
     inboxDismiss: "略過",
     inboxDelete: "刪除",
+    tabNew: "待處理",
+    tabAdopted: "已採納",
+    tabDismissed: "已略過",
 
     // PWA install prompt
     installTitle: "將 CineRooms 加入主畫面",

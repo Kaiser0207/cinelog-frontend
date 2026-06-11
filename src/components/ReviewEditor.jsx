@@ -52,7 +52,7 @@ const EMPTY_STATE = {
   season_reviews: [],
 };
 
-export default function ReviewEditor({ review = null, onClose, onSaved }) {
+export default function ReviewEditor({ review = null, onClose, onSaved, initialMovie = null }) {
   const isEdit = !!review;
   const { requireAuth } = useAdmin();
   const { addToast } = useToast();
@@ -91,6 +91,17 @@ export default function ReviewEditor({ review = null, onClose, onSaved }) {
         episode_scores: review.episode_scores || [],
         overall_score: review.overall_score ?? null,
         season_reviews: review.season_reviews || [],
+      };
+    }
+    if (initialMovie) {
+      // Adopted from the suggestion box: seed the movie so the editor opens on
+      // it. The backend re-fetches full TMDB details by tmdb_id on save.
+      return {
+        ...EMPTY_STATE,
+        tmdb_id: initialMovie.tmdb_id ?? null,
+        title: initialMovie.title || '',
+        poster_path: initialMovie.poster_path || '',
+        media_type: initialMovie.media_type === 'tv' ? 'tv' : 'movie',
       };
     }
     return { ...EMPTY_STATE };
