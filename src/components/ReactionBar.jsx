@@ -102,9 +102,8 @@ export default function ReactionBar({ reviewId }) {
               key={emoji}
               type="button"
               onClick={() => react(emoji)}
-              whileHover={{ y: -3, scale: 1.04 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 16 }}
+              whileTap={{ scale: 0.88 }}
+              transition={{ type: 'spring', stiffness: 700, damping: 15, mass: 0.4 }}
               className={`flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-2xl border-2 cursor-pointer ${
                 active
                   ? 'bg-[#FE494A]/15 border-[#FE494A] shadow-sm shadow-[#FE494A]/20'
