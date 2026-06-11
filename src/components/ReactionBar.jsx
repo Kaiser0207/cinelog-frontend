@@ -81,30 +81,47 @@ export default function ReactionBar({ reviewId }) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mt-3 mb-6">
-      <span className="text-[11px] font-bold uppercase tracking-wider text-text-muted mr-1">
+    <div className="mt-4 mb-8">
+      <span className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-3">
         {t('reactLabel')}
       </span>
-      {EMOJIS.map((e) => {
-        const active = mine === e;
-        const n = counts[e] || 0;
-        return (
-          <motion.button
-            key={e}
-            type="button"
-            onClick={() => react(e)}
-            whileTap={{ scale: 0.85 }}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border transition-all cursor-pointer ${
-              active
-                ? 'bg-[#FE494A]/15 border-[#FE494A] text-[#FE494A] font-bold'
-                : 'bg-bg-card border-border-subtle text-text-primary hover:border-text-dim'
-            }`}
-          >
-            <span className="text-base leading-none">{e}</span>
-            {n > 0 && <span className="font-bold tabular-nums">{n}</span>}
-          </motion.button>
-        );
-      })}
+      <div className="flex flex-wrap items-center gap-3">
+        {EMOJIS.map((e) => {
+          const active = mine === e;
+          const n = counts[e] || 0;
+          return (
+            <motion.button
+              key={e}
+              type="button"
+              onClick={() => react(e)}
+              whileHover={{ y: -3, scale: 1.06 }}
+              whileTap={{ scale: 0.88 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 cursor-pointer ${
+                active
+                  ? 'bg-[#FE494A]/15 border-[#FE494A] shadow-sm shadow-[#FE494A]/20'
+                  : 'bg-bg-card border-border-subtle hover:border-text-dim'
+              }`}
+            >
+              {/* Re-mounts on toggle so the emoji springs/pops when (de)selected */}
+              <motion.span
+                key={active ? 'on' : 'off'}
+                initial={{ scale: active ? 0.4 : 1 }}
+                animate={{ scale: active ? 1.15 : 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 14 }}
+                className="text-2xl leading-none"
+              >
+                {e}
+              </motion.span>
+              {n > 0 && (
+                <span className={`font-bold tabular-nums text-sm ${active ? 'text-[#FE494A]' : 'text-text-primary'}`}>
+                  {n}
+                </span>
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
     </div>
   );
 }
