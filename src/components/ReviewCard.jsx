@@ -186,14 +186,9 @@ export default function ReviewCard({ review, index = 0, gyroPermission = false }
           </div>
         )}
 
-        {/* Top: Score Badge - Floating with some space */}
+        {/* Top: Score Badge — light liquid-glass over the poster (demo of .glass) */}
         <div className="absolute top-3 right-3 z-20">
-          <div
-            className="w-12 h-12 rounded-lg flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0 shadow-lg"
-            style={{
-              background: `rgba(0, 0, 0, 0.65)`,
-            }}
-          >
+          <div className="glass w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
             <span
               className="text-xl font-black tracking-tighter text-[#FE494A]"
             >

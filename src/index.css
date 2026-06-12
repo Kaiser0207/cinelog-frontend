@@ -262,36 +262,43 @@ body {
    so there's content to blur. `.glass` = light surface, `.glass-dark` = dark. */
 .glass {
   background:
-    /* crisp top light bar */
-    linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 22%),
-    /* diagonal sheen */
-    linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 48%),
+    /* faint grain for real-glass micro-texture */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.045'/%3E%3C/svg%3E"),
     rgba(245, 239, 225, 0.5);
   -webkit-backdrop-filter: blur(20px) saturate(190%) brightness(1.06);
   backdrop-filter: blur(20px) saturate(190%) brightness(1.06);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow:
-    0 10px 34px rgba(26, 26, 26, 0.16),            /* float */
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),       /* bright top edge */
-    inset 0 0 0 1px rgba(255, 255, 255, 0.18),     /* glossy rim */
-    inset 0 -14px 22px rgba(26, 26, 26, 0.05);     /* depth at base */
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.12);   /* soft float only — no bevels */
 }
 .glass-dark {
   background:
-    /* crisp top light bar — the signature glass highlight */
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 20%),
-    /* diagonal sheen */
-    linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 42%),
-    /* base tint — less transparent than before, per feedback */
-    rgba(59, 72, 86, 0.66);
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E"),
+    rgba(59, 72, 86, 0.66);                          /* 0.66 kept — not too transparent */
   -webkit-backdrop-filter: blur(24px) saturate(195%) brightness(1.1);
   backdrop-filter: blur(24px) saturate(195%) brightness(1.1);
-  border-top: 1px solid rgba(255, 255, 255, 0.32);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),        /* bright top edge */
-    inset 0 0 0 1px rgba(255, 255, 255, 0.07),     /* glossy rim */
-    inset 0 -12px 22px rgba(0, 0, 0, 0.12),        /* depth */
-    0 -10px 30px rgba(0, 0, 0, 0.22);              /* lift off content */
+  border-top: 1px solid rgba(255, 255, 255, 0.08);   /* hairline separator only — no glossy bar */
+}
+/* Opt-in slow sheen — a soft light band that sweeps once every ~9s, nothing
+   like the static skeuomorphic gloss. Host must be positioned + overflow-hidden. */
+.glass-sheen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -45%;
+  width: 35%;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  transform: skewX(-12deg);
+  animation: glass-sheen 9s ease-in-out infinite;
+}
+@keyframes glass-sheen {
+  0%   { left: -45%; }
+  18%  { left: 130%; }
+  100% { left: 130%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-sheen::after { animation: none; opacity: 0; }
 }
 /* Browsers without backdrop-filter (rare): fall back to a more opaque fill so
    text stays legible instead of floating on near-transparent glass. */
