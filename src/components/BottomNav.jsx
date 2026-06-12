@@ -12,8 +12,8 @@ export default function BottomNav({ onHomeClick, onSearchClick, onStatsClick }) 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-[110]">
       {/* Liquid-glass background — translucent so the scrolling content blurs
-          through it; .glass-sheen adds a slow light sweep (see index.css) */}
-      <div className="glass-dark glass-sheen overflow-hidden absolute inset-0" />
+          through it (see .glass-dark in index.css) */}
+      <div className="glass-dark absolute inset-0" />
       
       <div
         className="relative flex items-center justify-around px-4"

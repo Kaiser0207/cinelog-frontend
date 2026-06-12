@@ -278,28 +278,6 @@ body {
   backdrop-filter: blur(24px) saturate(195%) brightness(1.1);
   border-top: 1px solid rgba(255, 255, 255, 0.08);   /* hairline separator only — no glossy bar */
 }
-/* Opt-in slow sheen — a soft light band that sweeps once every ~9s, nothing
-   like the static skeuomorphic gloss. Host must be positioned + overflow-hidden. */
-.glass-sheen::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -45%;
-  width: 35%;
-  pointer-events: none;
-  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
-  transform: skewX(-12deg);
-  animation: glass-sheen 9s ease-in-out infinite;
-}
-@keyframes glass-sheen {
-  0%   { left: -45%; }
-  18%  { left: 130%; }
-  100% { left: 130%; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .glass-sheen::after { animation: none; opacity: 0; }
-}
 /* Browsers without backdrop-filter (rare): fall back to a more opaque fill so
    text stays legible instead of floating on near-transparent glass. */
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
