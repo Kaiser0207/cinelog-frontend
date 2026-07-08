@@ -10,7 +10,7 @@ export default defineConfig({
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-motion': ['framer-motion', 'gsap'],
-          'vendor-utils': ['html2canvas']
+          'vendor-utils': ['html2canvas-pro']
         }
       }
     }

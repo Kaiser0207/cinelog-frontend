@@ -37,7 +37,10 @@ export default function ShareCard({ review, className }) {
     if (sharing) return;
     setSharing(true);
     try {
-      const html2canvas = (await import('html2canvas')).default;
+      // html2canvas-pro (not the original) — it supports Tailwind v4's
+      // oklch()/color-mix()/lab() colors, which the old html2canvas choked on
+      // and hung the whole share (stuck on "產生中").
+      const html2canvas = (await import('html2canvas-pro')).default;
 
       let canvas;
       try {
