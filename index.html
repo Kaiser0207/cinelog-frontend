@@ -65,7 +65,12 @@
         font-weight: 100 900;
         font-display: swap;
       }
-      html, body { background: #E3DAC9; }
+      /* Only <html> paints the cream. If <body> also has a background, it paints
+         in the element-background layer — which sits ABOVE negative-z-index
+         elements — and completely hides the WebGL backdrop behind the page.
+         <html>'s colour still shows if WebGL never comes up. */
+      html { background: #E3DAC9; }
+      body { background: transparent; }
       #launch-screen { display: none; }
       html.pwa-standalone #launch-screen {
         display: flex; align-items: center; justify-content: center;

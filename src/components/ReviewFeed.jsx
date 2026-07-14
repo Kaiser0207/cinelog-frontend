@@ -1,17 +1,15 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
-import ReviewCard, { ReviewCardSkeleton } from './ReviewCard';
 import ReviewListRow from './ReviewListRow';
-import HeroCarousel from './HeroCarousel';
+import CardDeck from './CardDeck';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
-import { API_URL, flattenReview, TMDB_IMG_BASE } from '../utils/constants';
-import { useLanguage } from './LanguageContext';
+import { API_URL, flattenReview } from '../utils/constants';
 
 const LIMIT = 12;
 
-export default function ReviewFeed({ sort = 'newest', genre = '', media = '', searchQuery = '', searchMode = 'standard', viewMode = 'grid', gyroPermission, onReviewsLoaded }) {
+export default function ReviewFeed({ sort = 'newest', genre = '', media = '', searchQuery = '', searchMode = 'standard', viewMode = 'deck', onReviewsLoaded }) {
   const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -25,7 +23,6 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
   const [expandedRowId, setExpandedRowId] = useState(null);
 
   const portalRef = useRef(null);
-  const { t } = useLanguage();
 
   // The Hero "cover" is a single, manually-featured review (admin pins it on
   // the review page). Fetched independently so it isn't tied to pagination
@@ -57,6 +54,12 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // The deck has no sentinel to trip infinite scroll (it replaces the whole feed
+  // layout), and a deck you can only flip 12 cards deep is just wrong — so it
+  // pulls the full set in the background, 100 at a time (the backend's cap).
+  const isDeck = viewMode === 'deck' && !searchQuery;
+  const pageSize = isDeck ? 100 : LIMIT;
+
   const fetchReviews = useCallback(async (offset = 0, reset = false) => {
     if (loading) return;
     setLoading(true);
@@ -72,7 +75,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
         params.append('limit', '50'); // Fetch up to 50 results for search
       } else {
         params.append('offset', offset.toString());
-        params.append('limit', LIMIT.toString());
+        params.append('limit', pageSize.toString());
         params.append('sort', sort);
         if (genre) params.append('genre', genre);
         if (media) params.append('media', media);
@@ -101,7 +104,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
         if (searchQuery) {
           setHasMore(false);
         } else {
-          setHasMore(items.length >= LIMIT);
+          setHasMore(items.length >= pageSize);
         }
       }
     } catch (err) {
@@ -110,15 +113,23 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
       setLoading(false);
       setInitialLoad(false);
     }
-  }, [sort, genre, media, loading]);
+  }, [sort, genre, media, loading, pageSize]);
 
-  // Reset on sort/genre/media/search change
+  // Reset on sort/genre/media/search/view change. viewMode is in here because the
+  // deck and the grid page at different sizes — switching needs a clean refetch.
   useEffect(() => {
     setReviews([]);
     setHasMore(true);
     setInitialLoad(true);
     fetchReviews(0, true);
-  }, [sort, genre, media, searchQuery, searchMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sort, genre, media, searchQuery, searchMode, isDeck]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Deck only: keep pulling the next page as soon as the last one lands, until
+  // there's nothing left. Each fetch flips `loading`, which re-runs this.
+  useEffect(() => {
+    if (!isDeck || initialLoad || loading || !hasMore) return;
+    fetchReviews(reviews.length);
+  }, [isDeck, initialLoad, loading, hasMore, reviews.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {
@@ -129,13 +140,21 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
   const sentinelRef = useInfiniteScroll(loadMore, loading);
 
   if (initialLoad) {
-    const skeletonCount = searchQuery ? 6 : 12;
+    // The deck's skeleton is a single poster where the front card will land.
+    if (isDeck) {
+      return (
+        <div className="h-dvh flex items-center justify-center">
+          <div
+            className="aspect-[2/3] rounded-2xl bg-[#1A1A1A]/10 animate-pulse"
+            style={{ height: 'clamp(300px, 54dvh, 520px)' }}
+          />
+        </div>
+      );
+    }
     return (
-      <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-0"}>
-        {[...Array(skeletonCount)].map((_, i) => (
-          viewMode === 'grid' 
-            ? <ReviewCardSkeleton key={`initial-skel-${i}`} />
-            : <div key={`skel-list-init-${i}`} className="w-full h-16 bg-neutral-900 animate-pulse border-b border-border-subtle" />
+      <div className="flex flex-col gap-0">
+        {[...Array(searchQuery ? 6 : 12)].map((_, i) => (
+          <div key={`skel-list-init-${i}`} className="w-full h-16 bg-neutral-900 animate-pulse border-b border-border-subtle" />
         ))}
       </div>
     );
@@ -159,54 +178,40 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
     );
   }
 
-  const showHero = featuredReviews.length > 0 && !searchQuery && viewMode === 'grid';
   const featuredIds = new Set(featuredReviews.map((r) => r.id));
+
+  // 疊卡檢視 — the scroll-flip deck, and the default feed. 精選(方案 A): the
+  // admin-pinned featured reviews lead the deck (badged), then everything else —
+  // one continuous scroll, no competing hero section above it.
+  if (isDeck) {
+    const deckReviews = [...featuredReviews, ...reviews.filter((r) => !featuredIds.has(r.id))];
+    return <CardDeck reviews={deckReviews} featuredIds={featuredIds} />;
+  }
+  if (viewMode === 'deck') {
+    // deck + an active search: just the results, in deck form.
+    return <CardDeck reviews={reviews} featuredIds={featuredIds} />;
+  }
 
   return (
     <>
-      {showHero && (
-        <div className="w-full mb-8">
-          <HeroCarousel reviews={featuredReviews} />
-        </div>
-      )}
-
-      <motion.div 
-        layout="position"
-        className={viewMode === 'grid' 
-          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" 
-          : "flex flex-col gap-0"}
-      >
-        {reviews
-          .filter((review) => !(showHero && featuredIds.has(review.id)))
-          .map((review, i) => {
-          if (viewMode === 'grid') {
-            return (
-              <div key={review.id}>
-                <ReviewCard review={review} index={i % LIMIT} gyroPermission={gyroPermission} />
-              </div>
-            );
-          } else {
-            return (
-              <div key={review.id}>
-                <ReviewListRow 
-                  review={review} 
-                  index={i % LIMIT} 
-                  onHover={setHoveredImage} 
-                  onLeave={() => setHoveredImage(null)} 
-                  isExpanded={expandedRowId === review.id}
-                  hasAnyExpanded={expandedRowId !== null}
-                  onToggleExpand={() => setExpandedRowId(expandedRowId === review.id ? null : review.id)}
-                  onClick={() => navigate(`/review/${review.id}`, { state: { review } })}
-                />
-              </div>
-            );
-          }
-        })}
+      <motion.div layout="position" className="flex flex-col gap-0">
+        {reviews.map((review, i) => (
+          <div key={review.id}>
+            <ReviewListRow
+              review={review}
+              index={i % LIMIT}
+              onHover={setHoveredImage}
+              onLeave={() => setHoveredImage(null)}
+              isExpanded={expandedRowId === review.id}
+              hasAnyExpanded={expandedRowId !== null}
+              onToggleExpand={() => setExpandedRowId(expandedRowId === review.id ? null : review.id)}
+              onClick={() => navigate(`/review/${review.id}`, { state: { review } })}
+            />
+          </div>
+        ))}
         {loading &&
           [...Array(3)].map((_, i) => (
-            viewMode === 'grid' 
-              ? <ReviewCardSkeleton key={`skel-${i}`} />
-              : <div key={`skel-list-${i}`} className="w-full h-16 bg-neutral-900 animate-pulse border-b border-border-subtle" />
+            <div key={`skel-${i}`} className="w-full h-16 bg-neutral-900 animate-pulse border-b border-border-subtle" />
           ))
         }
       </motion.div>

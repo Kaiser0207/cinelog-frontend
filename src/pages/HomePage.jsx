@@ -1,14 +1,13 @@
 import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ReviewFeed from '../components/ReviewFeed';
-import BottomNav from '../components/BottomNav';
+import StaggeredMenu from '../components/StaggeredMenu';
 import SearchOverlay from '../components/SearchOverlay';
-import StatsModal from '../components/StatsModal';
 import { SORT_OPTIONS } from '../utils/constants';
 import { useLanguage } from '../components/LanguageContext';
 import { useAdmin } from '../components/AdminAuth';
 import SuggestionBox from '../components/SuggestionBox';
-import { useGyroscope } from '../hooks/useGyroscope';
 
 const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
 
@@ -18,8 +17,6 @@ export default function HomePage() {
   const [mediaFilter, setMediaFilter] = useState('movie'); // 'movie' | 'tv' | 'anime' — always one media type, defaults to 電影 (no 'all')
   const [showEditor, setShowEditor] = useState(false);
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
-  const [showStatsModal, setShowStatsModal] = useState(false);
-  const [loadedReviews, setLoadedReviews] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
   
   // Search State
@@ -30,9 +27,14 @@ export default function HomePage() {
 
   const { lang, toggleLanguage, t } = useLanguage();
   const { isAdmin, requireAuth, openDeviceManager } = useAdmin();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [sortOpen, setSortOpen] = useState(false);
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('cinelog_view_mode') || 'grid');
-  const { permissionGranted, requestPermission } = useGyroscope();
+  // 疊卡 is the feed now — it took the grid's place. Anyone carrying a saved
+  // 'grid' from before lands on the deck too; only 'list' is still a choice.
+  const [viewMode, setViewMode] = useState(
+    () => (localStorage.getItem('cinelog_view_mode') === 'list' ? 'list' : 'deck')
+  );
   
   const activeGenreRef = useRef(null);
 
@@ -45,6 +47,16 @@ export default function HomePage() {
     const raf = requestAnimationFrame(() => window.scrollTo(0, 0));
     return () => cancelAnimationFrame(raf);
   }, []);
+
+  // The nav's 搜尋 works from any page; off the feed it routes here and asks for
+  // the overlay on arrival (the overlay lives on this page). Clear the flag so a
+  // later back/forward doesn't silently reopen it.
+  useEffect(() => {
+    if (location.state?.openSearch) {
+      setShowSearchOverlay(true);
+      navigate('.', { replace: true, state: null });
+    }
+  }, [location.state, navigate]);
 
   useEffect(() => {
     localStorage.setItem('cinelog_view_mode', viewMode);
@@ -147,6 +159,7 @@ export default function HomePage() {
   };
 
   const handleHomeClick = () => {
+    setShowSearchOverlay(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -156,7 +169,7 @@ export default function HomePage() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="min-h-screen relative overflow-hidden"
+      className="min-h-screen relative overflow-x-clip"
     >
       {/* Massive Hero Section */}
       <div className="relative pt-24 pb-12 px-5 flex flex-col items-start md:items-center justify-center min-h-[40vh]">
@@ -194,14 +207,13 @@ export default function HomePage() {
               </button>
             </div>
 
-            {/* Language Toggle Button */}
+            {/* Language Toggle — a circle, mirroring the nav hamburger opposite it */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center justify-center h-11 md:h-12 px-3 md:px-4 md:py-2.5 bg-[#E8E2D2] border-none rounded-full font-bold text-[10px] md:text-xs uppercase tracking-wider text-[#1A1A1A] hover:bg-[#FE494A] transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
+              className="flex items-center justify-center w-11 h-11 md:w-12 md:h-12 p-0 bg-[#E8E2D2] border-none rounded-full font-bold text-[11px] md:text-xs uppercase tracking-wider text-[#1A1A1A] hover:bg-[#FE494A] transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
               title={lang === 'en' ? '切換成中文' : 'Switch to English'}
             >
-              <span className="md:inline hidden mr-1">🌐</span>
-              <span>{lang === 'en' ? '繁' : 'EN'}</span>
+              {lang === 'en' ? '繁' : 'EN'}
             </button>
           </div>
 
@@ -280,19 +292,17 @@ export default function HomePage() {
       <main className="max-w-7xl mx-auto px-5 pb-32 md:pb-24" key={refreshKey}>
         {/* Sort Dropdown aligned to the right */}
         <div className="flex justify-between items-center mb-6">
-          {/* View Mode Toggle */}
+          {/* View Mode Toggle — 疊卡 (default) or list */}
           <div className="flex bg-[#E8E2D2] rounded-full p-1 border border-border-subtle shadow-sm">
             <button
               type="button"
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'grid' ? 'bg-[#FE494A] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
-              title="Grid View"
+              onClick={() => setViewMode('deck')}
+              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'deck' ? 'bg-[#FE494A] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
+              title="Deck View (scroll to flip)"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" viewBox="0 0 24 24">
+                <rect x="3" y="6" width="11" height="13" rx="2"></rect>
+                <path d="M8 3h9a2 2 0 0 1 2 2v11"></path>
               </svg>
             </button>
             <button
@@ -312,22 +322,6 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* 3D Gyroscope Toggle (Mobile Only) */}
-          <div className="md:hidden flex ml-3 bg-[#E8E2D2] rounded-full p-1 border border-border-subtle shadow-sm">
-            <button
-              type="button"
-              onClick={requestPermission}
-              className={`p-2 rounded-full transition-all duration-200 ${permissionGranted ? 'bg-[#FE494A] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
-              title="3D Tilt View"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-              </svg>
-            </button>
-          </div>
-          
           <div className="flex-1" />
 
           {/* Sort Dropdown aligned to the right */}
@@ -389,9 +383,7 @@ export default function HomePage() {
           media={mediaFilter}
           searchQuery={showSearchOverlay ? '' : searchQuery}
           searchMode={searchMode}
-          viewMode={viewMode} 
-          gyroPermission={permissionGranted}
-          onReviewsLoaded={setLoadedReviews}
+          viewMode={viewMode}
         />
       </main>
 
@@ -433,7 +425,7 @@ export default function HomePage() {
             </span>
           </a>
 
-          {/* Mobile uses the BottomNav entry; keep a footer entry for desktop. */}
+          {/* Mobile uses the nav menu entry; keep a footer entry for desktop. */}
           <div className="hidden md:block">
             <SuggestionBox />
           </div>
@@ -493,18 +485,12 @@ export default function HomePage() {
           searchMode={searchMode}
           onModeToggle={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
         />
-
-        <StatsModal
-          isOpen={showStatsModal}
-          onClose={() => setShowStatsModal(false)}
-          reviews={loadedReviews}
-        />
       </Suspense>
 
-      <BottomNav 
+      <StaggeredMenu
         onHomeClick={handleHomeClick}
         onSearchClick={() => setShowSearchOverlay(true)}
-        onStatsClick={() => setShowStatsModal(true)}
+        searchOpen={showSearchOverlay}
       />
     </motion.div>
   );

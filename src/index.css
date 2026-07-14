@@ -82,11 +82,17 @@ html {
 
 body {
   font-family: var(--font-google-sans);
-  background-color: var(--color-bg-deep);
+  /* Transparent on purpose — <html> carries the cream (see index.html). A
+     background here would paint over the fixed WebGL backdrop, which sits at
+     z-index -10 and is therefore painted BEFORE element backgrounds. */
+  background-color: transparent;
   color: var(--color-text-primary);
   min-height: 100vh; /* fallback */
   min-height: 100dvh; /* avoids mobile address-bar jump */
-  overflow-x: hidden;
+  /* `clip` (not `hidden`) — hidden makes <body> a scroll container, which
+     silently breaks `position: sticky` for any descendant. clip still stops
+     horizontal overflow but keeps sticky working. */
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { API_URL, TMDB_IMG_BASE, formatDateTime } from '../utils/constants';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
@@ -18,34 +19,33 @@ const ReviewEditor = lazy(() => import('./ReviewEditor'));
  * tokens and inputs inherit the global cream input style.
  */
 
-export function SuggestionModal({ mode, onClose }) {
+/**
+ * `page` renders the same content inline (for the /suggestions route) instead of
+ * as a floating modal over a backdrop.
+ */
+export function SuggestionModal({ mode, onClose, page = false }) {
   const { password } = useAdmin();
   return mode === 'inbox' ? (
-    <Inbox password={password} onClose={onClose} />
+    <Inbox password={password} onClose={onClose} page={page} />
   ) : (
-    <SuggestForm onClose={onClose} />
+    <SuggestForm onClose={onClose} page={page} />
   );
 }
 
+/** Footer entry point — goes to the /suggestions page (it used to pop a modal). */
 export default function SuggestionBox() {
   const { t } = useLanguage();
   const { isAdmin } = useAdmin();
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="fx-btn inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold text-xs md:text-sm uppercase tracking-wider transition-all duration-300 border-none shadow-sm active:scale-95 cursor-pointer"
-      >
-        <span className="btn-ico text-lg">{isAdmin ? '📥' : '🎬'}</span>
-        {isAdmin ? t('inbox') : t('suggestBox')}
-      </button>
-
-      <AnimatePresence>
-        {open && <SuggestionModal mode={isAdmin ? 'inbox' : 'form'} onClose={() => setOpen(false)} />}
-      </AnimatePresence>
-    </>
+    <button
+      onClick={() => navigate('/suggestions')}
+      className="fx-btn inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold text-xs md:text-sm uppercase tracking-wider transition-all duration-300 border-none shadow-sm active:scale-95 cursor-pointer"
+    >
+      <span className="btn-ico text-lg">{isAdmin ? '📥' : '🎬'}</span>
+      {isAdmin ? t('inbox') : t('suggestBox')}
+    </button>
   );
 }
 
@@ -53,7 +53,7 @@ export default function SuggestionBox() {
 // Public submit form
 // --------------------------------------------------------------------------
 
-function SuggestForm({ onClose }) {
+function SuggestForm({ onClose, page = false }) {
   const { t } = useLanguage();
   const { addToast } = useToast();
   const [picked, setPicked] = useState(null);
@@ -100,7 +100,7 @@ function SuggestForm({ onClose }) {
   };
 
   return (
-    <Backdrop onClose={onClose}>
+    <Backdrop onClose={onClose} page={page}>
       <h2 className="text-xl font-bold text-text-primary mb-1 flex items-center gap-2">🎬 {t('suggestTitle')}</h2>
       <p className="text-text-muted text-sm mb-5">{t('suggestSubtitle')}</p>
 
@@ -161,7 +161,7 @@ function SuggestForm({ onClose }) {
 // Admin inbox — status tabs + "adopt = jump into writing the review"
 // --------------------------------------------------------------------------
 
-function Inbox({ password, onClose }) {
+function Inbox({ password, onClose, page = false }) {
   const { t } = useLanguage();
   const { addToast } = useToast();
   const [items, setItems] = useState([]);
@@ -252,10 +252,13 @@ function Inbox({ password, onClose }) {
   const shown = items.filter((it) => it.status === filter);
 
   return (
-    <Backdrop onClose={onClose} wide>
+    <Backdrop onClose={onClose} wide page={page}>
       <div className="flex justify-between items-center mb-4 border-b border-border-subtle pb-4">
         <h2 className="text-2xl font-bold text-text-primary">📥 {t('inbox')}</h2>
-        <button onClick={onClose} className="text-text-muted hover:text-text-primary bg-transparent border-none cursor-pointer text-xl">✕</button>
+        {/* The /suggestions page has its own back button in the header. */}
+        {!page && (
+          <button onClick={onClose} className="text-text-muted hover:text-text-primary bg-transparent border-none cursor-pointer text-xl">✕</button>
+        )}
       </div>
 
       {/* Status tabs */}
@@ -281,7 +284,7 @@ function Inbox({ password, onClose }) {
       ) : shown.length === 0 ? (
         <p className="text-sm text-text-dim py-8 text-center">{t('inboxEmpty')}</p>
       ) : (
-        <ul className="space-y-3 m-0 p-0 list-none max-h-[55vh] overflow-y-auto">
+        <ul className={`space-y-3 m-0 p-0 list-none ${page ? '' : 'max-h-[55vh] overflow-y-auto'}`}>
           {shown.map((it) => (
             <li
               key={it.id}
@@ -334,14 +337,25 @@ function Inbox({ password, onClose }) {
 // Shared modal shell (light/cream theme)
 // --------------------------------------------------------------------------
 
-function Backdrop({ children, onClose, wide = false }) {
+function Backdrop({ children, onClose, wide = false, page = false }) {
   // Lock background scroll while the modal is open, otherwise touch-dragging
-  // over the overlay scrolls the page behind it (mobile).
+  // over the overlay scrolls the page behind it (mobile). A page isn't an
+  // overlay — it IS the scroll container, so leave the body alone there.
   useEffect(() => {
+    if (page) return undefined;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = prev; };
-  }, []);
+  }, [page]);
+
+  // Inline (route) form: same card, no backdrop, no fixed positioning.
+  if (page) {
+    return (
+      <div className={`bg-bg-surface border border-border-subtle p-6 rounded-2xl w-full shadow-sm text-left text-text-primary mx-auto ${wide ? 'max-w-xl' : 'max-w-md'}`}>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <motion.div

@@ -21,6 +21,15 @@ if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
 // initial bundle stays small and loads fast; the chunk fetches on navigation.
 const ReviewPage = lazy(() => import('./pages/ReviewPage'));
 
+// 統計 / 推薦箱 are their own routes (not overlays on the feed), so the nav's
+// "首頁" can actually take you back. Lazy — neither is on the first paint path.
+const StatsPage = lazy(() => import('./pages/StatsPage'));
+const SuggestionsPage = lazy(() => import('./pages/SuggestionsPage'));
+
+// Decorative WebGL backdrop — it pulls in `ogl`, so keep it off the critical
+// path. <body>'s cream already paints while this loads; nothing pops.
+const SiteBackground = lazy(() => import('./components/SiteBackground'));
+
 // Keyed by pathname so <AnimatePresence mode="wait"> actually runs each page's
 // exit animation before the next mounts — a smooth crossfade between the feed
 // and a review, instead of an abrupt swap. (Without the location key the exit
@@ -31,6 +40,8 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/stats" element={<StatsPage />} />
+        <Route path="/suggestions" element={<SuggestionsPage />} />
         <Route path="/review/:id" element={<ReviewPage />} />
       </Routes>
     </AnimatePresence>
@@ -43,6 +54,9 @@ export default function App() {
       <AdminProvider>
         <ToastProvider>
           <SmoothScroll />
+          <Suspense fallback={null}>
+            <SiteBackground />
+          </Suspense>
           <CustomCursor />
           <BrowserRouter>
             {/* Inside the router so it can hide itself off the home feed — its
