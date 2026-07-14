@@ -70,7 +70,10 @@ export default function HomePage() {
   const greenBtnRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => {
+    let ticking = false;
+
+    const measure = () => {
+      ticking = false;
       if (!footerRef.current || !greenBtnRef.current || !greenBtnRef.current.parentElement) return;
       const footerRect = footerRef.current.getBoundingClientRect();
       const buttonRect = greenBtnRef.current.parentElement.getBoundingClientRect();
@@ -78,11 +81,21 @@ export default function HomePage() {
       clip = Math.max(0, Math.min(56, clip));
       greenBtnRef.current.style.clipPath = `inset(${clip}px 0 0 0)`;
     };
-    
+
+    // Coalesce to one measure per frame. Running two getBoundingClientRect()s and
+    // a style write inline in the scroll handler forces a synchronous layout on
+    // every single scroll event — which is exactly the kind of thing that makes
+    // scrolling feel sticky.
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(measure);
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleScroll);
-    handleScroll(); // Initial check
-    
+    measure(); // Initial check
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);

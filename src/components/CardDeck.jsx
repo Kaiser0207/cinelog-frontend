@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect, useCallback, memo } from 'react';
 import {
   motion,
   useScroll,
@@ -18,12 +18,26 @@ import { TMDB_IMG_BASE, getReviewTotal } from '../utils/constants';
  *
  * NOTE: relies on `position: sticky`, which silently dies if ANY ancestor has
  * `overflow: hidden` — <body> and the HomePage wrapper use `overflow-x: clip`.
+ *
+ * Sizing uses svh, NOT dvh. dvh tracks the *live* viewport, which on mobile grows
+ * and shrinks as the address bar collapses while you scroll — so a dvh-sized
+ * sticky box gets relaid out mid-scroll, every scroll. svh is the stable
+ * (bar-visible) height: same look, no layout thrash.
  */
 
 const Y_STEP = 30;            // vertical offset per card behind (fans upward)
 const Z_STEP = 90;            // depth pushed back per card
 const SCROLL_PER_CARD = 85;   // vh of scrolling to flip one card (bigger = slower)
 const DROP = 620;             // how far the passed card falls
+
+const CARD_H = 'clamp(300px, 54svh, 520px)';
+
+// How many cards around the front actually get mounted.
+const BEHIND = 2;   // kept mounted while they fall away
+const AHEAD = 5;    // beyond this the opacity transform is already 0
+const PRELOAD = 4;  // posters fetched past the window so they're warm on mount
+
+const posterUrl = (r) => (r.poster_path ? `${TMDB_IMG_BASE}w500${r.poster_path}` : null);
 
 export default function CardDeck({ reviews = [], featuredIds }) {
   const navigate = useNavigate();
@@ -46,6 +60,27 @@ export default function CardDeck({ reviews = [], featuredIds }) {
     setFront(Math.min(Math.max(Math.round(v), 0), last));
   });
 
+  // Warm the posters just past the mount window. Without this, every card you
+  // flip past mounts an <img> that only THEN starts fetching + decoding — a hitch
+  // on the exact frame you're scrolling. By the time it mounts it's in cache.
+  useEffect(() => {
+    for (let i = front; i <= front + AHEAD + PRELOAD && i < n; i++) {
+      const url = posterUrl(reviews[i]);
+      if (url) {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = url;
+      }
+    }
+  }, [front, n, reviews]);
+
+  // Stable across renders so the memoised cards don't all re-render whenever the
+  // front index ticks over.
+  const openReview = useCallback(
+    (review) => navigate(`/review/${review.id}`, { state: { review } }),
+    [navigate]
+  );
+
   if (n === 0) return null;
 
   return (
@@ -59,34 +94,28 @@ export default function CardDeck({ reviews = [], featuredIds }) {
       style={{ height: `${Math.max(n, 2) * SCROLL_PER_CARD}vh` }}
     >
       {/*
-        h-dvh (not h-screen/100vh): on mobile the address bar makes 100vh taller
-        than the visible area, so the deck would sit too low. dvh tracks the real
-        viewport, so the deck centres in the space you can actually see.
-      */}
-      {/*
         Centred in the viewport once pinned. At rest the deck peeks up from the
         fold instead — that's the invitation to scroll; the header above it slides
         away as you do, and the deck settles dead centre with nothing competing.
       */}
       <div
-        className="sticky top-0 h-dvh flex items-center justify-center"
-        style={{ perspective: 1500 }}
+        className="sticky top-0 flex items-center justify-center"
+        style={{ perspective: 1500, height: '100svh' }}
       >
         {/*
-          Poster (2:3), sized with clamp() so it adapts to every phone:
-          never smaller than 300px, never larger than 520px, otherwise 54% of the
-          real viewport height. This is the standard approach — relative units +
-          clamp() rather than hard-coded per-device breakpoints.
+          Poster (2:3), sized with clamp() so it adapts to every phone: never
+          smaller than 300px, never larger than 520px, otherwise 54% of the
+          viewport height. Relative units + clamp(), not per-device breakpoints.
         */}
-        <div className="relative aspect-[2/3]" style={{ height: 'clamp(300px, 54dvh, 520px)' }}>
+        <div className="relative aspect-[2/3]" style={{ height: CARD_H }}>
           {/*
-            Only the cards you can actually see get mounted. The deck now holds the
+            Only the cards you can actually see get mounted. The deck holds the
             WHOLE feed, and every card is a full-bleed TMDB poster stacked in the
-            viewport — lazy loading can't save you when all 100 are technically on
-            screen. Behind the 5th card the opacity transform has already hit 0.
+            same spot — lazy loading can't save you when all 100 are technically
+            on screen. Behind AHEAD the opacity transform has already hit 0.
           */}
           {reviews.map((review, i) => (
-            i < front - 2 || i > front + 5 ? null : (
+            i < front - BEHIND || i > front + AHEAD ? null : (
               <DeckCard
                 key={review.id}
                 review={review}
@@ -95,7 +124,7 @@ export default function CardDeck({ reviews = [], featuredIds }) {
                 pos={pos}
                 isFront={i === front}
                 isFeatured={!!featuredIds?.has(review.id)}
-                onOpen={() => navigate(`/review/${review.id}`, { state: { review } })}
+                onOpen={openReview}
               />
             )
           ))}
@@ -112,7 +141,7 @@ export default function CardDeck({ reviews = [], featuredIds }) {
   );
 }
 
-function DeckCard({ review, i, n, pos, isFront, isFeatured, onOpen }) {
+const DeckCard = memo(function DeckCard({ review, i, n, pos, isFront, isFeatured, onOpen }) {
   const reduce = useReducedMotion();
 
   // p = this card's position relative to the front. 0 = front, >0 = stacked
@@ -133,13 +162,13 @@ function DeckCard({ review, i, n, pos, isFront, isFeatured, onOpen }) {
   // behind the deck — that's the "突然跑到最後面" glitch.
   const zIndex = useTransform(p, (v) => (v < 0 ? n + 1 : Math.round(n - v)));
 
-  const poster = review.poster_path ? `${TMDB_IMG_BASE}w500${review.poster_path}` : null;
+  const poster = posterUrl(review);
   const total = getReviewTotal(review);
 
   return (
     <motion.div
       className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-      onClick={() => { if (isFront) onOpen(); }}
+      onClick={() => { if (isFront) onOpen(review); }}
       style={{
         y: reduce ? 0 : y,
         z: reduce ? 0 : z,
@@ -156,7 +185,6 @@ function DeckCard({ review, i, n, pos, isFront, isFeatured, onOpen }) {
           src={poster}
           alt={review.title}
           className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
           decoding="async"
         />
       ) : (
@@ -170,8 +198,11 @@ function DeckCard({ review, i, n, pos, isFront, isFeatured, onOpen }) {
         </div>
       )}
 
+      {/* No backdrop-blur here: a backdrop-filter on a transformed, stacked card
+          forces the whole deck to re-composite every scroll frame. The badge is
+          already near-opaque, so the blur bought nothing. */}
       {total != null && (
-        <div className="absolute top-3 right-3 w-12 h-12 rounded-lg flex items-center justify-center backdrop-blur-md border border-white/10 shadow-lg bg-black/65">
+        <div className="absolute top-3 right-3 w-12 h-12 rounded-lg flex items-center justify-center border border-white/10 shadow-lg bg-black/75">
           <span className="text-xl font-black tracking-tighter text-[#FE494A]">
             {total.toFixed(1)}
           </span>
@@ -185,4 +216,4 @@ function DeckCard({ review, i, n, pos, isFront, isFeatured, onOpen }) {
       </div>
     </motion.div>
   );
-}
+});

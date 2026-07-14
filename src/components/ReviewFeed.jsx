@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
@@ -139,14 +139,30 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
 
   const sentinelRef = useInfiniteScroll(loadMore, loading);
 
+  // Memoised so the deck gets a STABLE array. Rebuilding it on every render would
+  // re-render every card (defeating their memo) and re-run the poster preload,
+  // mid-scroll, for nothing.
+  const featuredIds = useMemo(
+    () => new Set(featuredReviews.map((r) => r.id)),
+    [featuredReviews]
+  );
+  // 精選(方案 A): the admin-pinned reviews lead the deck (badged), then the rest —
+  // one continuous scroll, no competing hero above it. A search shows just results.
+  const deckReviews = useMemo(
+    () => (searchQuery
+      ? reviews
+      : [...featuredReviews, ...reviews.filter((r) => !featuredIds.has(r.id))]),
+    [searchQuery, reviews, featuredReviews, featuredIds]
+  );
+
   if (initialLoad) {
     // The deck's skeleton is a single poster where the front card will land.
     if (isDeck) {
       return (
-        <div className="h-dvh flex items-center justify-center">
+        <div className="flex items-center justify-center" style={{ height: '100svh' }}>
           <div
             className="aspect-[2/3] rounded-2xl bg-[#1A1A1A]/10 animate-pulse"
-            style={{ height: 'clamp(300px, 54dvh, 520px)' }}
+            style={{ height: 'clamp(300px, 54svh, 520px)' }}
           />
         </div>
       );
@@ -178,18 +194,9 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
     );
   }
 
-  const featuredIds = new Set(featuredReviews.map((r) => r.id));
-
-  // 疊卡檢視 — the scroll-flip deck, and the default feed. 精選(方案 A): the
-  // admin-pinned featured reviews lead the deck (badged), then everything else —
-  // one continuous scroll, no competing hero section above it.
-  if (isDeck) {
-    const deckReviews = [...featuredReviews, ...reviews.filter((r) => !featuredIds.has(r.id))];
-    return <CardDeck reviews={deckReviews} featuredIds={featuredIds} />;
-  }
+  // 疊卡檢視 — the scroll-flip deck, and the default feed.
   if (viewMode === 'deck') {
-    // deck + an active search: just the results, in deck form.
-    return <CardDeck reviews={reviews} featuredIds={featuredIds} />;
+    return <CardDeck reviews={deckReviews} featuredIds={featuredIds} />;
   }
 
   return (
