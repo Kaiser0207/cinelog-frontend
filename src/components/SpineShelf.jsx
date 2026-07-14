@@ -76,7 +76,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
       */}
       <div className="relative -mt-[3vh] w-screen left-1/2 -ml-[50vw]">
         <div
-          className="flex items-end gap-[7px] overflow-x-auto overflow-y-hidden scrollbar-none pt-8"
+          className="flex items-end gap-[7px] overflow-x-auto overflow-y-hidden scrollbar-none pl-5 pt-8"
           style={{ height: `calc(${SHELF_H} + 2.5rem)` }}
         >
           {reviews.map((review, i) => (
@@ -89,6 +89,10 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
               onPull={pull}
             />
           ))}
+          {/* Trailing gutter as a real element, not padding-right: a horizontal flex
+              scroller drops its end padding in several engines, and the last case
+              ends up flush against the edge no matter what you set. */}
+          <div className="shrink-0 w-5" aria-hidden="true" />
         </div>
 
         {/* The cases just sit on a soft contact shadow. The grey bar that used to
