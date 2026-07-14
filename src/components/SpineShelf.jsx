@@ -19,9 +19,10 @@ import './SpineShelf.css';
 
 const SHELF_H = 'clamp(340px, 62svh, 580px)';
 const POSTER_RATIO = 2 / 3;
-const DEPTH = 64;   // case thickness, px — how far the side face runs back
-const TURN = -13;   // resting Y rotation: brings the right edge forward
-const TILT = 5;     // resting X rotation: you're looking slightly DOWN at it
+const DEPTH = 64;        // case thickness, px — how far the side face runs back
+const SHELF_WRAP = 8;    // how far the printed band wraps onto the cover, on the shelf
+const TURN = -8;         // resting Y rotation: brings the right edge forward
+const TILT = 3;          // resting X rotation: you're looking slightly DOWN at it
 
 const FALLBACK = [
   ['#FE494A', '#3B4856'], ['#D480C0', '#2E2A33'], ['#3B4856', '#E8B84B'],
@@ -195,12 +196,12 @@ const isDark = (c) => lum((c.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
 
 // Shared by the spine and by the band that wraps round onto the cover — they have
 // to line up to the pixel, because on a real case they're the same printed strip.
-const PANEL_H = 'clamp(50px, 9vw, 66px)';
-const FOOT_H = 'clamp(30px, 5.5vw, 42px)';
-const WRAP_W = 'clamp(6px, 7%, 22px)';
+const PANEL_H = 'clamp(66px, 12vw, 92px)';
+const FOOT_H = 'clamp(42px, 7.5vw, 60px)';
 
-/** The paper edge of the case: soft, milky, slightly out of focus. */
-const EDGE_WHITE = 'linear-gradient(180deg, #FAF7F0, #DED7C7)';
+/** Every non-printed face of the case: milky white, translucent, softly out of
+ *  focus — the cut edge of a stack of paper behind a slab of clear plastic. */
+const EDGE_WHITE = 'linear-gradient(180deg, rgba(250,247,240,0.72), rgba(228,222,208,0.66))';
 
 /**
  * The strip that wraps round the hinge onto the cover. A case is ONE printed sheet
@@ -209,9 +210,9 @@ const EDGE_WHITE = 'linear-gradient(180deg, #FAF7F0, #DED7C7)';
  * Wrapping only the body colour (what I did first) is the giveaway that it's two
  * separate pieces of art rather than one object.
  */
-function WrapBand({ body, foot, total }) {
+function WrapBand({ body, foot, total, width }) {
   return (
-    <span className="absolute inset-y-0 left-0 flex flex-col" style={{ width: WRAP_W }}>
+    <span className="absolute inset-y-0 left-0 flex flex-col" style={{ width }}>
       <span className="relative flex-1 min-h-0" style={{ background: body }}>
         <span className="absolute inset-0 spine-weave" />
       </span>
@@ -357,7 +358,17 @@ function PaperEdges({ depth, hit = true }) {
   );
 }
 
-function CoverFace({ art, body, foot, total, width, radius = 'rounded-r-[2px]', dim, hit = true }) {
+/**
+ * The front cover: a wrap band, then the poster.
+ *
+ * `width` is the ART's width. The face is drawn wider than that, by exactly the
+ * band — because the band lives BESIDE the artwork, not over it. Sizing the face
+ * to the poster and then insetting the art (what I did before) silently squeezed
+ * every poster into a narrower box, and `bg-cover` cropped the difference off the
+ * sides. That crop is the "海報被遮到" you kept seeing: the band was never on top
+ * of the art, it was eating the art's width.
+ */
+function CoverFace({ art, body, foot, total, width, wrap, radius = 'rounded-r-[2px]', dim, hit = true }) {
   return (
     <span
       // On the shelf this face must NOT take clicks. It's turned into the screen,
@@ -366,7 +377,7 @@ function CoverFace({ art, body, foot, total, width, radius = 'rounded-r-[2px]', 
       // for the next case. In your hand it's the opposite: it has to take the drag.
       className={`absolute top-0 left-full h-full block overflow-hidden case-face ${radius} ${hit ? '' : 'pointer-events-none'}`}
       style={{
-        width,
+        width: width + wrap,
         transformOrigin: 'left center',
         transform: 'rotateY(90deg)',
         backgroundColor: body,
@@ -380,23 +391,23 @@ function CoverFace({ art, body, foot, total, width, radius = 'rounded-r-[2px]', 
           <span
             className="absolute inset-y-0 right-0 block bg-cover bg-center film-img"
             style={{
-              left: WRAP_W,
+              left: wrap,
               backgroundImage: `url(${art})`,
               filter: dim ? `brightness(${dim}) saturate(0.88) contrast(1.12) sepia(0.16)` : undefined,
             }}
           />
           <span
             className="absolute inset-y-0 right-0 block film-grain pointer-events-none"
-            style={{ left: WRAP_W }}
+            style={{ left: wrap }}
           />
           <span
             className="absolute inset-y-0 right-0 block film-vignette pointer-events-none"
-            style={{ left: WRAP_W }}
+            style={{ left: wrap }}
           />
         </>
       )}
 
-      <WrapBand body={body} foot={foot} total={total} />
+      <WrapBand body={body} foot={foot} total={total} width={wrap} />
       {/* the case is ONE printed sheet: the weave runs across the cover too */}
       <span className="absolute inset-0 spine-weave pointer-events-none" />
       <span className="absolute inset-0 case-bevel pointer-events-none" />
@@ -429,8 +440,8 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
         onClick={(e) => onPull(review, e.currentTarget, colors)}
         initial={false}
         animate={{ rotateY: TURN, rotateX: TILT, y: 0, z: 0 }}
-        whileHover={{ rotateY: -30, rotateX: TILT, y: -18, z: 40 }}
-        whileTap={{ rotateY: -30, y: -8, z: 20 }}
+        whileHover={{ rotateY: -19, rotateX: TILT, y: -18, z: 40 }}
+        whileTap={{ rotateY: -19, y: -8, z: 20 }}
         transition={{ type: 'spring', stiffness: 320, damping: 26 }}
         className="absolute inset-0 border-none bg-transparent p-0 cursor-pointer"
         style={{ transformStyle: 'preserve-3d' }}
@@ -443,7 +454,8 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
           body={body}
           foot={foot}
           total={total}
-          width={DEPTH}
+          width={DEPTH - SHELF_WRAP}
+          wrap={SHELF_WRAP}
           dim={0.66}
           hit={false}
         />
@@ -456,8 +468,8 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
             height: DEPTH,
             transformOrigin: 'center top',
             transform: 'rotateX(-90deg)',
-            background: `linear-gradient(180deg, ${body}, ${foot})`,
-            filter: 'brightness(0.78)',
+            background: EDGE_WHITE,
+            filter: 'blur(0.4px) brightness(0.92)',
           }}
         >
           <span className="absolute inset-0 spine-weave" />
@@ -498,8 +510,12 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
 
   const h = rect.height;
   const spineW = rect.width;
-  const coverW = h * POSTER_RATIO;
-  const targetX = window.innerWidth / 2 - coverW / 2 - spineW;
+  // The ART is a true 2:3 poster. The FACE is that plus the wrap band beside it,
+  // so the poster is never squeezed to make room for the band.
+  const artW = h * POSTER_RATIO;
+  const wrapW = clamp(Math.round(artW * 0.07), 8, 24);
+  const faceW = artW + wrapW;
+  const targetX = window.innerWidth / 2 - faceW / 2 - spineW;
   const targetY = Math.max(16, (window.innerHeight - h) / 2);
   const poster = review.poster_path ? `${TMDB_IMG_BASE}w500${review.poster_path}` : null;
   const total = getReviewTotal(review);
@@ -612,14 +628,15 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
         onPointerCancel={release}
         onClick={(e) => e.stopPropagation()}
       >
-        <PaperEdges depth={coverW} />
+        <PaperEdges depth={faceW} />
 
         <CoverFace
           art={poster}
           body={body}
           foot={foot}
           total={total}
-          width={coverW}
+          width={artW}
+          wrap={wrapW}
           radius="rounded-r-lg"
         />
 
@@ -627,11 +644,11 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
         <span
           className="absolute top-0 left-0 w-full block"
           style={{
-            height: coverW,
+            height: faceW,
             transformOrigin: 'center top',
             transform: 'rotateX(-90deg)',
-            background: `linear-gradient(180deg, ${body}, ${foot})`,
-            filter: 'brightness(0.8)',
+            background: EDGE_WHITE,
+            filter: 'blur(0.4px) brightness(0.94)',
           }}
         >
           <span className="absolute inset-0 spine-weave" />
@@ -647,7 +664,7 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             className="absolute inset-x-0 text-center text-white/85 text-sm font-bold pointer-events-none"
-            style={{ top: Math.min(targetY + h + 16, window.innerHeight - 32) }}
+            style={{ top: Math.min(targetY + h + 40, window.innerHeight - 30) }}
           >
             拖曳可以轉動 · 再點一次 → 進入影評
           </motion.p>
