@@ -18,11 +18,16 @@ import './SpineShelf.css';
  */
 
 const SHELF_H = 'clamp(340px, 62svh, 580px)';
+const CASE_W = 'clamp(52px, 12vw, 72px)';
 const POSTER_RATIO = 2 / 3;
 const DEPTH = 64;        // case thickness, px — how far the side face runs back
 const SHELF_WRAP = 8;    // how far the printed band wraps onto the cover, on the shelf
 const TURN = -8;         // resting Y rotation: brings the right edge forward
 const TILT = 3;          // resting X rotation: you're looking slightly DOWN at it
+// One camera for both the shelf and the pull-out. If they differ, the case is
+// projected one way in its slot and another way in your hand, and the hand-off at
+// each end of the animation visibly jumps.
+const CAMERA = 1200;
 
 const FALLBACK = [
   ['#FE494A', '#3B4856'], ['#D480C0', '#2E2A33'], ['#3B4856', '#E8B84B'],
@@ -137,8 +142,14 @@ function useSpineColors(posterPath, seed) {
 
 export default function SpineShelf({ reviews = [], featuredIds }) {
   const navigate = useNavigate();
-  // The case being taken off the shelf: { review, rect, colors }. rect is its
-  // on-screen box at click time — that's where the pull-out starts from.
+  // The case being taken off the shelf: { review, rect, colors }.
+  //
+  // `el` is the case's PERSPECTIVE WRAPPER, not the button inside it. The button
+  // carries the 3D transform (and, on a mouse, the hover lift), and
+  // getBoundingClientRect() reports the *transformed* box — so measuring the button
+  // handed us a slot that was a few px wide of where the case actually lives, and
+  // 18px high whenever you'd hovered it. The wrapper is untransformed: its rect is
+  // the true slot on the shelf, which is the thing the case has to go back into.
   const [pulled, setPulled] = useState(null);
 
   const pull = useCallback((review, el, colors) => {
@@ -152,7 +163,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
       {/* Pulled up under the controls row so more of the shelf is above the fold.
           Safe only because that row now carries `relative z-20` — otherwise this
           would sit on top of it and eat every tap on the view buttons. */}
-      <div className="relative -mt-[7vh]">
+      <div className="relative -mt-[3vh]">
         <div
           className="flex items-end gap-[7px] overflow-x-auto overflow-y-hidden scrollbar-none px-6 pt-8"
           style={{ height: `calc(${SHELF_H} + 2.5rem)` }}
@@ -432,22 +443,31 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
       style={{
         // Perspective PER CASE, not on the row: the row is a scroller thousands of
         // pixels wide, and one shared vanishing point would shear the far cases.
-        perspective: 900,
-        width: 'clamp(52px, 12vw, 72px)',
+        // The value must MATCH the pull-out overlay's, or the case is projected one
+        // way on the shelf and another way in your hand — and the hand-off at each
+        // end of the animation visibly jumps.
+        perspective: CAMERA,
+        width: CASE_W,
         height: SHELF_H,
         zIndex: depthOrder,
       }}
     >
       <motion.button
         type="button"
-        onClick={(e) => onPull(review, e.currentTarget, colors)}
+        onClick={(e) => onPull(review, e.currentTarget.parentElement, colors)}
         initial={false}
         animate={{ rotateY: TURN, rotateX: TILT, y: 0, z: 0 }}
         whileHover={{ rotateY: -19, rotateX: TILT, y: -18, z: 40 }}
         whileTap={{ rotateY: -19, y: -8, z: 20 }}
         transition={{ type: 'spring', stiffness: 320, damping: 26 }}
         className="absolute inset-0 border-none bg-transparent p-0 cursor-pointer"
-        style={{ transformStyle: 'preserve-3d' }}
+        style={{
+          transformStyle: 'preserve-3d',
+          // Same hinge the pull-out pivots on. Rotating about the centre here and
+          // about the right edge there means the two never line up, however exactly
+          // the numbers match — the case would land beside its slot, not in it.
+          transformOrigin: 'right center',
+        }}
         title={review.title}
       >
         <PaperEdges depth={DEPTH} hit={false} />
@@ -620,7 +640,7 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[300]" style={{ perspective: 1600 }} onClick={putBack}>
+    <div className="fixed inset-0 z-[300]" style={{ perspective: CAMERA }} onClick={putBack}>
       {/* Opaque enough that the title and the genre pills genuinely go away — at
           55% they were still legible through it, so the case never felt like it had
           the stage to itself. */}
