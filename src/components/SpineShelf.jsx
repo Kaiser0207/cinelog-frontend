@@ -29,7 +29,7 @@ const TILT = 3;          // resting X rotation: you're looking slightly DOWN at 
 // projected one way in its slot and another way in your hand, and the hand-off at
 // each end of the animation visibly jumps.
 const CAMERA = 1200;
-const NUDGE = 30;        // how far the cases to the right shuffle over to make room
+const NUDGE = 60;        // how far the cases to the right shuffle over to make room
 
 function useSpineColors(posterPath, seed) {
   const [pair, setPair] = useState(() => cachedColors(posterPath) || null);
