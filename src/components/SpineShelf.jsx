@@ -213,8 +213,8 @@ const isDark = (c) => lum((c.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
 // Proportions, not pixels: the two panels together own the bottom 35% of the spine,
 // whatever the shelf's height works out to. A fixed px block would swallow a short
 // spine and look like a stripe on a tall one.
-const PANEL_H = '21%';   // white panel (the barcode's slot) — carries the score
-const FOOT_H = '14%';    // colour block at the very foot
+const PANEL_H = '25%';   // white panel (the barcode's slot) — carries the score
+const FOOT_H = '10%';    // colour block at the very foot
 
 /** Every non-printed face of the case — top, underside, open edge. A cool, misty
  *  white-grey, and nearly solid: these are the cut edge of a stack of paper behind
