@@ -23,7 +23,6 @@ const CurvedLoop = ({
   const textPathRef = useRef(null);
   const pathRef = useRef(null);
   const [spacing, setSpacing] = useState(0);
-  const [offset, setOffset] = useState(0);
   const uid = useId();
   const pathId = `curve-${uid}`;
   // The baseline sits low in a TALL viewBox so the letters (which rise from it) and
@@ -38,13 +37,11 @@ const CurvedLoop = ({
   const dirRef = useRef(direction);
   const velRef = useRef(0);
 
-  const textLength = spacing;
-  const totalText = textLength
-    ? Array(Math.ceil(1800 / textLength) + 2)
-        .fill(text)
-        .join('')
-    : text;
   const ready = spacing > 0;
+  const totalText = useMemo(
+    () => (spacing ? Array(Math.ceil(1800 / spacing) + 2).fill(text).join('') : text),
+    [spacing, text]
+  );
 
   useEffect(() => {
     // getComputedTextLength() returns 0 until the webfont has actually landed, and a
@@ -61,17 +58,40 @@ const CurvedLoop = ({
     return () => { cancelled = true; };
   }, [text, className]);
 
+  // Re-seed the attribute whenever the measurement changes (i.e. once, when the webfont
+  // lands). React never touches startOffset again after mount: the JSX below hands it
+  // the same `-spacing` string every render, so the DOM diff is a no-op and the rAF's
+  // imperative writes survive. Keeping `offset` in state — which is what this used to
+  // do — meant any parent re-render could snap the marquee back to where it started.
   useEffect(() => {
-    if (!spacing) return;
-    if (textPathRef.current) {
-      const initial = -spacing;
-      textPathRef.current.setAttribute('startOffset', initial + 'px');
-      setOffset(initial);
+    if (spacing && textPathRef.current) {
+      textPathRef.current.setAttribute('startOffset', `${-spacing}px`);
     }
   }, [spacing]);
 
+  // The marquee is driven ENTIRELY by writing the startOffset attribute — no React
+  // state. It used to call setOffset() on every single frame as well, which re-rendered
+  // the whole SVG subtree (and rebuilt `totalText`, an Array().fill().join()) 60 times a
+  // second, forever, from first paint. `offset` is only ever read to seed the initial
+  // attribute; nothing downstream needs it after that. It was the single biggest
+  // continuous main-thread cost on the home page, and it was competing with the shelf.
+  //
+  // And it's gated on visibility: this thing lives in the FOOTER. On the default shelf
+  // view it is hundreds of pixels below the fold, animating for nobody. (rAF already
+  // pauses in a hidden tab, so that case is covered for free.)
+  const jacketRef = useRef(null);
+  const [onScreen, setOnScreen] = useState(false);
+
   useEffect(() => {
-    if (!spacing || !ready) return;
+    const el = jacketRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') { setOnScreen(true); return undefined; }
+    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting), { rootMargin: '120px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!spacing || !ready || !onScreen) return undefined;
     let frame = 0;
     const step = () => {
       if (!dragRef.current && textPathRef.current) {
@@ -84,13 +104,12 @@ const CurvedLoop = ({
         if (newOffset > 0) newOffset -= wrapPoint;
 
         textPathRef.current.setAttribute('startOffset', newOffset + 'px');
-        setOffset(newOffset);
       }
       frame = requestAnimationFrame(step);
     };
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
-  }, [spacing, speed, ready]);
+  }, [spacing, speed, ready, onScreen]);
 
   const onPointerDown = e => {
     if (!interactive) return;
@@ -113,8 +132,8 @@ const CurvedLoop = ({
     if (newOffset <= -wrapPoint) newOffset += wrapPoint;
     if (newOffset > 0) newOffset -= wrapPoint;
 
+    // Same as the rAF: the attribute IS the state. No re-render per pointermove either.
     textPathRef.current.setAttribute('startOffset', newOffset + 'px');
-    setOffset(newOffset);
   };
 
   const endDrag = () => {
@@ -127,6 +146,7 @@ const CurvedLoop = ({
 
   return (
     <div
+      ref={jacketRef}
       className="curved-loop-jacket"
       style={{ visibility: ready ? 'visible' : 'hidden', cursor: cursorStyle }}
       onPointerDown={onPointerDown}
@@ -143,7 +163,7 @@ const CurvedLoop = ({
         </defs>
         {ready && (
           <text fontWeight="bold" xmlSpace="preserve" className={className}>
-            <textPath ref={textPathRef} href={`#${pathId}`} startOffset={offset + 'px'} xmlSpace="preserve">
+            <textPath ref={textPathRef} href={`#${pathId}`} startOffset={`${-spacing}px`} xmlSpace="preserve">
               {totalText}
             </textPath>
           </text>

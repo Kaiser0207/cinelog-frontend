@@ -34,6 +34,11 @@ const TILT = 3;          // resting X rotation: you're looking slightly DOWN at 
 // each end of the animation visibly jumps.
 const CAMERA = 1200;
 const NUDGE = 60;        // how far the cases to the right shuffle over to make room
+// ...and how many of them bother. Only ~7 cases fit on a phone, and while a case is in
+// your hand the page is frozen and the overlay eats every tap, so nobody can scroll to
+// see the rest. Nudging ALL of them meant tapping the first case started 99 concurrent
+// springs, each dragging a wrapper full of blended layers across a moving neighbour.
+const NUDGE_REACH = 12;
 
 const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 
@@ -193,7 +198,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
               // Everything to the RIGHT of the case in your hand shuffles over to
               // make room, and closes back up once it's slotted in. A shelf where
               // the neighbours don't move is a shelf of pictures, not of objects.
-              nudged={gapAfter != null && i > gapAfter}
+              nudged={gapAfter != null && i > gapAfter && i <= gapAfter + NUDGE_REACH}
               // While it's in your hand it is NOT also on the shelf.
               held={pulled != null && i === pulled.index}
               onPull={pull}
@@ -248,6 +253,9 @@ const FOOT_H = '10%';    // colour block at the very foot
  *  white-grey, and nearly solid: these are the cut edge of a stack of paper behind
  *  clear plastic, not a piece of gauze. */
 const EDGE_WHITE = 'linear-gradient(180deg, rgba(247,247,245,0.95), rgba(214,214,212,0.92))';
+// The same paper, 2% down — what `filter: brightness(0.98)` was buying, minus the
+// offscreen render surface it cost. A brightness change is a colour, not a filter.
+const EDGE_WHITE_TOP = 'linear-gradient(180deg, rgba(242,242,240,0.95), rgba(210,210,208,0.92))';
 
 /**
  * The strip that wraps round the hinge onto the cover. A case is ONE printed sheet
@@ -256,20 +264,22 @@ const EDGE_WHITE = 'linear-gradient(180deg, rgba(247,247,245,0.95), rgba(214,214
  * Wrapping only the body colour (what I did first) is the giveaway that it's two
  * separate pieces of art rather than one object.
  */
-function WrapBand({ body, foot, total, width }) {
+function WrapBand({ body, foot, total, width, weave = 0 }) {
+  // Same argument as CoverFace's, and it wasn't being made here: on the shelf the whole
+  // 373px cover projects to a ~39px band, and this band is 24/373 of THAT — about two
+  // and a half screen pixels, half of it behind the next spine. Three overlay-blended,
+  // noise-textured, full-height layers, a hundred times over, to texture 2.5px.
+  const tex = weave === 0 ? null : (
+    <motion.span className="absolute inset-0 spine-weave" style={{ opacity: weave }} />
+  );
+
   return (
     <span className="absolute inset-y-0 left-0 flex flex-col" style={{ width }}>
-      <span className="relative flex-1 min-h-0" style={{ background: body }}>
-        <span className="absolute inset-0 spine-weave" />
-      </span>
+      <span className="relative flex-1 min-h-0" style={{ background: body }}>{tex}</span>
       {total != null && (
-        <span className="relative w-full shrink-0 bg-[#F5F1E6]" style={{ height: PANEL_H }}>
-          <span className="absolute inset-0 spine-weave" />
-        </span>
+        <span className="relative w-full shrink-0 bg-[#F5F1E6]" style={{ height: PANEL_H }}>{tex}</span>
       )}
-      <span className="relative w-full shrink-0" style={{ height: FOOT_H, background: foot }}>
-        <span className="absolute inset-0 spine-weave" />
-      </span>
+      <span className="relative w-full shrink-0" style={{ height: FOOT_H, background: foot }}>{tex}</span>
       {/* the crease, INSIDE the band — it used to spill 6px over the artwork and
           put a dirty shadow down the left of every poster */}
       <span
@@ -508,8 +518,9 @@ function CoverFace({
         />
       )}
 
-      <WrapBand body={body} foot={foot} total={total} width={wrap} />
-      <span className="absolute inset-0 case-bevel pointer-events-none" />
+      <WrapBand body={body} foot={foot} total={total} width={wrap} weave={weave} />
+      {/* the bevel is on the same edge-on face — also invisible on the shelf */}
+      {weave !== 0 && <span className="absolute inset-0 case-bevel pointer-events-none" />}
     </span>
   );
 }
@@ -607,18 +618,22 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, ca
             top face, which is why it read as hollow. This way it faces up.
 
             Also non-hit: it juts over the case beside it and would steal its taps. */}
+        {/* No filter, no weave, on the shelf's copy of this face.
+            `filter` forces an offscreen render surface for a 52 × 373px face — call it
+            1.9M px of them across a full shelf — in order to apply a 0.4px blur to a
+            face that projects 19px tall (unresolvable) and a 2% brightness change
+            (which is just a colour: it's baked into EDGE_WHITE_TOP). The weave is
+            compressed 19:1 vertically; a 3px thread period isn't there either.
+            The pull-out keeps both — there, the case is square on to you. */}
         <span
           className="absolute bottom-full left-0 w-full block pointer-events-none rounded-t-[3px]"
           style={{
             height: geom.faceW,
             transformOrigin: 'center bottom',
             transform: 'rotateX(90deg)',
-            background: EDGE_WHITE,
-            filter: 'blur(0.4px) brightness(0.98)',
+            background: EDGE_WHITE_TOP,
           }}
-        >
-          <span className="absolute inset-0 spine-weave" />
-        </span>
+        />
 
         <SpineFace
           review={review}

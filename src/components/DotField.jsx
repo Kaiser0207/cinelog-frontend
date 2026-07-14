@@ -41,6 +41,18 @@ const DotField = memo(({
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let resizeTimer;
 
+    // This is a field of dots that bulges away from THE CURSOR. A phone does not have
+    // one — and iOS Safari synthesises a `mousemove` before every single click. So on a
+    // touchscreen the thing woke up on every tap: the mouse "jumps" from (-9999,-9999),
+    // `speed` spikes, and `engagement` lerps back down at 0.06/frame — a hundred-odd
+    // frames during which tick() does a full clearRect, builds a fresh gradient, and
+    // issues ~1,000 ctx.arc() calls. That's a second or two of full-canvas repainting
+    // beginning on the exact frame the pull-out's 3D animation starts.
+    //
+    // On touch: build the grid, paint it ONCE, and never start the loop. Identical
+    // picture, no listeners, no interval, no rAF.
+    const INTERACTIVE = window.matchMedia?.('(hover: hover)').matches ?? true;
+
     function resize() {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(doResize, 100);
@@ -65,6 +77,7 @@ const DotField = memo(({
 
       buildDots(w, h);
       idleFrames = 0; // a resized canvas is blank — force a repaint
+      if (!INTERACTIVE) tick();   // no loop is running to do it for us
     }
 
     function buildDots(w, h) {
@@ -104,10 +117,14 @@ const DotField = memo(({
       m.prevY = m.y;
     }
 
-    const speedInterval = setInterval(updateMouseSpeed, 20);
+    const speedInterval = INTERACTIVE ? setInterval(updateMouseSpeed, 20) : null;
 
     let frameCount = 0;
     let idleFrames = 0;
+
+    const schedule = () => {
+      if (INTERACTIVE) rafRef.current = requestAnimationFrame(tick);
+    };
 
     function tick() {
       frameCount++;
@@ -131,7 +148,7 @@ const DotField = memo(({
         && !p.sparkle && p.waveAmplitude === 0;
       idleFrames = canIdle ? idleFrames + 1 : 0;
       if (idleFrames > 40) {
-        rafRef.current = requestAnimationFrame(tick);
+        schedule();
         return;
       }
 
@@ -215,7 +232,7 @@ const DotField = memo(({
 
       ctx.fill();
 
-      rafRef.current = requestAnimationFrame(tick);
+      schedule();
     }
 
     // Don't burn a rAF loop + a full canvas repaint on a backgrounded tab.
@@ -228,15 +245,20 @@ const DotField = memo(({
       }
     }
 
-    doResize();
+    doResize();   // on touch this also paints the one and only frame
     window.addEventListener('resize', resize);
-    window.addEventListener('mousemove', onMouseMove, { passive: true });
-    document.addEventListener('visibilitychange', onVisibility);
-    rafRef.current = requestAnimationFrame(tick);
+    if (INTERACTIVE) {
+      window.addEventListener('mousemove', onMouseMove, { passive: true });
+      document.addEventListener('visibilitychange', onVisibility);
+      rafRef.current = requestAnimationFrame(tick);
+    }
 
     rebuildRef.current = () => {
       const { w, h } = sizeRef.current;
-      if (w > 0 && h > 0) buildDots(w, h);
+      if (w > 0 && h > 0) {
+        buildDots(w, h);
+        if (!INTERACTIVE) tick();
+      }
     };
 
     return () => {
