@@ -210,8 +210,8 @@ const isDark = (c) => lum((c.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
 
 // Shared by the spine and by the band that wraps round onto the cover — they have
 // to line up to the pixel, because on a real case they're the same printed strip.
-const PANEL_H = 'clamp(66px, 12vw, 92px)';
-const FOOT_H = 'clamp(42px, 7.5vw, 60px)';
+const PANEL_H = 'clamp(84px, 15vw, 116px)';
+const FOOT_H = 'clamp(56px, 10vw, 78px)';
 
 /** Every non-printed face of the case: milky white, translucent, softly out of
  *  focus — the cut edge of a stack of paper behind a slab of clear plastic. */
