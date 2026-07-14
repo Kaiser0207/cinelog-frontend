@@ -54,7 +54,14 @@
    underneath its own neighbour.
 
    !important because the slot's z-index is an inline style, and in the cascade an
-   important author rule outranks a normal inline one. */
-.case-slot:hover {
-  z-index: 400 !important;
+   important author rule outranks a normal inline one.
+
+   Guarded by (hover: hover) because a touchscreen's :hover STICKS. Tap a case on a
+   phone and Safari leaves it :hover until you tap somewhere else — so the case you
+   just came back from stayed promoted to the top of the stack, lying across its
+   neighbours with its cover swung out. Hover is a mouse idea; only a mouse gets it. */
+@media (hover: hover) {
+  .case-slot:hover {
+    z-index: 400 !important;
+  }
 }
