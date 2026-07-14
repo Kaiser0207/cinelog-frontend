@@ -31,10 +31,11 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [sortOpen, setSortOpen] = useState(false);
   // 疊卡 is the feed now — it took the grid's place. Anyone carrying a saved
-  // 'grid' from before lands on the deck too; only 'list' is still a choice.
-  const [viewMode, setViewMode] = useState(
-    () => (localStorage.getItem('cinelog_view_mode') === 'list' ? 'list' : 'deck')
-  );
+  // 'grid' from before lands on the deck too.
+  const [viewMode, setViewMode] = useState(() => {
+    const saved = localStorage.getItem('cinelog_view_mode');
+    return saved === 'list' || saved === 'shelf' ? saved : 'deck';
+  });
   
   const activeGenreRef = useRef(null);
 
@@ -316,6 +317,19 @@ export default function HomePage() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" viewBox="0 0 24 24">
                 <rect x="3" y="6" width="11" height="13" rx="2"></rect>
                 <path d="M8 3h9a2 2 0 0 1 2 2v11"></path>
+              </svg>
+            </button>
+            {/* 書脊牆 — the collection as a shelf of spines */}
+            <button
+              type="button"
+              onClick={() => setViewMode('shelf')}
+              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'shelf' ? 'bg-[#FE494A] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
+              title="Shelf View (書脊牆)"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="4" height="16" rx="1"></rect>
+                <rect x="9" y="4" width="4" height="16" rx="1"></rect>
+                <rect x="15" y="4" width="4" height="16" rx="1"></rect>
               </svg>
             </button>
             <button

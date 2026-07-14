@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import ReviewListRow from './ReviewListRow';
 import CardDeck from './CardDeck';
+import SpineShelf from './SpineShelf';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { API_URL, flattenReview } from '../utils/constants';
 
@@ -54,11 +55,13 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // The deck has no sentinel to trip infinite scroll (it replaces the whole feed
-  // layout), and a deck you can only flip 12 cards deep is just wrong — so it
-  // pulls the full set in the background, 100 at a time (the backend's cap).
+  // The deck and the shelf both replace the whole feed layout, so neither renders
+  // the sentinel that trips infinite scroll — and a deck 12 cards deep, or a shelf
+  // holding 12 of your 100 films, is just wrong. They pull the full set in the
+  // background instead, 100 at a time (the backend's cap).
   const isDeck = viewMode === 'deck' && !searchQuery;
-  const pageSize = isDeck ? 100 : LIMIT;
+  const loadsAll = (viewMode === 'deck' || viewMode === 'shelf') && !searchQuery;
+  const pageSize = loadsAll ? 100 : LIMIT;
 
   const fetchReviews = useCallback(async (offset = 0, reset = false) => {
     if (loading) return;
@@ -122,14 +125,14 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
     setHasMore(true);
     setInitialLoad(true);
     fetchReviews(0, true);
-  }, [sort, genre, media, searchQuery, searchMode, isDeck]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sort, genre, media, searchQuery, searchMode, loadsAll]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Deck only: keep pulling the next page as soon as the last one lands, until
+  // Deck/shelf: keep pulling the next page as soon as the last one lands, until
   // there's nothing left. Each fetch flips `loading`, which re-runs this.
   useEffect(() => {
-    if (!isDeck || initialLoad || loading || !hasMore) return;
+    if (!loadsAll || initialLoad || loading || !hasMore) return;
     fetchReviews(reviews.length);
-  }, [isDeck, initialLoad, loading, hasMore, reviews.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loadsAll, initialLoad, loading, hasMore, reviews.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {
@@ -197,6 +200,10 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
   // 疊卡檢視 — the scroll-flip deck, and the default feed.
   if (viewMode === 'deck') {
     return <CardDeck reviews={deckReviews} featuredIds={featuredIds} />;
+  }
+  // 書脊牆 — the whole collection as a shelf.
+  if (viewMode === 'shelf') {
+    return <SpineShelf reviews={deckReviews} featuredIds={featuredIds} />;
   }
 
   return (
