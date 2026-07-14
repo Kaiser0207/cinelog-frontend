@@ -193,6 +193,46 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
 const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 const isDark = (c) => lum((c.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
 
+// Shared by the spine and by the band that wraps round onto the cover — they have
+// to line up to the pixel, because on a real case they're the same printed strip.
+const PANEL_H = 'clamp(50px, 9vw, 66px)';
+const FOOT_H = 'clamp(30px, 5.5vw, 42px)';
+const WRAP_W = 'clamp(6px, 7%, 22px)';
+
+/** The paper edge of the case: soft, milky, slightly out of focus. */
+const EDGE_WHITE = 'linear-gradient(180deg, #FAF7F0, #DED7C7)';
+
+/**
+ * The strip that wraps round the hinge onto the cover. A case is ONE printed sheet
+ * folded over, so whatever is at the spine's edge keeps going: the body colour, the
+ * white panel and the foot block all continue across the fold at the same heights.
+ * Wrapping only the body colour (what I did first) is the giveaway that it's two
+ * separate pieces of art rather than one object.
+ */
+function WrapBand({ body, foot, total }) {
+  return (
+    <span className="absolute inset-y-0 left-0 flex flex-col" style={{ width: WRAP_W }}>
+      <span className="relative flex-1 min-h-0" style={{ background: body }}>
+        <span className="absolute inset-0 spine-weave" />
+      </span>
+      {total != null && (
+        <span className="relative w-full shrink-0 bg-[#F5F1E6]" style={{ height: PANEL_H }}>
+          <span className="absolute inset-0 spine-weave" />
+        </span>
+      )}
+      <span className="relative w-full shrink-0" style={{ height: FOOT_H, background: foot }}>
+        <span className="absolute inset-0 spine-weave" />
+      </span>
+      {/* the crease, INSIDE the band — it used to spill 6px over the artwork and
+          put a dirty shadow down the left of every poster */}
+      <span
+        className="absolute inset-y-0 right-0 w-[5px]"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(0,0,0,0.32))' }}
+      />
+    </span>
+  );
+}
+
 /**
  * The spine artwork — one component, so the case on the shelf and the case in your
  * hand are literally the same object.
@@ -244,13 +284,17 @@ function SpineFace({ review, body, foot, total, isFeatured, big }) {
         )}
       </span>
 
-      {/* white panel — the barcode's slot on a real case; here it carries the score */}
+      {/* white panel — the barcode's slot on a real case; here it carries the score.
+          It gets its OWN weave: the face-wide texture layer sits *under* these
+          panels (they're painted after it), so without this the white and the foot
+          block came out as flat digital blocks stuck on a textured spine. */}
       {total != null && (
         <span
           className="relative w-full flex items-center justify-center bg-[#F5F1E6] text-[#1A1A1A] shrink-0"
-          style={{ height: 'clamp(50px, 9vw, 66px)' }}
+          style={{ height: PANEL_H }}
         >
-          <span className="text-[15px] font-black tabular-nums leading-none">
+          <span className="absolute inset-0 spine-weave pointer-events-none" />
+          <span className="relative text-[15px] font-black tabular-nums leading-none">
             {total.toFixed(1)}
           </span>
         </span>
@@ -259,19 +303,61 @@ function SpineFace({ review, body, foot, total, isFeatured, big }) {
       {/* colour block at the very foot */}
       <span
         className="relative w-full shrink-0"
-        style={{ height: 'clamp(30px, 5.5vw, 42px)', background: foot }}
-      />
+        style={{ height: FOOT_H, background: foot }}
+      >
+        <span className="absolute inset-0 spine-weave pointer-events-none" />
+      </span>
     </span>
   );
 }
 
 /**
- * The front cover. The spine's colour wraps a little way onto it — printed cases
- * are one continuous sheet folded round the hinge, so the colour doesn't stop dead
- * at the corner. The poster art starts after that band.
+ * The front cover. The wrapped band sits alongside the artwork, never on top of it —
+ * the poster gets everything to the right of the fold, uncropped and unshadowed.
  */
-function CoverFace({ art, body, width, radius = 'rounded-r-[2px]', dim, hit = true }) {
-  const WRAP = 'clamp(6px, 7%, 22px)';
+/**
+ * The two faces the box was missing: its underside, and the open edge opposite the
+ * spine. Without them, tilt the case and you look straight through a hollow shell.
+ *
+ * Both are the paper edge, not the printed sheet — milky white, softly blurred.
+ * That's what the cut edge of a stack of paper actually looks like, and it's also
+ * what stops the case reading as an infinitely thin box.
+ */
+function PaperEdges({ depth, hit = true }) {
+  const off = hit ? '' : 'pointer-events-none';
+  return (
+    <>
+      {/* underside — folds back from the bottom edge */}
+      <span
+        className={`absolute top-full left-0 w-full block ${off}`}
+        style={{
+          height: depth,
+          transformOrigin: 'center top',
+          transform: 'rotateX(-90deg)',
+          background: EDGE_WHITE,
+          filter: 'blur(0.4px) brightness(0.86)',
+        }}
+      >
+        <span className="absolute inset-0 spine-weave" />
+      </span>
+
+      {/* the open edge — the far face of the box, which after the case turns to
+          meet you ends up as its right-hand side */}
+      <span
+        className={`absolute inset-0 block ${off}`}
+        style={{
+          transform: `translateZ(${-depth}px)`,
+          background: EDGE_WHITE,
+          filter: 'blur(0.5px)',
+        }}
+      >
+        <span className="absolute inset-0 spine-weave" />
+      </span>
+    </>
+  );
+}
+
+function CoverFace({ art, body, foot, total, width, radius = 'rounded-r-[2px]', dim, hit = true }) {
   return (
     <span
       // On the shelf this face must NOT take clicks. It's turned into the screen,
@@ -294,36 +380,23 @@ function CoverFace({ art, body, width, radius = 'rounded-r-[2px]', dim, hit = tr
           <span
             className="absolute inset-y-0 right-0 block bg-cover bg-center film-img"
             style={{
-              left: WRAP,
+              left: WRAP_W,
               backgroundImage: `url(${art})`,
               filter: dim ? `brightness(${dim}) saturate(0.88) contrast(1.12) sepia(0.16)` : undefined,
             }}
           />
           <span
             className="absolute inset-y-0 right-0 block film-grain pointer-events-none"
-            style={{ left: WRAP }}
+            style={{ left: WRAP_W }}
           />
           <span
             className="absolute inset-y-0 right-0 block film-vignette pointer-events-none"
-            style={{ left: WRAP }}
+            style={{ left: WRAP_W }}
           />
         </>
       )}
 
-      {/* the wrapped spine colour — same paper, same weave, same colour */}
-      <span
-        className="absolute inset-y-0 left-0 block spine-weave"
-        style={{ width: WRAP, background: body }}
-      />
-      {/* the crease where the sheet folds round the hinge */}
-      <span
-        className="absolute inset-y-0 block"
-        style={{
-          left: WRAP,
-          width: 6,
-          background: 'linear-gradient(90deg, rgba(0,0,0,0.28), transparent)',
-        }}
-      />
+      <WrapBand body={body} foot={foot} total={total} />
       {/* the case is ONE printed sheet: the weave runs across the cover too */}
       <span className="absolute inset-0 spine-weave pointer-events-none" />
       <span className="absolute inset-0 case-bevel pointer-events-none" />
@@ -363,7 +436,17 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
         style={{ transformStyle: 'preserve-3d' }}
         title={review.title}
       >
-        <CoverFace art={thumb} body={body} width={DEPTH} dim={0.66} hit={false} />
+        <PaperEdges depth={DEPTH} hit={false} />
+
+        <CoverFace
+          art={thumb}
+          body={body}
+          foot={foot}
+          total={total}
+          width={DEPTH}
+          dim={0.66}
+          hit={false}
+        />
 
         {/* top face — the edge you look down on. Also non-hit: it juts up over the
             case beside it and would steal that case's taps. */}
@@ -529,7 +612,16 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
         onPointerCancel={release}
         onClick={(e) => e.stopPropagation()}
       >
-        <CoverFace art={poster} body={body} width={coverW} radius="rounded-r-lg" />
+        <PaperEdges depth={coverW} />
+
+        <CoverFace
+          art={poster}
+          body={body}
+          foot={foot}
+          total={total}
+          width={coverW}
+          radius="rounded-r-lg"
+        />
 
         {/* top edge */}
         <span
