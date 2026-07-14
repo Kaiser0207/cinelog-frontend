@@ -96,14 +96,17 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
     () => new Set(featuredReviews.map((r) => r.id)),
     [featuredReviews]
   );
-  // 精選: the pinned reviews lead, badged, then everything else. A search just shows
-  // its results.
-  const items = useMemo(
-    () => (searchQuery
-      ? reviews
-      : [...featuredReviews, ...reviews.filter((r) => !featuredIds.has(r.id))]),
-    [searchQuery, reviews, featuredReviews, featuredIds]
-  );
+  // 精選 REORDERS the current results; it doesn't inject into them. Splicing the
+  // pinned reviews in from their own endpoint meant a featured comedy kept showing
+  // up at the head of the 恐怖 shelf — it had never passed through the genre filter
+  // at all. Now a pinned review only leads if it's actually part of what you asked
+  // for. A search just shows its results, unshuffled.
+  const items = useMemo(() => {
+    if (searchQuery) return reviews;
+    const pinned = reviews.filter((r) => featuredIds.has(r.id));
+    const rest = reviews.filter((r) => !featuredIds.has(r.id));
+    return [...pinned, ...rest];
+  }, [searchQuery, reviews, featuredIds]);
 
   if (initialLoad) {
     return (
