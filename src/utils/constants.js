@@ -20,22 +20,26 @@ export const FONTS = [
   { name: 'Zhi Mang Xing', label: '中文手寫', category: 'Indie' },
 ];
 
+// Literal font stacks, NOT var(--font-*). The site chrome now puts Nevis at the
+// front of those variables (all latin UI text is Nevis), and a review's chosen
+// font must not inherit that — picking "Caveat" has to actually give you Caveat's
+// latin, not Nevis's. So the picker owns its own stacks.
 export const FONT_MAP = {
-  'Outfit': 'var(--font-outfit)',
-  'Playfair Display': 'var(--font-playfair)',
-  'Noto Serif TC': 'var(--font-noto-serif-tc)',
-  'Caveat': 'var(--font-caveat)',
-  'Nunito': 'var(--font-nunito)',
-  'Bebas Neue': 'var(--font-bebas)',
-  'JetBrains Mono': 'var(--font-jetbrains)',
-  'UnifrakturCook': 'var(--font-unifraktur)',
-  'DM Serif Display': 'var(--font-dm-serif)',
-  'Cormorant Garamond': 'var(--font-cormorant)',
-  'Lora': 'var(--font-lora)',
-  'Space Grotesk': 'var(--font-space)',
-  'Ma Shan Zheng': 'var(--font-ma-shan)',
-  'LXGW WenKai TC': 'var(--font-wenkai)',
-  'Zhi Mang Xing': 'var(--font-zhimang)',
+  'Outfit': "'Outfit', system-ui, sans-serif",
+  'Playfair Display': "'Playfair Display', serif",
+  'Noto Serif TC': "'Noto Serif TC', serif",
+  'Caveat': "'Caveat', cursive",
+  'Nunito': "'Nunito', sans-serif",
+  'Bebas Neue': "'Bebas Neue', sans-serif",
+  'JetBrains Mono': "'JetBrains Mono', monospace",
+  'UnifrakturCook': "'UnifrakturCook', cursive",
+  'DM Serif Display': "'DM Serif Display', serif",
+  'Cormorant Garamond': "'Cormorant Garamond', serif",
+  'Lora': "'Lora', serif",
+  'Space Grotesk': "'Space Grotesk', sans-serif",
+  'Ma Shan Zheng': "'Ma Shan Zheng', cursive",
+  'LXGW WenKai TC': "'LXGW WenKai TC', 'Noto Serif TC', serif",
+  'Zhi Mang Xing': "'Zhi Mang Xing', cursive",
 };
 
 export const SCORE_LABELS = {

@@ -28,16 +28,29 @@
   --color-border-subtle: rgba(26, 26, 26, 0.15);
   --color-border-active: #D480C0;
 
-  --font-inter: 'Inter', system-ui, sans-serif;
+  /* ── Site chrome: ALL latin text is Nevis ──────────────────────────────
+     Nevis carries only basic latin (116 glyphs), so every Chinese character
+     misses and falls through to Noto Sans TC on its own — "english = Nevis,
+     chinese = Noto" needs no per-element logic, just the stack order.
+
+     These five are the vars the UI's font-* utilities resolve to. A review's
+     own font comes from FONT_MAP (literal stacks, set inline), so the per-review
+     font picker is unaffected by anything here. */
+  --font-inter: 'Nevis', 'Inter', 'Noto Sans TC', system-ui, sans-serif;
+  --font-bebas: 'Nevis', 'Bebas Neue', 'Noto Sans TC', sans-serif;
+  --font-jetbrains: 'Nevis', 'JetBrains Mono', 'Noto Sans TC', monospace;
+  --font-syne: 'Nevis', 'Syne', 'Noto Sans TC', sans-serif;
+  --font-google-sans: 'Nevis', 'Google Sans Flex', 'Noto Sans TC', 'Inter', system-ui, sans-serif;
+  /* Display title face for big headings, same stack */
+  --font-nevis: 'Nevis', 'Noto Sans TC', system-ui, sans-serif;
+
+  /* ── Review body faces (the per-review font picker) — untouched ── */
   --font-outfit: 'Outfit', system-ui, sans-serif;
   --font-playfair: 'Playfair Display', serif;
   --font-noto-serif-tc: 'Noto Serif TC', serif;
   --font-caveat: 'Caveat', cursive;
   --font-nunito: 'Nunito', sans-serif;
-  --font-bebas: 'Bebas Neue', sans-serif;
-  --font-jetbrains: 'JetBrains Mono', monospace;
   --font-unifraktur: 'UnifrakturCook', cursive;
-  --font-syne: 'Syne', sans-serif;
   --font-space: 'Space Grotesk', sans-serif;
   --font-dm-serif: 'DM Serif Display', serif;
   --font-cormorant: 'Cormorant Garamond', serif;
@@ -45,10 +58,6 @@
   --font-ma-shan: 'Ma Shan Zheng', cursive;
   --font-wenkai: 'LXGW WenKai TC', 'Noto Serif TC', serif;
   --font-zhimang: 'Zhi Mang Xing', cursive;
-  /* Display title face for big headings (Nevis), Chinese falls back to Noto Sans TC */
-  --font-nevis: 'Nevis', 'Noto Sans TC', system-ui, sans-serif;
-  /* UI default: Google Sans Flex for latin, Noto Sans TC for Chinese */
-  --font-google-sans: 'Google Sans Flex', 'Noto Sans TC', 'Inter', system-ui, sans-serif;
 }
 
 /* iOS safe-area helpers (notch / home indicator) */

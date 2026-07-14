@@ -39,6 +39,9 @@ const PRELOAD = 4;  // posters fetched past the window so they're warm on mount
 
 const posterUrl = (r) => (r.poster_path ? `${TMDB_IMG_BASE}w500${r.poster_path}` : null);
 
+const isTouch = typeof window !== 'undefined'
+  && window.matchMedia?.('(pointer: coarse)').matches;
+
 export default function CardDeck({ reviews = [], featuredIds }) {
   const navigate = useNavigate();
   const sectionRef = useRef(null);
@@ -133,7 +136,12 @@ export default function CardDeck({ reviews = [], featuredIds }) {
             <span className="text-xs font-bold font-[var(--font-jetbrains)] tabular-nums">
               {front + 1} / {n}
             </span>
-            <span className="text-xs">↓ 往下滑翻卡</span>
+            {/*
+              Same gesture, opposite words: on a touchscreen you swipe your finger
+              UP to scroll the page DOWN. "↓ 往下滑" reads as "swipe down" on a
+              phone — i.e. the exact opposite of what actually advances the deck.
+            */}
+            <span className="text-xs">{isTouch ? '↑ 上滑翻卡' : '↓ 向下捲動翻卡'}</span>
           </div>
         </div>
       </div>
