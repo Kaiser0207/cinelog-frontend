@@ -53,6 +53,38 @@ const CAMERA = 1200;
  */
 const HAND_SIZE = 'w780';
 
+const handSrc = (posterPath) =>
+  (posterPath ? `${TMDB_IMG_BASE}${HAND_SIZE}${posterPath}` : null);
+
+/** Resolves when the bitmap is decoded and ready to paint — not merely downloaded. */
+const decoded = (src) => new Promise((resolve) => {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';   // same cache entry as the <img> on the cover
+  img.onload = img.onerror = () => resolve();
+  img.src = src;
+});
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// How long the case will hang in mid-air, spine-on, waiting for its poster before it
+// gives up and turns anyway. Long enough to cover a normal fetch; short enough that a
+// dead connection can't leave the case floating there.
+const POSTER_WAIT_CAP = 1100;
+
+// Start the poster downloading the instant a finger LANDS on a case — not when the tap
+// completes and the overlay mounts. It's only a hundred milliseconds or so, but it's a
+// hundred milliseconds the picture gets for free, and it's the difference between the
+// gate above being met and being missed.
+const prefetched = new Set();
+function prefetchHand(posterPath) {
+  const src = handSrc(posterPath);
+  if (!src || prefetched.has(src)) return;
+  prefetched.add(src);
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = src;
+}
+
 const NUDGE = 60;        // how far the cases to the right shuffle over to make room
 // ...and how many of them bother. Only ~7 cases fit on a phone, and while a case is in
 // your hand the page is frozen and the overlay eats every tap, so nobody can scroll to
@@ -645,6 +677,10 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, ca
       <motion.button
         type="button"
         onClick={(e) => onPull(review, e.currentTarget.parentElement, colors, seed)}
+        // The poster starts downloading the moment you TOUCH the case, not when the
+        // tap completes — see prefetchHand. On a mouse, the moment you point at it.
+        onPointerDown={() => prefetchHand(review.poster_path)}
+        onPointerEnter={CAN_HOVER ? () => prefetchHand(review.poster_path) : undefined}
         initial={false}
         animate={{ rotateY: TURN, rotateX: TILT, y: 0, z: 0 }}
         // A gentler lean than before, on purpose: the box is now as deep as the poster
@@ -773,7 +809,7 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
   // centre, so the case's centre projects to itself, whatever k is.
   const targetY = Math.max(16, (window.innerHeight - h) / 2);
   const projBottom = targetY + h / 2 + (h / 2) * k;
-  const poster = review.poster_path ? `${TMDB_IMG_BASE}${HAND_SIZE}${review.poster_path}` : null;
+  const poster = handSrc(review.poster_path);
   const thumb = samplerSrc(review.poster_path);
   const total = getReviewTotal(review);
 
@@ -794,22 +830,52 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
   const grow = useMotionValue(0);
   const weave = useTransform(grow, (v) => v * 0.42);
 
+  // The opening was ONE timeline, so the cover started turning to face you on a clock,
+  // whether or not the poster had arrived — which is why you watched it sharpen up in
+  // your hand. But the run already has a beat where the poster CAN'T be seen: the case
+  // floats forward off the shelf, still spine-on, for the first 360ms. So make that
+  // beat wait for the picture. Two phases, and the turn is gated on the poster being
+  // decoded:
+  //
+  //   1. LIFT   — spine-on, comes toward you. Nothing to see, so nothing to spoil.
+  //   2. TURN   — starts once the poster is ready (or once we give up on it).
+  //
+  // The cap matters as much as the gate: on a dead connection the case must not hang in
+  // mid-air waiting for a picture. Past it, the case turns anyway and the blurred
+  // thumbnail does its job — which is now the fallback rather than the normal case.
   useEffect(() => {
-    const t = { duration: 1.0, times: [0, 0.36, 1], ease: [0.22, 1, 0.36, 1] };
-    const runs = [
-      animate(x, [rect.left, rect.left, targetX], t),
-      animate(y, [rect.top, rect.top - 28, targetY], t),
-      animate(z, [0, 170, zRest], t),
-      animate(rotY, [TURN, TURN, -90], t),
-      animate(rotX, [TILT, TILT, 0], t),
-      animate(grow, 1, { duration: 0.55, delay: 0.3, ease: 'easeOut' }),
-      animate(veil, 1, { duration: 0.4 }),
-    ];
     let cancelled = false;
-    runs[0].then(() => { if (!cancelled) setSettled(true); }).catch(() => {});
+    const running = [];
+    const lift = { duration: 0.36, ease: [0.22, 1, 0.36, 1] };
+
+    running.push(
+      animate(y, rect.top - 28, lift),
+      animate(z, 170, lift),
+      animate(veil, 1, { duration: 0.4 }),
+    );
+
+    const ready = poster
+      ? Promise.race([decoded(poster), wait(POSTER_WAIT_CAP)])
+      : Promise.resolve();
+
+    Promise.all([running[0], ready]).then(() => {
+      if (cancelled) return;
+      const turn = { duration: 0.64, ease: [0.22, 1, 0.36, 1] };
+      running.push(
+        animate(x, targetX, turn),
+        animate(y, targetY, turn),
+        animate(z, zRest, turn),
+        animate(rotX, 0, turn),
+        animate(grow, 1, { duration: 0.55, ease: 'easeOut' }),
+      );
+      const spin = animate(rotY, -90, turn);
+      running.push(spin);
+      spin.then(() => { if (!cancelled) setSettled(true); }).catch(() => {});
+    }).catch(() => {});
+
     return () => {
       cancelled = true;
-      runs.forEach((r) => r.stop());
+      running.forEach((r) => r.stop());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
