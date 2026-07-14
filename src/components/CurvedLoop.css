@@ -10,7 +10,9 @@
   display: block;
   width: 100%;
   height: auto;
-  overflow: visible;
+  /* The viewBox is now tall enough to hold the type and the sag of the curve, so
+     nothing needs to escape the frame — and nothing lands on the line below it. */
+  overflow: hidden;
 }
 
 .curved-loop-svg text {
@@ -18,10 +20,10 @@
   fill: currentColor;
 }
 
-/* The wordmark itself. Sized in SVG user units (the viewBox is 1440×120), so it
-   scales with the container instead of needing a breakpoint per screen. */
+/* The wordmark. Sized in SVG user units against a 1440-wide viewBox, so it scales
+   with the container — no per-screen breakpoints. */
 .curved-loop-mark {
-  font-size: 84px;
+  font-size: 180px;
   font-weight: 900;
   letter-spacing: 0.04em;
 }

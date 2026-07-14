@@ -757,7 +757,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           {/* Decorative Section Header */}
           <div className="w-full space-y-4">
             <div className="w-full space-y-1">
-              <h2 className="w-full text-[#D480C0] -mb-4" aria-label="CINEROOMS">
+              <h2 className="w-full text-[#D480C0]" aria-label="CINEROOMS">
                 <CurvedLoop
                   marqueeText="CINEROOMS ✦ "
                   speed={1.1}

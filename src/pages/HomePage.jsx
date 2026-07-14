@@ -416,7 +416,7 @@ export default function HomePage() {
           <div className="w-full space-y-1">
             {/* The wordmark runs on a curve, endlessly. Drag it and it follows your
                 finger, then keeps going the way you threw it. */}
-            <h2 className="w-full text-[#D480C0] -mb-4" aria-label="CINEROOMS">
+            <h2 className="w-full text-[#D480C0]" aria-label="CINEROOMS">
               <CurvedLoop
                 marqueeText="CINEROOMS ✦ "
                 speed={1.1}

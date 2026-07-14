@@ -1,6 +1,11 @@
 import { useRef, useEffect, useState, useMemo, useId } from 'react';
 import './CurvedLoop.css';
 
+// viewBox geometry. Height is generous on purpose — see pathD.
+const VB_W = 1440;
+const VB_H = 280;
+const BASELINE = 210;
+
 const CurvedLoop = ({
   marqueeText = '',
   speed = 2,
@@ -21,7 +26,12 @@ const CurvedLoop = ({
   const [offset, setOffset] = useState(0);
   const uid = useId();
   const pathId = `curve-${uid}`;
-  const pathD = `M-100,40 Q500,${40 + curveAmount} 1540,40`;
+  // The baseline sits low in a TALL viewBox so the letters (which rise from it) and
+  // the sag of the curve both land INSIDE the box. The original ran the path at y=40
+  // in a 120-high box, so an 84px face overflowed the frame in both directions — and
+  // since the <svg> only reserves the space its viewBox describes, the spill just sat
+  // on top of whatever came next. That's what was covering the line beneath it.
+  const pathD = `M-100,${BASELINE} Q500,${BASELINE + curveAmount} 1540,${BASELINE}`;
 
   const dragRef = useRef(false);
   const lastXRef = useRef(0);
@@ -124,7 +134,7 @@ const CurvedLoop = ({
       onPointerUp={endDrag}
       onPointerLeave={endDrag}
     >
-      <svg className="curved-loop-svg" viewBox="0 0 1440 120">
+      <svg className="curved-loop-svg" viewBox={`0 0 ${VB_W} ${VB_H}`}>
         <text ref={measureRef} xmlSpace="preserve" className={className} style={{ visibility: 'hidden', opacity: 0, pointerEvents: 'none' }}>
           {text}
         </text>
