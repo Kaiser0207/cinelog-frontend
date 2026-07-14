@@ -97,6 +97,10 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   // We keep the element itself, not just the rect, so the case can ask the shelf
   // where its slot is NOW when it's time to go back — see PullOut.putBack().
   const [pulled, setPulled] = useState(null);
+  // Set once the case is on its way down into its slot — the shelf closes the gap
+  // around it from here, instead of waiting for the overlay to unmount and then doing
+  // twenty springs in the same frame as the repaint.
+  const [settling, setSettling] = useState(false);
 
   // SHELF_H is a clamp(): only the browser knows what it actually works out to, and
   // the case's whole geometry hangs off it. Measure it once, pre-paint.
@@ -120,6 +124,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   const catalog = useCatalogNumbers();
 
   const pull = useCallback((review, el, colors, index) => {
+    setSettling(false);
     setPulled({ review, el, rect: el.getBoundingClientRect(), colors, index });
   }, []);
 
@@ -176,7 +181,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
               // Everything to the RIGHT of the case in your hand shuffles over to
               // make room, and closes back up once it's slotted in. A shelf where
               // the neighbours don't move is a shelf of pictures, not of objects.
-              nudged={pulled != null && i > pulled.index}
+              nudged={pulled != null && !settling && i > pulled.index}
               // While it's in your hand it is NOT also on the shelf.
               held={pulled != null && i === pulled.index}
               onPull={pull}
@@ -210,7 +215,8 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
             getHome={() => (pulled.el?.isConnected ? pulled.el.getBoundingClientRect() : pulled.rect)}
             colors={pulled.colors}
             onOpen={() => navigate(`/review/${pulled.review.id}`, { state: { review: pulled.review } })}
-            onClose={() => setPulled(null)}
+            onSettling={() => setSettling(true)}
+            onClose={() => { setPulled(null); setSettling(false); }}
           />
         )}
       </AnimatePresence>
@@ -383,15 +389,16 @@ function SpineFace({ review, body, foot, total, isFeatured, catalogNo }) {
  * That's what the cut edge of a stack of paper actually looks like, and it's also
  * what stops the case reading as an infinitely thin box.
  */
-function PaperEdges({ depth, hit = true }) {
+function PaperEdges({ depth, opacity = 1, hit = true }) {
   const off = hit ? '' : 'pointer-events-none';
   return (
     <>
       {/* underside — folds back from the bottom edge */}
-      <span
+      <motion.span
         className={`absolute top-full left-0 w-full block ${off}`}
         style={{
           height: depth,
+          opacity,
           transformOrigin: 'center top',
           transform: 'rotateX(-90deg)',
           background: EDGE_WHITE,
@@ -399,20 +406,21 @@ function PaperEdges({ depth, hit = true }) {
         }}
       >
         <span className="absolute inset-0 spine-weave" />
-      </span>
+      </motion.span>
 
       {/* the open edge — the far face of the box, which after the case turns to
           meet you ends up as its right-hand side */}
-      <span
+      <motion.span
         className={`absolute inset-0 block ${off}`}
         style={{
+          opacity,
           transform: `translateZ(${-depth}px)`,
           background: EDGE_WHITE,
           filter: 'blur(0.5px)',
         }}
       >
         <span className="absolute inset-0 spine-weave" />
-      </span>
+      </motion.span>
     </>
   );
 }
@@ -648,9 +656,11 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, ca
  * COVER dead centre, the box has to be parked left of centre by exactly
  * (spine width + half a cover).
  */
-function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, onOpen, onClose }) {
+function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, onOpen, onSettling, onClose }) {
   const [settled, setSettled] = useState(false);
   const [body, foot] = colors || fallbackFor(0);
+  const timers = useRef([]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
   const h = rect.height;
   const spineW = rect.width;
@@ -727,6 +737,17 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
     // beside its slot instead of in it.
     const home = getHome?.() || rect;
     const t = { duration: 0.8, times: [0, 0.6, 1], ease: [0.4, 0, 0.2, 1] };
+
+    // Tell the shelf to close the gap while the case is still coming DOWN into it,
+    // rather than the instant the overlay unmounts. Two reasons, and they're both
+    // real: the frame where the case is handed back was doing everything at once —
+    // unmount the overlay, un-hide the case in the slot, repaint the whole un-veiled
+    // shelf AND kick off a spring on every one of the twenty-odd cases to the right of
+    // it. That's the hitch. And it's the wrong order anyway: a shelf closes AROUND a
+    // case as you push it in, not half a second after it's already seated.
+    const closeGap = setTimeout(() => onSettling?.(), 430);
+    timers.current.push(closeGap);
+
     animate(veil, 0, { duration: 0.65 });
     animate(dim, SHELF_DIM, { duration: 0.65 });
     animate(grow, 0, { duration: 0.45 });
@@ -785,7 +806,7 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
   };
 
   return (
-    <div className="fixed inset-0 z-[300]" style={{ perspective: CAMERA }} onClick={putBack}>
+    <div className="fixed inset-0 z-[300]" onClick={putBack}>
       {/* Opaque enough that the title and the genre pills genuinely go away — at
           55% they were still legible through it, so the case never felt like it had
           the stage to itself.
@@ -800,66 +821,97 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
         style={{ opacity: veil }}
       />
 
+      {/*
+        THE CAMERA. It has to travel with the case.
+
+        `perspective` puts the vanishing point at its own box's perspective-origin —
+        50% 50% by default. On the shelf that box is the case's own 52px slot, so the
+        vanishing point sits at the case's centre and you are looking STRAIGHT AT IT.
+        This overlay used to carry the perspective on its full-screen root instead,
+        which put the vanishing point at the centre of the SCREEN — so a case whose slot
+        is 300px off-centre was being projected from 300px off-axis: sheared, and showing
+        far more of its own depth than the shelf ever shows. Same camera distance (1200),
+        completely different camera position.
+
+        Invisible while the box was a 64px slab. Impossible to miss now that it's as deep
+        as the poster is wide: the case came back looking DEEPER than it left, sat there
+        wrong for the last beat of the put-back, and snapped straight the instant the
+        overlay handed it back to the shelf.
+
+        So: the perspective lives on a wrapper the exact size of the slot, and x/y move
+        THAT. The vanishing point rides along at the case's centre, wherever it goes —
+        which is both what the shelf does and, conveniently, what "you're holding it"
+        means. Everything 3D (z, the two rotations) stays on the child, whose
+        transform-origin is the hinge. Splitting the transform this way is algebraically
+        identical to the single-element version — translation commutes with the origin
+        shift — so nothing about the motion changes. Only the camera does.
+      */}
       <motion.div
-        className="absolute cursor-grab active:cursor-grabbing"
-        style={{
-          top: 0,
-          left: 0,
-          width: spineW,
-          height: h,
-          x,
-          y,
-          z,
-          rotateY: rotY,
-          rotateX: rotX,
-          transformStyle: 'preserve-3d',
-          transformOrigin: 'right center', // the hinge: the spine's right edge
-          touchAction: 'none',             // the finger turns the case, not the page
-        }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={release}
-        onPointerCancel={release}
-        onClick={(e) => e.stopPropagation()}
+        className="absolute"
+        style={{ top: 0, left: 0, width: spineW, height: h, x, y, perspective: CAMERA }}
       >
-        <PaperEdges depth={faceW} />
-
-        <CoverFace
-          art={poster}
-          artFallback={thumb}
-          body={body}
-          foot={foot}
-          total={total}
-          width={artW}
-          wrap={wrapW}
-          artFilter={artFilter}
-          detail={detail}
-          radius="rounded-r-lg"
-        />
-
-        {/* top edge — hung from above and folded back, so its face points UP
-            (see the shelf case for why the other way round reads as hollow) */}
-        <span
-          className="absolute bottom-full left-0 w-full block"
+        <motion.div
+          className="absolute inset-0 cursor-grab active:cursor-grabbing"
           style={{
-            height: faceW,
-            transformOrigin: 'center bottom',
-            transform: 'rotateX(90deg)',
-            background: EDGE_WHITE,
-            filter: 'blur(0.4px)',
+            z,
+            rotateY: rotY,
+            rotateX: rotX,
+            transformStyle: 'preserve-3d',
+            transformOrigin: 'right center', // the hinge: the spine's right edge
+            touchAction: 'none',             // the finger turns the case, not the page
           }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={release}
+          onPointerCancel={release}
+          onClick={(e) => e.stopPropagation()}
         >
-          <span className="absolute inset-0 spine-weave" />
-        </span>
+          {/* The underside and the far wall are the two faces the SHELF doesn't build,
+              because on a shelf you can never see them. So they arrive with the turn,
+              on the same `grow` clock as the grain — which means that at the hand-off,
+              in both directions, this case's DOM paints exactly what the case in the
+              slot paints. Nothing appears; nothing is taken away. */}
+          <PaperEdges depth={faceW} opacity={grow} />
 
-        <SpineFace
-          review={review}
-          body={body}
-          foot={foot}
-          total={total}
-          isFeatured={isFeatured}
-          catalogNo={catalogNo}
-        />
+          <CoverFace
+            art={poster}
+            artFallback={thumb}
+            body={body}
+            foot={foot}
+            total={total}
+            width={artW}
+            wrap={wrapW}
+            artFilter={artFilter}
+            detail={detail}
+            radius="rounded-r-lg"
+          />
+
+          {/* top edge — hung from above and folded back, so its face points UP
+              (see the shelf case for why the other way round reads as hollow).
+              Same rounding and same brightness as the shelf's: this face is square on
+              to you at rest, so any difference between the two IS the pop. */}
+          <span
+            className="absolute bottom-full left-0 w-full block rounded-t-[3px]"
+            style={{
+              height: faceW,
+              transformOrigin: 'center bottom',
+              transform: 'rotateX(90deg)',
+              background: EDGE_WHITE,
+              filter: 'blur(0.4px) brightness(0.98)',
+            }}
+          >
+            <span className="absolute inset-0 spine-weave" />
+          </span>
+
+          <SpineFace
+            review={review}
+            body={body}
+            foot={foot}
+            total={total}
+            isFeatured={isFeatured}
+            catalogNo={catalogNo}
+          />
+        </motion.div>
       </motion.div>
 
       <AnimatePresence>
