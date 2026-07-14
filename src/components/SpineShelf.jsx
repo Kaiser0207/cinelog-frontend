@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback, memo } from 'react';
-import { motion, AnimatePresence, useMotionValue, useMotionTemplate, useTransform, animate } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, getReviewTotal } from '../utils/constants';
 import { getPosterColors, cachedColors, fallbackFor, isDark } from '../utils/posterColors';
@@ -44,14 +44,6 @@ const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 // to a mouse.
 const CAN_HOVER = typeof window !== 'undefined'
   && window.matchMedia?.('(hover: hover)').matches;
-
-// How lit the poster is on the shelf vs. in your hand. It ANIMATES between the two
-// (see PullOut) rather than switching: the same object can't change its exposure in
-// a single frame just because you picked it up.
-const SHELF_DIM = 0.66;
-const HAND_DIM = 1.04;
-const filmFilter = (b) =>
-  `brightness(${b}) saturate(0.78) contrast(1.16) sepia(0.2) hue-rotate(-4deg)`;
 
 /**
  * THE case's geometry, derived in ONE place from its height.
@@ -145,7 +137,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   const seat = useCallback(() => {
     setPulled(null);
     clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => setGapAfter(null), 220);
+    closeTimer.current = setTimeout(() => setGapAfter(null), 120);
   }, []);
 
   if (reviews.length === 0) return null;
@@ -454,16 +446,15 @@ function PaperEdges({ depth, opacity = 1, hit = true }) {
  * sides. That crop is the "海報被遮到" you kept seeing: the band was never on top
  * of the art, it was eating the art's width.
  *
- * `artFilter` may be a plain string (the shelf) or a MotionValue (the pull-out,
- * where the exposure travels with the case instead of switching in one frame).
+ * The poster gets NO filter — no grain, no vignette, no film look. It's the poster.
+ * What survives is the weave: the case is a printed, folded sheet, and that texture
+ * runs across the cover the same as it runs down the spine.
  *
- * `detail` is the opacity of the grain / vignette / weave layers, and 0 means DON'T
- * BUILD THEM. On the shelf this face is ~310px of poster foreshortened into a 30px
- * band, so none of that detail is resolvable — but it was still costing three
- * full-size composited layers per case, two of them mix-blend-mode: overlay, thirty
- * times over. That's what the tap was fighting. In your hand the face is 300px of
- * poster staring straight at you and every one of those layers earns its keep, so the
- * pull-out fades them in (a MotionValue) rather than switching them on.
+ * `weave` is that texture's opacity, and 0 means DON'T BUILD IT. On the shelf this face
+ * is ~370px of poster foreshortened into a 30px band, where a 3px-period weave is not
+ * resolvable by anyone — but it was still a full-size mix-blend-mode: overlay layer,
+ * thirty times over. So the shelf skips it and the pull-out fades it in (a MotionValue)
+ * as the case turns to face you, which is the only place you can actually see it.
  */
 function CoverFace({
   art,
@@ -474,8 +465,7 @@ function CoverFace({
   width,
   wrap,
   radius = 'rounded-r-[2px]',
-  artFilter,
-  detail = null,
+  weave = 0,
   hit = true,
 }) {
   // Two bitmaps, stacked as CSS background layers: the big one on top, the shelf's
@@ -500,41 +490,22 @@ function CoverFace({
       }}
     >
       {layers && (
-        // The film look belongs to the ART, not to the whole face. Filtering the face
-        // darkened the wrapped band too, so the spine and its own wrap came out as two
-        // different colours — the one thing they can never be.
-        <motion.span
+        <span
           className="absolute inset-y-0 right-0 block bg-cover bg-center"
-          style={{ left: wrap, backgroundImage: layers, filter: artFilter }}
+          style={{ left: wrap, backgroundImage: layers }}
         />
       )}
 
-      {/* Grain, vignette and weave. They must stay SIBLINGS of the art, never children
-          of one shared opacity wrapper: grain and weave are mix-blend-mode: overlay,
-          an opacity < 1 opens a stacking context, and inside one they'd blend against
-          the wrapper instead of against the poster. So each carries its own opacity —
-          scaled so that "fully faded in" means the value the stylesheet asked for
-          (grain 0.38, weave 0.42), not 1. */}
-      {detail && (
-        <>
-          {layers && (
-            <>
-              <motion.span
-                className="absolute inset-y-0 right-0 block film-grain pointer-events-none"
-                style={{ left: wrap, opacity: detail.grain }}
-              />
-              <motion.span
-                className="absolute inset-y-0 right-0 block film-vignette pointer-events-none"
-                style={{ left: wrap, opacity: detail.vignette }}
-              />
-            </>
-          )}
-          {/* the case is ONE printed sheet: the weave runs across the cover too */}
-          <motion.span
-            className="absolute inset-0 spine-weave pointer-events-none"
-            style={{ opacity: detail.weave }}
-          />
-        </>
+      {/* The weave is a SIBLING of the art, never wrapped with it in a shared opacity
+          box: it's mix-blend-mode: overlay, an opacity < 1 opens a stacking context, and
+          inside one it would blend against that box instead of against the poster. Its
+          own opacity, then — scaled so "fully in" means the 0.42 the stylesheet asks
+          for, not 1. */}
+      {weave !== 0 && (
+        <motion.span
+          className="absolute inset-0 spine-weave pointer-events-none"
+          style={{ opacity: weave }}
+        />
       )}
 
       <WrapBand body={body} foot={foot} total={total} width={wrap} />
@@ -623,8 +594,7 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, ca
           total={total}
           width={geom.artW}
           wrap={geom.wrapW}
-          artFilter={filmFilter(SHELF_DIM)}
-          detail={null}
+          weave={0}
           hit={false}
         />
 
@@ -688,8 +658,31 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
   const h = rect.height;
   const spineW = rect.width;
   const { artW, wrapW, faceW } = geom;
-  const targetX = window.innerWidth / 2 - faceW / 2 - spineW;
+
+  // WHERE the case comes to rest, and HOW DEEP.
+  //
+  // The camera now rides with the case (see the note on the perspective wrapper), so
+  // the magnification that translateZ buys you happens about the CASE's centre, not
+  // the screen's. The old targetX didn't know that. It parked the box so that the
+  // cover's LAYOUT centre was mid-screen — but the box's spine ends up off-screen to
+  // the left, so the perspective origin is off-screen too, and the magnification pushed
+  // everything away from it: the poster came out shoved right, with its edge cut off.
+  // So solve for the PROJECTED centre instead.
+  //
+  // And the depth is a free variable now, which is lucky, because the cover is h × 2/3
+  // wide — on a phone that's wider than the screen, and no amount of centring fixes a
+  // poster that doesn't fit. So don't pick a z and hope: pick the z at which the cover
+  // lands exactly inside the margins. On a phone the case settles a touch BEHIND the
+  // screen plane; on a desktop it floats forward, capped so it can't loom.
+  const FIT_MARGIN = 16;
+  const fitW = Math.max(160, window.innerWidth - FIT_MARGIN * 2);
+  const zRest = Math.min(90, CAMERA * (1 - faceW / fitW));
+  const k = CAMERA / (CAMERA - zRest);   // how much bigger everything gets at that depth
+  const targetX = window.innerWidth / 2 - spineW / 2 - (k * (spineW + faceW)) / 2;
+  // Vertically it's already honest: the perspective origin sits at the case's own
+  // centre, so the case's centre projects to itself, whatever k is.
   const targetY = Math.max(16, (window.innerHeight - h) / 2);
+  const projBottom = targetY + h / 2 + (h / 2) * k;
   const poster = review.poster_path ? `${TMDB_IMG_BASE}w500${review.poster_path}` : null;
   const thumb = review.poster_path ? `${TMDB_IMG_BASE}w92${review.poster_path}` : null;
   const total = getReviewTotal(review);
@@ -702,33 +695,23 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
   const rotY = useMotionValue(TURN);
   const rotX = useMotionValue(TILT);
   const veil = useMotionValue(0);
-  // The exposure travels with the case. It starts at exactly the shelf's, so the
-  // frame where the held case replaces the shelf one is identical, and only then
-  // does it come up into the light.
-  const dim = useMotionValue(SHELF_DIM);
-  const artFilter = useMotionTemplate`brightness(${dim}) saturate(0.78) contrast(1.16) sepia(0.2) hue-rotate(-4deg)`;
 
-  // Grain, vignette and weave don't exist on the shelf's cover — they're unresolvable
-  // in a 30px band and they were the shelf's single biggest rendering cost. So they
-  // arrive WITH the turn: 0 at the hand-off (identical to the case that was in the
-  // slot), full by the time the poster is facing you. Each scaled to the opacity its
-  // stylesheet rule asks for.
+  // The weave and the two paper faces don't exist on the shelf's case — nobody can see
+  // a 3px weave in a 30px band, and they were the shelf's biggest rendering cost. So
+  // they arrive WITH the turn: 0 at the hand-off (so the DOM the overlay paints is
+  // exactly the DOM the slot paints, in both directions), full by the time the poster
+  // is facing you.
   const grow = useMotionValue(0);
-  const detail = {
-    grain: useTransform(grow, (v) => v * 0.38),
-    vignette: useTransform(grow, (v) => v),
-    weave: useTransform(grow, (v) => v * 0.42),
-  };
+  const weave = useTransform(grow, (v) => v * 0.42);
 
   useEffect(() => {
     const t = { duration: 1.0, times: [0, 0.36, 1], ease: [0.22, 1, 0.36, 1] };
     const runs = [
       animate(x, [rect.left, rect.left, targetX], t),
       animate(y, [rect.top, rect.top - 28, targetY], t),
-      animate(z, [0, 170, 90], t),
+      animate(z, [0, 170, zRest], t),
       animate(rotY, [TURN, TURN, -90], t),
       animate(rotX, [TILT, TILT, 0], t),
-      animate(dim, HAND_DIM, { duration: 0.85, ease: 'easeOut' }),
       animate(grow, 1, { duration: 0.55, delay: 0.3, ease: 'easeOut' }),
       animate(veil, 1, { duration: 0.4 }),
     ];
@@ -761,7 +744,6 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
     const home = getHome?.() || rect;
     const t = { duration: 0.8, times: [0, 0.6, 1], ease: [0.4, 0, 0.2, 1] };
     animate(veil, 0, { duration: 0.65 });
-    animate(dim, SHELF_DIM, { duration: 0.65 });
     animate(grow, 0, { duration: 0.45 });
     animate(x, [x.get(), home.left, home.left], t);
     animate(y, [y.get(), home.top - 28, home.top], t);
@@ -893,8 +875,7 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
             total={total}
             width={artW}
             wrap={wrapW}
-            artFilter={artFilter}
-            detail={detail}
+            weave={weave}
             radius="rounded-r-lg"
           />
 
@@ -933,7 +914,7 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             className="absolute inset-x-0 text-center text-white/85 text-sm font-bold pointer-events-none"
-            style={{ top: Math.min(targetY + h + 40, window.innerHeight - 30) }}
+            style={{ top: Math.min(projBottom + 32, window.innerHeight - 34) }}
           >
             拖曳可以轉動 · 再點一次 → 進入影評
           </motion.p>
