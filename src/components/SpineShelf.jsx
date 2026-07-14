@@ -149,10 +149,13 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
 
   return (
     <>
-      <div className="relative">
+      {/* Pulled up under the controls row so more of the shelf is above the fold.
+          Safe only because that row now carries `relative z-20` — otherwise this
+          would sit on top of it and eat every tap on the view buttons. */}
+      <div className="relative -mt-[7vh]">
         <div
-          className="flex items-end gap-[7px] overflow-x-auto overflow-y-hidden scrollbar-none px-6 pt-14"
-          style={{ height: `calc(${SHELF_H} + 4.5rem)` }}
+          className="flex items-end gap-[7px] overflow-x-auto overflow-y-hidden scrollbar-none px-6 pt-8"
+          style={{ height: `calc(${SHELF_H} + 2.5rem)` }}
         >
           {reviews.map((review, i) => (
             <Case
@@ -527,6 +530,7 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
   const z = useMotionValue(0);
   const rotY = useMotionValue(TURN);
   const rotX = useMotionValue(TILT);
+  const veil = useMotionValue(0);
 
   useEffect(() => {
     const t = { duration: 1.0, times: [0, 0.36, 1], ease: [0.22, 1, 0.36, 1] };
@@ -536,6 +540,7 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
       animate(z, [0, 170, 90], t),
       animate(rotY, [TURN, TURN, -90], t),
       animate(rotX, [TILT, TILT, 0], t),
+      animate(veil, 1, { duration: 0.4 }),
     ];
     let cancelled = false;
     runs[0].then(() => { if (!cancelled) setSettled(true); }).catch(() => {});
@@ -545,6 +550,27 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Putting it BACK on the shelf — the opening run in reverse: turn spine-on, drift
+  // back over its slot, then sink into the row.
+  //
+  // This can't be an AnimatePresence `exit`: position and rotation are motion values
+  // we drive by hand, and exit can't take them back off us — it would just fade a
+  // case that's still sitting in mid-air. So the component stays mounted, plays the
+  // reverse itself, and only then tells the shelf to drop it.
+  const closing = useRef(false);
+  const putBack = () => {
+    if (closing.current) return;
+    closing.current = true;
+    setSettled(false);
+    const t = { duration: 0.8, times: [0, 0.6, 1], ease: [0.4, 0, 0.2, 1] };
+    animate(veil, 0, { duration: 0.65 });
+    animate(x, [x.get(), rect.left, rect.left], t);
+    animate(y, [y.get(), rect.top - 28, rect.top], t);
+    animate(z, [z.get(), 170, 0], t);
+    animate(rotX, [rotX.get(), TILT, TILT], t);
+    animate(rotY, [rotY.get(), TURN, TURN], t).then(onClose).catch(() => {});
+  };
 
   // Freeze the page underneath. Without this the shelf (and the whole feed) keeps
   // scrolling behind the case you're holding — and worse, the pull-out's start
@@ -580,7 +606,7 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
   };
 
   const release = (e) => {
-    if (!grab.current) return;
+    if (!grab.current || closing.current) return;
     e.stopPropagation();
     const wasTap = travelled.current < 6;
     grab.current = null;
@@ -594,15 +620,13 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[300]" style={{ perspective: 1600 }} onClick={onClose}>
+    <div className="fixed inset-0 z-[300]" style={{ perspective: 1600 }} onClick={putBack}>
       {/* Opaque enough that the title and the genre pills genuinely go away — at
           55% they were still legible through it, so the case never felt like it had
           the stage to itself. */}
       <motion.div
         className="absolute inset-0 bg-[#12100E]/92 backdrop-blur-md"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        style={{ opacity: veil }}
       />
 
       <motion.div
@@ -621,7 +645,6 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
           transformOrigin: 'right center', // the hinge: the spine's right edge
           touchAction: 'none',             // the finger turns the case, not the page
         }}
-        exit={{ opacity: 0, scale: 0.94 }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={release}

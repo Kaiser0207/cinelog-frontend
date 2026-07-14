@@ -30,12 +30,11 @@ export default function HomePage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [sortOpen, setSortOpen] = useState(false);
-  // 疊卡 is the feed now — it took the grid's place. Anyone carrying a saved
-  // 'grid' from before lands on the deck too.
-  const [viewMode, setViewMode] = useState(() => {
-    const saved = localStorage.getItem('cinelog_view_mode');
-    return saved === 'list' || saved === 'shelf' ? saved : 'deck';
-  });
+  // 書脊牆 is the feed. 疊卡 is the alternative; the old grid and list views are
+  // gone, so anyone carrying either of those in localStorage lands on the shelf.
+  const [viewMode, setViewMode] = useState(
+    () => (localStorage.getItem('cinelog_view_mode') === 'deck' ? 'deck' : 'shelf')
+  );
   
   const activeGenreRef = useRef(null);
 
@@ -304,21 +303,16 @@ export default function HomePage() {
 
       {/* Feed */}
       <main className="max-w-7xl mx-auto px-5 pb-32 md:pb-24" key={refreshKey}>
-        {/* Sort Dropdown aligned to the right */}
-        <div className="flex justify-between items-center mb-6">
-          {/* View Mode Toggle — 疊卡 (default) or list */}
+        {/*
+          relative z-20: both feeds are pulled UP under this row by a negative
+          margin (that's what gives them a bigger peek above the fold), and a
+          transparent box still hit-tests — so without a stacking context of its
+          own, this row would sit *behind* the feed and every tap on these buttons
+          would be swallowed. Lifting it out of the way is what makes the peek safe.
+        */}
+        <div className="relative z-20 flex justify-between items-center mb-6">
+          {/* View Mode Toggle — 書脊牆 (default) or 疊卡 */}
           <div className="flex bg-[#E8E2D2] rounded-full p-1 border border-border-subtle shadow-sm">
-            <button
-              type="button"
-              onClick={() => setViewMode('deck')}
-              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'deck' ? 'bg-[#FE494A] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
-              title="Deck View (scroll to flip)"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" viewBox="0 0 24 24">
-                <rect x="3" y="6" width="11" height="13" rx="2"></rect>
-                <path d="M8 3h9a2 2 0 0 1 2 2v11"></path>
-              </svg>
-            </button>
             {/* 書脊牆 — the collection as a shelf of spines */}
             <button
               type="button"
@@ -334,17 +328,13 @@ export default function HomePage() {
             </button>
             <button
               type="button"
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'list' ? 'bg-[#FE494A] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
-              title="List View"
+              onClick={() => setViewMode('deck')}
+              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'deck' ? 'bg-[#FE494A] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
+              title="Deck View (scroll to flip)"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24">
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12"></line>
-                <line x1="8" y1="18" x2="21" y2="18"></line>
-                <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" viewBox="0 0 24 24">
+                <rect x="3" y="6" width="11" height="13" rx="2"></rect>
+                <path d="M8 3h9a2 2 0 0 1 2 2v11"></path>
               </svg>
             </button>
           </div>
