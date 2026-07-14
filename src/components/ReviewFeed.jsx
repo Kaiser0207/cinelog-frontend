@@ -162,7 +162,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
         <div className="flex items-center justify-center" style={{ height: '100svh' }}>
           <div
             className="aspect-[2/3] rounded-2xl bg-[#1A1A1A]/10 animate-pulse"
-            style={{ height: 'clamp(300px, 54svh, 520px)' }}
+            style={{ height: 'clamp(340px, 62svh, 580px)' }}
           />
         </div>
       );

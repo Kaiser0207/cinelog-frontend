@@ -30,7 +30,7 @@ const Z_STEP = 90;            // depth pushed back per card
 const SCROLL_PER_CARD = 85;   // vh of scrolling to flip one card (bigger = slower)
 const DROP = 620;             // how far the passed card falls
 
-const CARD_H = 'clamp(300px, 54svh, 520px)';
+const CARD_H = 'clamp(340px, 62svh, 580px)';
 
 // How many cards around the front actually get mounted.
 const BEHIND = 2;   // kept mounted while they fall away
