@@ -8,6 +8,7 @@ import { SORT_OPTIONS } from '../utils/constants';
 import { useLanguage } from '../components/LanguageContext';
 import { useAdmin } from '../components/AdminAuth';
 import SuggestionBox from '../components/SuggestionBox';
+import CurvedLoop from '../components/CurvedLoop';
 
 const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
 
@@ -412,10 +413,16 @@ export default function HomePage() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center text-left md:text-center space-y-6 md:space-y-8">
-          <div className="space-y-1">
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black font-nevis text-[#D480C0] tracking-wider leading-none">
-              <span className="md:hidden">CINE<br/>ROOMS</span>
-              <span className="hidden md:inline">CINEROOMS</span>
+          <div className="w-full space-y-1">
+            {/* The wordmark runs on a curve, endlessly. Drag it and it follows your
+                finger, then keeps going the way you threw it. */}
+            <h2 className="w-full text-[#D480C0] -mb-4" aria-label="CINEROOMS">
+              <CurvedLoop
+                marqueeText="CINEROOMS ✦ "
+                speed={1.1}
+                curveAmount={90}
+                className="curved-loop-mark"
+              />
             </h2>
             <p className="text-base md:text-2xl font-bold font-bebas text-[#D480C0]/80 tracking-wider">
               {t('footerSubtitle')}

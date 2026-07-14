@@ -8,6 +8,7 @@ import EpisodeHeatmap from './EpisodeHeatmap';
 import RadarChart from './RadarChart';
 import SpotifyEmbed from './SpotifyEmbed';
 import ShareCard from './ShareCard';
+import CurvedLoop from './CurvedLoop';
 import TLDRButton from './TLDRButton';
 import ReactionBar from './ReactionBar';
 import { useAdmin } from './AdminAuth';
@@ -754,11 +755,15 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       <div data-theme="grey" className="w-full bg-[#3B4856] text-white py-16 md:py-20 px-5">
         <div className="max-w-5xl mx-auto flex flex-col items-start md:items-center justify-center space-y-12 text-left md:text-center">
           {/* Decorative Section Header */}
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <h2 className="text-5xl md:text-6xl font-black font-nevis text-[#D480C0] tracking-wider leading-none">
-                <span className="md:hidden">CINE<br/>ROOMS</span>
-                <span className="hidden md:inline">CINEROOMS</span>
+          <div className="w-full space-y-4">
+            <div className="w-full space-y-1">
+              <h2 className="w-full text-[#D480C0] -mb-4" aria-label="CINEROOMS">
+                <CurvedLoop
+                  marqueeText="CINEROOMS ✦ "
+                  speed={1.1}
+                  curveAmount={90}
+                  className="curved-loop-mark"
+                />
               </h2>
               <p className="text-base md:text-2xl font-bold font-syne text-[#D480C0]/80 tracking-wider">
                 {t('footerSubtitle')}

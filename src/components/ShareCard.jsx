@@ -1,79 +1,294 @@
-import { useRef, useCallback, useState } from 'react';
-import { FONT_MAP, getReviewTotal, TMDB_IMG_BASE } from '../utils/constants';
+import { useCallback, useState } from 'react';
+import { getReviewTotal, TMDB_IMG_BASE } from '../utils/constants';
+import { getPosterColors, isDark } from '../utils/posterColors';
 
-export default function ShareCard({ review, className }) {
-  const cardRef = useRef(null);
+/**
+ * Share to Story — a photograph of the film's case.
+ *
+ * Drawn on a 2D canvas, NOT screenshotted off the DOM. html2canvas (pro or not)
+ * has no support for CSS 3D: `perspective`, `preserve-3d` and `rotateY` are simply
+ * dropped, so capturing the real 3D case gives you its faces collapsed into a pile
+ * of flat rectangles. Projecting the box by hand is both more faithful and more
+ * predictable — and it drops the 246 KB html2canvas chunk entirely.
+ *
+ * The case is drawn in a light axonometric: the cover face-on, the spine and the top
+ * receding up-and-left along one shared vector. Same two poster colours the shelf
+ * uses, so the case you post is the case you own.
+ */
 
-  const total = getReviewTotal(review) ?? 0;
-  
-  const getScoreColor = (score) => {
-    if (score >= 9) return '#1db954'; // Green
-    if (score >= 7) return '#f5c518'; // Yellow
-    if (score >= 5) return '#e50914'; // Red
-    return '#6b6b80'; // Gray
-  };
+const W = 1080;
+const H = 1920;          // 9:16 — it's a story
 
-  const fontFamily = FONT_MAP[review.review_font] || FONT_MAP['Outfit'];
-  const cleanFontFamily = fontFamily.replace(/var\(--font-\w+\)/, '').replace(/['"]/g, '').trim() || 'sans-serif';
+const COVER_W = 600;
+const COVER_H = 900;     // 2:3
+const COVER_X = 330;
+const COVER_Y = 400;
+const RX = -112;         // recession vector: back = up and to the left
+const RY = -68;
 
-  const genres = review.genres
-    ? (typeof review.genres === 'string' ? JSON.parse(review.genres) : review.genres)
-    : [];
+const WRAP = 44;         // the printed band that folds onto the cover
+const PANEL_TOP = 0.65;  // white panel starts 65% down the spine
+const FOOT_TOP = 0.90;   // colour block starts at 90%
 
-  const backdropUrl = review.custom_backdrop_url
-    ? review.custom_backdrop_url
-    : review.backdrop_path
-      ? `${TMDB_IMG_BASE}w1280${review.backdrop_path}`
-      : null;
+const CREAM = '#E7E0CF';
+const INK = '#1A1A1A';
+const RED = '#FE494A';
 
-  const posterUrl = review.poster_path
-    ? `${TMDB_IMG_BASE}w780${review.poster_path}`
+const loadImage = (src) =>
+  new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous'; // TMDB sends Access-Control-Allow-Origin: *
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+
+/** A point on the spine/top parallelogram: u = 0 at the cover, 1 at the back. */
+const back = (x, y, u = 1) => [x + RX * u, y + RY * u];
+
+function quad(ctx, pts, fill) {
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+}
+
+/** Film grain, as a tiled noise pattern — a canvas filter can only reshape the
+ *  pixels that are already there, it can't add any. */
+function grain(ctx, alpha) {
+  const n = 220;
+  const tile = document.createElement('canvas');
+  tile.width = n;
+  tile.height = n;
+  const tctx = tile.getContext('2d');
+  const img = tctx.createImageData(n, n);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = 90 + Math.random() * 130;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    img.data[i + 3] = 255;
+  }
+  tctx.putImageData(img, 0, 0);
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.globalCompositeOperation = 'overlay';
+  const pat = ctx.createPattern(tile, 'repeat');
+  ctx.fillStyle = pat;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+
+function wrapText(ctx, text, maxWidth, maxLines) {
+  const chars = [...text];
+  const lines = [];
+  let line = '';
+  for (const ch of chars) {
+    const next = line + ch;
+    if (ctx.measureText(next).width > maxWidth && line) {
+      lines.push(line);
+      line = ch;
+      if (lines.length === maxLines) break;
+    } else {
+      line = next;
+    }
+  }
+  if (lines.length < maxLines && line) lines.push(line);
+  if (lines.length === maxLines && chars.length) {
+    const joined = lines.join('');
+    if (joined.length < chars.length) {
+      lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…';
+    }
+  }
+  return lines;
+}
+
+async function drawCase(ctx, review, total) {
+  const [body, foot] = await getPosterColors(review.poster_path);
+  const poster = review.poster_path
+    ? await loadImage(`${TMDB_IMG_BASE}w780${review.poster_path}`)
     : null;
 
+  const x0 = COVER_X;
+  const y0 = COVER_Y;
+  const x1 = COVER_X + COVER_W;
+  const y1 = COVER_Y + COVER_H;
+
+  // Contact shadow on the "table"
+  ctx.save();
+  ctx.filter = 'blur(30px)';
+  ctx.fillStyle = 'rgba(26,26,26,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(x0 + COVER_W / 2 - 20, y1 + 26, COVER_W * 0.52, 34, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // ── top face: the paper edge you look down on ──
+  quad(ctx, [[x0, y0], [x1, y0], back(x1, y0), back(x0, y0)], '#EDEDEA');
+  quad(ctx, [[x0, y0], [x1, y0], back(x1, y0), back(x0, y0)], 'rgba(26,26,26,0.06)');
+
+  // ── spine face: body, then the white panel, then the foot block ──
+  const spineBand = (t0, t1, fill) => {
+    const ya = y0 + COVER_H * t0;
+    const yb = y0 + COVER_H * t1;
+    quad(ctx, [[x0, ya], [x0, yb], back(x0, yb), back(x0, ya)], fill);
+  };
+  spineBand(0, PANEL_TOP, body);
+  spineBand(PANEL_TOP, FOOT_TOP, '#F5F1E6');
+  spineBand(FOOT_TOP, 1, foot);
+  // the spine is in shade — it's turned away from the light
+  quad(
+    ctx,
+    [[x0, y0], [x0, y1], back(x0, y1), back(x0, y0)],
+    'rgba(0,0,0,0.22)'
+  );
+
+  // ── cover: the poster, with the printed band folded onto its left edge ──
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x0, y0, COVER_W, COVER_H);
+  ctx.clip();
+
+  if (poster) {
+    ctx.save();
+    ctx.filter = 'saturate(0.8) contrast(1.14) sepia(0.16) brightness(1.03)';
+    // The art gets everything to the RIGHT of the band — the band sits beside it,
+    // never on top, so the poster is never cropped to make room.
+    const artW = COVER_W - WRAP;
+    const scale = Math.max(artW / poster.width, COVER_H / poster.height);
+    const dw = poster.width * scale;
+    const dh = poster.height * scale;
+    ctx.drawImage(poster, x0 + WRAP + (artW - dw) / 2, y0 + (COVER_H - dh) / 2, dw, dh);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = body;
+    ctx.fillRect(x0 + WRAP, y0, COVER_W - WRAP, COVER_H);
+  }
+
+  // vignette over the art
+  const vg = ctx.createRadialGradient(
+    x0 + COVER_W / 2, y0 + COVER_H * 0.45, COVER_W * 0.25,
+    x0 + COVER_W / 2, y0 + COVER_H * 0.45, COVER_W * 0.85
+  );
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.35)');
+  ctx.fillStyle = vg;
+  ctx.fillRect(x0, y0, COVER_W, COVER_H);
+
+  // the wrapped band — the same three bands as the spine, at the same heights
+  ctx.fillStyle = body;
+  ctx.fillRect(x0, y0, WRAP, COVER_H * PANEL_TOP);
+  ctx.fillStyle = '#F5F1E6';
+  ctx.fillRect(x0, y0 + COVER_H * PANEL_TOP, WRAP, COVER_H * (FOOT_TOP - PANEL_TOP));
+  ctx.fillStyle = foot;
+  ctx.fillRect(x0, y0 + COVER_H * FOOT_TOP, WRAP, COVER_H * (1 - FOOT_TOP));
+
+  // the crease where the sheet folds round the hinge
+  const cr = ctx.createLinearGradient(x0 + WRAP, 0, x0 + WRAP + 14, 0);
+  cr.addColorStop(0, 'rgba(0,0,0,0.35)');
+  cr.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = cr;
+  ctx.fillRect(x0 + WRAP, y0, 14, COVER_H);
+
+  ctx.restore();
+
+  // gloss: a single soft highlight raked across the plastic
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x0, y0, COVER_W, COVER_H);
+  ctx.clip();
+  const gl = ctx.createLinearGradient(x0, y0, x0 + COVER_W, y0 + COVER_H);
+  gl.addColorStop(0, 'rgba(255,255,255,0.16)');
+  gl.addColorStop(0.35, 'rgba(255,255,255,0.02)');
+  gl.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = gl;
+  ctx.fillRect(x0, y0, COVER_W, COVER_H);
+  ctx.restore();
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x0, y0, COVER_W, COVER_H);
+
+  return { body, foot };
+}
+
+export default function ShareCard({ review, className }) {
   const [sharing, setSharing] = useState(false);
-  const bgRef = useRef(null);
+  const total = getReviewTotal(review);
 
   const handleShare = useCallback(async () => {
     if (sharing) return;
     setSharing(true);
     try {
-      // html2canvas-pro (not the original) — it supports Tailwind v4's
-      // oklch()/color-mix()/lab() colors, which the old html2canvas choked on
-      // and hung the whole share (stuck on "產生中").
-      const html2canvas = (await import('html2canvas-pro')).default;
+      // Nevis and Noto Sans TC have to be resolved before fillText, or the canvas
+      // silently falls back to a system face.
+      if (document.fonts?.ready) await document.fonts.ready;
 
-      let canvas;
-      try {
-        canvas = await html2canvas(cardRef.current, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: null,
-          logging: false,
-        });
-      } catch {
-        // Cross-origin image likely tainted the canvas — retry without the BG
-        if (bgRef.current) bgRef.current.style.display = 'none';
-        canvas = await html2canvas(cardRef.current, {
-          scale: 2,
-          useCORS: false,
-          allowTaint: false,
-          backgroundColor: '#1a1a1a',
-          logging: false,
-        });
-        if (bgRef.current) bgRef.current.style.display = '';
+      const cv = document.createElement('canvas');
+      cv.width = W;
+      cv.height = H;
+      const ctx = cv.getContext('2d');
+
+      // ── backdrop ──
+      const bg = ctx.createLinearGradient(0, 0, W * 0.4, H);
+      bg.addColorStop(0, '#F2ECDD');
+      bg.addColorStop(1, '#D9CFBB');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      const { foot } = await drawCase(ctx, review, total);
+
+      // ── the score: the loudest thing on the card after the artwork ──
+      const scoreY = COVER_Y + COVER_H + 210;
+      if (total != null) {
+        ctx.textBaseline = 'alphabetic';
+        ctx.font = '900 208px Nevis, "Noto Sans TC", sans-serif';
+        const s = total.toFixed(1);
+        const sw = ctx.measureText(s).width;
+
+        ctx.fillStyle = RED;
+        ctx.fillText(s, 90, scoreY);
+
+        ctx.font = '900 30px Nevis, "Noto Sans TC", sans-serif';
+        ctx.fillStyle = 'rgba(26,26,26,0.55)';
+        ctx.fillText('CINEROOMS SCORE', 100 + sw + 24, scoreY - 118);
+
+        // a rule that runs from the score out to the edge, like a spec sheet
+        ctx.fillStyle = 'rgba(26,26,26,0.18)';
+        ctx.fillRect(100 + sw + 24, scoreY - 92, W - (100 + sw + 24) - 90, 3);
+
+        ctx.font = '700 26px "Noto Sans TC", sans-serif';
+        ctx.fillStyle = 'rgba(26,26,26,0.45)';
+        ctx.fillText('/ 10.0', 100 + sw + 26, scoreY - 24);
       }
 
-      const blob = await new Promise((resolve) =>
-        canvas.toBlob((b) => resolve(b), 'image/png')
-      );
-      if (!blob) { setSharing(false); return; }
+      // ── title ──
+      ctx.font = '900 66px Nevis, "Noto Sans TC", sans-serif';
+      ctx.fillStyle = INK;
+      const lines = wrapText(ctx, review.title || '', W - 180, 2);
+      lines.forEach((line, i) => {
+        ctx.fillText(line, 90, scoreY + 110 + i * 76);
+      });
+
+      // ── watermark ──
+      ctx.font = '900 34px Nevis, "Noto Sans TC", sans-serif';
+      ctx.fillStyle = 'rgba(26,26,26,0.35)';
+      ctx.fillText('CINEROOMS', 90, H - 80);
+
+      ctx.fillStyle = foot;
+      ctx.fillRect(W - 90 - 56, H - 112, 56, 34);
+
+      grain(ctx, 0.09);
+
+      const blob = await new Promise((r) => cv.toBlob(r, 'image/png'));
+      if (!blob) throw new Error('toBlob returned nothing');
 
       const file = new File([blob], `cinerooms-${review.title || 'review'}.png`, {
         type: 'image/png',
       });
 
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (navigator.canShare?.({ files: [file] })) {
         try {
           await navigator.share({
             files: [file],
@@ -92,155 +307,18 @@ export default function ShareCard({ review, className }) {
     } finally {
       setSharing(false);
     }
-  }, [review, sharing]);
+  }, [review, total, sharing]);
 
   return (
-    <div>
-      {/* Hidden render target */}
-      <div className="fixed -left-[9999px] top-0" aria-hidden="true">
-        <div
-          ref={cardRef}
-          style={{
-            position: 'relative',
-            width: '1080px',
-            aspectRatio: '16/9',
-            borderRadius: '40px',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-end',
-            padding: '50px 60px',
-            boxSizing: 'border-box',
-            fontFamily: "'Inter', sans-serif",
-            color: '#ffffff',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-            backgroundColor: '#1a1a1a',
-          }}
-        >
-          {/* Background Image */}
-          {(backdropUrl || posterUrl) && (
-            <div
-              ref={bgRef}
-              style={{
-                position: 'absolute',
-                top: 0, left: 0, width: '100%', height: '100%',
-                backgroundImage: `url(${backdropUrl || posterUrl})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                zIndex: 0
-              }}
-            />
-          )}
-
-          {/* Gradient Overlay */}
-          <div style={{
-            position: 'absolute',
-            top: 0, left: 0, width: '100%', height: '100%',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.2) 100%)',
-            zIndex: 1
-          }} />
-
-          {/* Content Container */}
-          <div style={{ position: 'relative', zIndex: 2 }}>
-              {/* Score */}
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'baseline', 
-                gap: '20px',
-                marginBottom: '10px' 
-              }}>
-                 <div style={{
-                   fontSize: '110px',
-                   fontWeight: 900,
-                   lineHeight: 1,
-                   color: '#FE494A',
-                   fontFamily: "'Outfit', sans-serif",
-                   textShadow: `0 0 30px #FE494A80, 0 4px 20px rgba(0,0,0,0.8)`
-                 }}>
-                   {total.toFixed(1)}
-                 </div>
-                 <div style={{ fontSize: '32px', color: 'rgba(255,255,255,0.8)', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
-                   CineRooms Score
-                 </div>
-              </div>
-
-              {/* Title */}
-              <h1 style={{
-                fontSize: review.title.length > 25 ? '60px' : review.title.length > 15 ? '75px' : '85px',
-                fontWeight: 900,
-                margin: '0 0 15px 0',
-                lineHeight: 1.1,
-                fontFamily: cleanFontFamily,
-                textShadow: '0 4px 20px rgba(0,0,0,0.9)'
-              }}>
-                {review.title}
-              </h1>
-
-              {/* Genres */}
-              {genres.length > 0 && (
-                <div style={{ display: 'flex', gap: '20px', marginBottom: '25px', alignItems: 'center' }}>
-                   {genres.slice(0, 3).map((g, i) => (
-                      <div key={i} style={{
-                        fontSize: '26px',
-                        fontWeight: 'bold',
-                        color: '#D480C0', // Bright cinematic color for tags
-                        textTransform: 'uppercase',
-                        textShadow: '0 2px 10px rgba(0,0,0,0.8)',
-                        letterSpacing: '1px'
-                      }}>
-                        #{typeof g === 'string' ? g : g.name}
-                      </div>
-                   ))}
-                </div>
-              )}
-
-              {/* Short text snippet (Teaser) */}
-              {review.review_text && (
-                <p style={{
-                  fontSize: '30px',
-                  color: 'rgba(255,255,255,0.9)',
-                  lineHeight: 1.5,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  margin: '0 0 25px 0',
-                  fontFamily: cleanFontFamily,
-                  textShadow: '0 2px 10px rgba(0,0,0,0.5)'
-                }}>
-                  {review.review_text.replace(/[#*_~`>]/g, '').slice(0, 100)}...
-                </p>
-              )}
-
-              {/* Call to action & Watermark */}
-              <div style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingTop: '20px',
-                borderTop: '2px solid rgba(255,255,255,0.2)'
-              }}>
-                <div style={{ fontSize: '24px', color: '#FE494A', fontWeight: 900 }}>
-                  🔗 點擊連結閱讀完整影評
-                </div>
-                <div style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '2px' }}>
-                  CINEROOMS
-                </div>
-              </div>
-          </div>
-        </div>
-      </div>
-
-      <button
-        onClick={handleShare}
-        disabled={sharing}
-        className={className || "group flex items-center gap-2 px-8 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"}
-      >
-        <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
-          {sharing ? '⏳ 產生中...' : '📱 Share to Story'}
-        </span>
-      </button>
-    </div>
+    <button
+      onClick={handleShare}
+      disabled={sharing}
+      className={className || "group flex items-center gap-2 px-8 py-3 rounded-full bg-[#D480C0] hover:bg-[#FE494A] hover:text-white text-black font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm"}
+    >
+      <span className="inline-block font-black text-sm uppercase tracking-wider transition-all duration-300 group-hover:scale-105">
+        {sharing ? '⏳ 產生中...' : '📱 Share to Story'}
+      </span>
+    </button>
   );
 }
 

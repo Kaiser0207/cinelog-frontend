@@ -1,0 +1,27 @@
+.curved-loop-jacket {
+  position: relative;
+  width: 100%;
+  /* the finger drags the marquee sideways; the page still scrolls vertically */
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.curved-loop-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.curved-loop-svg text {
+  font-family: var(--font-nevis), sans-serif;
+  fill: currentColor;
+}
+
+/* The wordmark itself. Sized in SVG user units (the viewBox is 1440×120), so it
+   scales with the container instead of needing a breakpoint per screen. */
+.curved-loop-mark {
+  font-size: 84px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}

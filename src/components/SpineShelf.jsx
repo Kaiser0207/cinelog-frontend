@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, getReviewTotal } from '../utils/constants';
+import { getPosterColors, cachedColors, fallbackFor, isDark } from '../utils/posterColors';
 import './SpineShelf.css';
 
 /**
@@ -29,115 +30,17 @@ const TILT = 3;          // resting X rotation: you're looking slightly DOWN at 
 // each end of the animation visibly jumps.
 const CAMERA = 1200;
 
-const FALLBACK = [
-  ['#FE494A', '#3B4856'], ['#D480C0', '#2E2A33'], ['#3B4856', '#E8B84B'],
-  ['#E8B84B', '#1A1A1A'], ['#4C9A6A', '#F0EAD6'], ['#E86A33', '#1A1A1A'],
-];
-
-const colorCache = new Map();
-
-const rgbToHsv = (r, g, b) => {
-  const mx = Math.max(r, g, b);
-  const mn = Math.min(r, g, b);
-  const d = mx - mn;
-  let h = 0;
-  if (d) {
-    if (mx === r) h = ((g - b) / d) % 6;
-    else if (mx === g) h = (b - r) / d + 2;
-    else h = (r - g) / d + 4;
-    h *= 60;
-    if (h < 0) h += 360;
-  }
-  return [h, mx === 0 ? 0 : d / mx, mx / 255];
-};
-
-const css = ([r, g, b]) => `rgb(${r}, ${g}, ${b})`;
-const lum = ([r, g, b]) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-const shade = ([r, g, b], f) =>
-  [r, g, b].map((v) => Math.round(f > 0 ? v + (255 - v) * f : v * (1 + f)));
-
-/**
- * TWO colours off the poster: the case body, and the block at its foot.
- *
- * Hue-bucketed and saturation-weighted, NOT averaged. A movie poster is mostly
- * dark background — a plain mean of its pixels is always the same brown mud, and
- * every spine on the shelf would come out the same colour. Bucketing by hue finds
- * what the poster is actually *about*, and the second colour is the heaviest
- * bucket that's a genuinely different hue, so the pair reads as a deliberate
- * two-colour scheme rather than two shades of one.
- */
-function extractPair(data) {
-  const bins = new Map(); // hue bin (30° each) -> { r, g, b, w }
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i], g = data[i + 1], b = data[i + 2];
-    const [h, s, v] = rgbToHsv(r, g, b);
-    if (v < 0.12) continue;                  // near-black carries no hue
-    const key = s < 0.16 ? -1 : Math.floor(h / 30);
-    const w = 0.15 + s * 1.8;
-    const acc = bins.get(key) || { r: 0, g: 0, b: 0, w: 0 };
-    acc.r += r * w; acc.g += g * w; acc.b += b * w; acc.w += w;
-    bins.set(key, acc);
-  }
-  if (!bins.size) return null;
-
-  const ranked = [...bins.entries()]
-    .sort((a, b) => b[1].w - a[1].w)
-    .map(([key, a]) => ({
-      key,
-      col: [Math.round(a.r / a.w), Math.round(a.g / a.w), Math.round(a.b / a.w)],
-    }));
-
-  const primary = ranked[0];
-  const other = ranked.find((c) => {
-    if (c.key === primary.key) return false;
-    if (c.key === -1 || primary.key === -1) return true;
-    const d = Math.abs(c.key - primary.key);
-    return Math.min(d, 12 - d) >= 2;         // at least 60° away in hue
-  });
-
-  // No second hue in the poster (a monochrome one-sheet) — derive the foot block
-  // by pushing the primary the other way in lightness, so it still reads as a pair.
-  const secondary = other
-    ? other.col
-    : shade(primary.col, lum(primary.col) > 0.5 ? -0.6 : 0.55);
-
-  return [css(primary.col), css(secondary)];
-}
-
 function useSpineColors(posterPath, seed) {
-  const [pair, setPair] = useState(() => colorCache.get(posterPath) || null);
+  const [pair, setPair] = useState(() => cachedColors(posterPath) || null);
 
   useEffect(() => {
     if (!posterPath) return undefined;
-    if (colorCache.has(posterPath)) {
-      setPair(colorCache.get(posterPath));
-      return undefined;
-    }
-
     let cancelled = false;
-    const img = new Image();
-    img.crossOrigin = 'anonymous'; // TMDB serves Access-Control-Allow-Origin: *
-    img.src = `${TMDB_IMG_BASE}w92${posterPath}`;
-    img.onload = () => {
-      try {
-        const cv = document.createElement('canvas');
-        cv.width = 20;
-        cv.height = 30;
-        const ctx = cv.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(img, 0, 0, 20, 30);
-        const found = extractPair(ctx.getImageData(0, 0, 20, 30).data);
-        if (found) {
-          colorCache.set(posterPath, found);
-          if (!cancelled) setPair(found);
-        }
-      } catch {
-        /* tainted canvas — keep the fallback */
-      }
-    };
+    getPosterColors(posterPath, seed).then((p) => { if (!cancelled) setPair(p); });
     return () => { cancelled = true; };
-  }, [posterPath]);
+  }, [posterPath, seed]);
 
-  return pair || FALLBACK[seed % FALLBACK.length];
+  return pair || fallbackFor(seed);
 }
 
 export default function SpineShelf({ reviews = [], featuredIds }) {
@@ -160,12 +63,20 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
 
   return (
     <>
-      {/* Pulled up under the controls row so more of the shelf is above the fold.
-          Safe only because that row now carries `relative z-20` — otherwise this
-          would sit on top of it and eat every tap on the view buttons. */}
-      <div className="relative -mt-[3vh]">
+      {/*
+        Full-bleed: the shelf breaks out of <main>'s max-width and runs edge to edge,
+        so cases are cut off by both sides of the screen and the row reads as a shelf
+        that carries on past the frame — not a widget with margins. (w-screen +
+        left-1/2 + -ml-50vw is the standard escape hatch from a centred container;
+        <body> is overflow-x: clip, so nothing gains a horizontal scrollbar from it.)
+
+        The negative top margin pulls it up under the controls row for a bigger peek.
+        Safe only because that row carries `relative z-20` — otherwise this would sit
+        on top of it and eat every tap on the view buttons.
+      */}
+      <div className="relative -mt-[3vh] w-screen left-1/2 -ml-[50vw]">
         <div
-          className="flex items-end gap-[7px] overflow-x-auto overflow-y-hidden scrollbar-none px-6 pt-8"
+          className="flex items-end gap-[7px] overflow-x-auto overflow-y-hidden scrollbar-none pt-8"
           style={{ height: `calc(${SHELF_H} + 2.5rem)` }}
         >
           {reviews.map((review, i) => (
@@ -182,7 +93,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
 
         {/* The cases just sit on a soft contact shadow. The grey bar that used to
             be here read as a scrollbar, which is the last thing it should look like. */}
-        <div className="mx-6 h-5 -mt-1 bg-[radial-gradient(ellipse_at_top,rgba(26,26,26,0.20),transparent_70%)]" />
+        <div className="h-5 -mt-1 bg-[radial-gradient(ellipse_at_top,rgba(26,26,26,0.20),transparent_70%)]" />
         <p className="mt-2 text-center text-xs text-[#1A1A1A]/45">
           ← 左右滑動瀏覽 · 點一片抽出來 →
         </p>
@@ -206,7 +117,6 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
 
 
 const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
-const isDark = (c) => lum((c.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
 
 // Shared by the spine and by the band that wraps round onto the cover — they have
 // to line up to the pixel, because on a real case they're the same printed strip.
@@ -540,7 +450,7 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
  */
 function PullOut({ review, rect, colors, onOpen, onClose }) {
   const [settled, setSettled] = useState(false);
-  const [body, foot] = colors || FALLBACK[0];
+  const [body, foot] = colors || fallbackFor(0);
 
   const h = rect.height;
   const spineW = rect.width;
