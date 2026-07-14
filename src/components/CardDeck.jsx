@@ -91,9 +91,16 @@ export default function CardDeck({ reviews = [], featuredIds }) {
     // much of the front card peeks above the fold before you've scrolled. Once
     // the sticky child pins (top-0) the margin is irrelevant and it's still dead
     // centre, so this buys a bigger peek for free.
+    //
+    // pointer-events-none is NOT cosmetic. That same negative margin slides the
+    // deck's top edge up over the view-toggle row, and a transparent box still
+    // hit-tests — so the deck was silently eating every tap on those buttons. Only
+    // the front card takes pointer events (see DeckCard); everything else here is
+    // a pane of glass. Page scrolling is unaffected: it targets the document, not
+    // this element.
     <div
       ref={sectionRef}
-      className="relative -mt-[8vh]"
+      className="relative -mt-[8vh] pointer-events-none"
       style={{ height: `${Math.max(n, 2) * SCROLL_PER_CARD}vh` }}
     >
       {/*
