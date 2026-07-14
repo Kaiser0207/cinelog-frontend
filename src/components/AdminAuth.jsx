@@ -260,11 +260,11 @@ function DeviceManagerModal({ password, onClose }) {
   const [registering, setRegistering] = useState(false);
   const [newDeviceName, setNewDeviceName] = useState('');
 
-  useEffect(() => {
-    fetchDevices();
-  }, []);
-
-  const fetchDevices = async () => {
+  // `password` is fixed for this modal's lifetime (it's what unlocked it), so this
+  // genuinely only needs to run on mount — but saying so with a useCallback beats
+  // silencing the rule, because the day someone makes the password mutable the lint
+  // will notice and a hand-written disable comment would not.
+  const fetchDevices = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/api/auth/passkey/devices`, {
         headers: { 'Authorization': `Bearer ${password}` }
@@ -278,7 +278,11 @@ function DeviceManagerModal({ password, onClose }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [password]);
+
+  useEffect(() => {
+    fetchDevices();
+  }, [fetchDevices]);
 
   const handleRegister = async () => {
     if (!newDeviceName.trim()) return alert('Please enter a device name');

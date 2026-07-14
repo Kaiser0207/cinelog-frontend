@@ -19,11 +19,9 @@ import {
   FONT_MAP,
   computeEntertainment,
   computeCinematic,
-  computeTotal,
   getReviewTotal,
   getEpisodeColor,
   seasonAverage,
-  getScoreColor,
   formatDate,
   API_URL,
 } from '../utils/constants';

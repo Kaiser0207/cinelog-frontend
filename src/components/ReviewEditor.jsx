@@ -9,7 +9,7 @@ import WatchHistory from './WatchHistory';
 import AIPredictButton from './AIPredictButton';
 import { useAdmin } from './AdminAuth';
 import { useToast } from './Toast';
-import { API_URL, TMDB_IMG_BASE, FONT_MAP, computeEntertainment, computeCinematic, computeTotal, autoSeriesTotal, getScoreColor } from '../utils/constants';
+import { API_URL, TMDB_IMG_BASE, FONT_MAP, computeEntertainment, computeCinematic, computeTotal, autoSeriesTotal } from '../utils/constants';
 import { pressFx } from '../utils/motion';
 
 const EMPTY_STATE = {

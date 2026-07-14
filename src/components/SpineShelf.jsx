@@ -478,13 +478,6 @@ function CoverFace({
   weave = 0,
   hit = true,
 }) {
-  // Two bitmaps, stacked as CSS background layers: the big one on top, the shelf's
-  // already-cached thumbnail underneath. The w500 is a fresh request the moment you
-  // pull a case, and until it lands the cover would otherwise be a blank slab of
-  // spine colour — a poster popping in mid-turn is exactly the kind of seam we're
-  // here to kill. This way it's the same picture throughout, just sharpening.
-  const layers = [art, artFallback].filter(Boolean).map((u) => `url("${u}")`).join(', ');
-
   return (
     <span
       // On the shelf this face must NOT take clicks. It's turned into the screen,
@@ -499,11 +492,53 @@ function CoverFace({
         backgroundColor: body,
       }}
     >
-      {layers && (
-        <span
-          className="absolute inset-y-0 right-0 block bg-cover bg-center"
-          style={{ left: wrap, backgroundImage: layers }}
-        />
+      {/*
+        Real <img>s, NOT a CSS background-image — and every one of them crossOrigin.
+
+        This is the same URL that posterColors.js samples the case's two colours from,
+        and that sampler needs `crossOrigin = 'anonymous'` or the canvas taints and
+        getImageData() throws. But a CSS background is ALWAYS fetched no-CORS, and the
+        browser will not reuse a cached response whose CORS mode differs — so the shelf
+        was downloading every single poster TWICE: once no-CORS to paint it, once CORS
+        to read six hundred pixels off it. 30 films = 60 requests where 30 would do, and
+        it scales linearly with the collection.
+
+        Matching the CORS mode collapses them into one cache entry and one request. (It
+        also gives us decoding="async", which a background image can never carry.)
+
+        Two of them, stacked: the big one on top, the thumbnail underneath. The w500 is
+        a fresh request the moment you pull a case, and until it lands the cover would
+        otherwise be a blank slab of spine colour — a poster popping in mid-turn is
+        exactly the kind of seam we've spent all this time killing. Same picture
+        throughout, just sharpening.
+
+        NOT loading="lazy", deliberately: these faces are rotated 90° inside a
+        preserve-3d group, and lazy loading is driven by intersection geometry that 3D
+        transforms make a liar of. A cover that never loads is a much worse bug than one
+        that loads early — and the bytes are in cache from the colour sampler anyway, so
+        there is nothing to save.
+      */}
+      {art && (
+        <span className="absolute inset-y-0 right-0 block overflow-hidden" style={{ left: wrap }}>
+          {artFallback && (
+            <img
+              src={artFallback}
+              alt=""
+              aria-hidden="true"
+              crossOrigin="anonymous"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+          <img
+            src={art}
+            alt=""
+            aria-hidden="true"
+            crossOrigin="anonymous"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </span>
       )}
 
       {/* The weave is a SIBLING of the art, never wrapped with it in a shared opacity

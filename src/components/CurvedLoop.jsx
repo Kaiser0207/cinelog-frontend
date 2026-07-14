@@ -1,6 +1,9 @@
 import { useRef, useEffect, useState, useMemo, useId } from 'react';
 import './CurvedLoop.css';
 
+// The wordmark's separator. See the note in the component.
+const NBSP = '\u00A0';
+
 // viewBox geometry. Height is generous on purpose — see pathD.
 const VB_W = 1440;
 const VB_H = 280;
@@ -14,9 +17,15 @@ const CurvedLoop = ({
   direction = 'left',
   interactive = true
 }) => {
+  // The separator is a NON-BREAKING space, and it has to be: a plain trailing space
+  // gets collapsed away and the wordmark then repeats with no gap at all. It was a
+  // literal U+00A0 sitting in the source — invisible, indistinguishable from a normal
+  // space to anyone reading it, and one careless reformat away from silently breaking
+  // the marquee's spacing. Spell it.
   const text = useMemo(() => {
-    const hasTrailing = /\s| $/.test(marqueeText);
-    return (hasTrailing ? marqueeText.replace(/\s+$/, '') : marqueeText) + ' ';
+    const hasTrailing = new RegExp(`[\\s${NBSP}]$`).test(marqueeText);
+    const body = hasTrailing ? marqueeText.replace(new RegExp(`[\\s${NBSP}]+$`), '') : marqueeText;
+    return body + NBSP;
   }, [marqueeText]);
 
   const measureRef = useRef(null);

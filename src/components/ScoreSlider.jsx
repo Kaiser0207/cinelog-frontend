@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { getScoreColor } from '../utils/constants';
 
 export default function ScoreSlider({
   label,
@@ -8,12 +7,7 @@ export default function ScoreSlider({
   animated = false,
   readOnly = false,
 }) {
-  const color = getScoreColor(value);
   const pct = (value / 10) * 100;
-
-  const gradientStyle = {
-    background: `linear-gradient(to right, #e50914 0%, #ff6b35 30%, #f5c518 60%, #1db954 100%)`,
-  };
 
   return (
     <div className="space-y-2">

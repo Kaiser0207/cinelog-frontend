@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { getReviewTotal, TMDB_IMG_BASE } from '../utils/constants';
-import { getPosterColors, isDark } from '../utils/posterColors';
+import { getPosterColors } from '../utils/posterColors';
 
 /**
  * Share to Story — a photograph of the film's case.

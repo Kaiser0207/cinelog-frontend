@@ -28,7 +28,6 @@ function feedUrl({ searchQuery, searchMode, sort, genre, media, offset }) {
 export default function ReviewFeed({ sort = 'newest', genre = '', media = '', searchQuery = '', searchMode = 'standard', viewMode = 'shelf' }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
   const [failed, setFailed] = useState(false);
 
@@ -74,7 +73,6 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
     const ac = new AbortController();
 
     setReviews([]);
-    setHasMore(true);
     setInitialLoad(true);
     setLoading(true);
     setFailed(false);
@@ -112,7 +110,6 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
       }
 
       if (mine !== gen.current) return;
-      setHasMore(false);
       setLoading(false);
     })();
 

@@ -1,8 +1,6 @@
 import { motion } from 'framer-motion';
 
 export default function WatchHistory({ dates = [], onChange }) {
-  const ordinals = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'];
-
   const addDate = () => {
     const today = new Date().toISOString().split('T')[0];
     onChange([...dates, today]);
