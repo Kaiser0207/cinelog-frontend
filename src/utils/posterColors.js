@@ -40,7 +40,29 @@ const rgbToHsv = (r, g, b) => {
 const cssRgb = ([r, g, b]) => `rgb(${r}, ${g}, ${b})`;
 
 export const lum = (rgb) => (0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]) / 255;
-export const isDark = (css) => lum((css.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
+
+/**
+ * Parse either of the two forms a case colour can arrive in: `rgb(r, g, b)` from the
+ * poster sampler, or `#rrggbb` from FALLBACK_PAIRS.
+ *
+ * It only understood the first. On a hex string /\d+/g does something quietly absurd —
+ * it matches the DIGIT RUNS and skips the letters, so '#3B4856' came back as
+ * ['3', '4856'] → [3, 4856, undefined] → lum() = NaN → `NaN < 0.55` is false → "light"
+ * → black ink. And a fallback colour is not a rare path: it's every review with no
+ * poster, every TMDB 404, every tainted canvas, every monochrome poster. #3B4856 is a
+ * dark slate, so those spines were printing a near-black title on a near-black spine.
+ */
+const toRgb = (css) => {
+  const hex = /^#([0-9a-f]{6})$/i.exec(css.trim());
+  if (hex) {
+    const n = parseInt(hex[1], 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  const nums = (css.match(/\d+/g) || []).map(Number);
+  return nums.length >= 3 ? nums.slice(0, 3) : [0, 0, 0];
+};
+
+export const isDark = (css) => lum(toRgb(css)) < 0.55;
 
 const shade = ([r, g, b], f) =>
   [r, g, b].map((v) => Math.round(f > 0 ? v + (255 - v) * f : v * (1 + f)));

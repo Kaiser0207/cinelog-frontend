@@ -59,11 +59,14 @@ export default function SearchOverlay({ isOpen, onClose, searchInput, searchQuer
           {searchInput ? (
             // Live results right inside the overlay — no need to close the screen
             <div className="pt-2">
+              {/* viewMode was "list" — an orphan of the deleted list view, which
+                  ReviewFeed silently fell through to the shelf anyway. Say what it
+                  actually does. */}
               {searchQuery ? (
                 <ReviewFeed
                   searchQuery={searchQuery}
                   searchMode={searchMode}
-                  viewMode="list"
+                  viewMode="shelf"
                 />
               ) : (
                 <p className="text-center text-sm font-bold text-[#1A1A1A]/40 mt-10">

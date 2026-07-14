@@ -106,10 +106,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (pointer: fine) {
-  body, a, button, input, textarea, select {
-    cursor: none !important;
-  }
+/* Hide the native cursor ONLY once CustomCursor has actually mounted a replacement
+   (it adds this class). Keyed on `@media (pointer: fine)` instead, this hid the cursor
+   on any device with a mouse — including a touchscreen laptop, where CustomCursor bails
+   out because `maxTouchPoints > 0` and renders nothing. Native cursor gone, custom
+   cursor never drawn: no pointer at all, over any button on the site. */
+html.has-custom-cursor body,
+html.has-custom-cursor a,
+html.has-custom-cursor button,
+html.has-custom-cursor input,
+html.has-custom-cursor textarea,
+html.has-custom-cursor select {
+  cursor: none !important;
 }
 
 /* The film look (.film-img / .film-grain / .film-vignette) is gone. It was three

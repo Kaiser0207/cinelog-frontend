@@ -15,6 +15,16 @@ export default function CustomCursor() {
       return;
     }
 
+    // The stylesheet used to hide the native cursor under `@media (pointer: fine)`
+    // while this component bailed out on `maxTouchPoints > 0`. On a touchscreen laptop
+    // (or an iPad with a trackpad) BOTH are true — the pointer is fine AND the screen
+    // is touchable — so the native cursor was hidden with !important and the
+    // replacement was never rendered. No pointer anywhere on the site, over any button.
+    //
+    // One source of truth: the CSS hides the cursor only when this component has
+    // actually mounted a replacement.
+    document.documentElement.classList.add('has-custom-cursor');
+
     const updateMousePosition = (e) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
       if (e.target && e.target.closest) {
@@ -38,6 +48,7 @@ export default function CustomCursor() {
     window.addEventListener('mouseover', handleMouseOver);
 
     return () => {
+      document.documentElement.classList.remove('has-custom-cursor');
       window.removeEventListener('mousemove', updateMousePosition);
       window.removeEventListener('mouseover', handleMouseOver);
     };

@@ -5,6 +5,7 @@ import ReviewFeed from '../components/ReviewFeed';
 import StaggeredMenu from '../components/StaggeredMenu';
 import SearchOverlay from '../components/SearchOverlay';
 import { SORT_OPTIONS } from '../utils/constants';
+import { invalidateApiCache } from '../utils/apiCache';
 import { useLanguage } from '../components/LanguageContext';
 import { useAdmin } from '../components/AdminAuth';
 import SuggestionBox from '../components/SuggestionBox';
@@ -169,6 +170,9 @@ export default function HomePage() {
   };
 
   const handleSaved = () => {
+    // Remounting the subtree is only half of it — without this the remounted feed just
+    // reads the same cached responses straight back and the new review never appears.
+    invalidateApiCache();
     setRefreshKey((k) => k + 1);
   };
 

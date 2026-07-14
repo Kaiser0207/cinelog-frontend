@@ -5,7 +5,6 @@ import remarkGfm from 'remark-gfm';
 import { useNavigate } from 'react-router-dom';
 import ScoreSlider from './ScoreSlider';
 import EpisodeHeatmap from './EpisodeHeatmap';
-import RadarChart from './RadarChart';
 import SpotifyEmbed from './SpotifyEmbed';
 import ShareCard from './ShareCard';
 import CurvedLoop from './CurvedLoop';
@@ -14,6 +13,7 @@ import ReactionBar from './ReactionBar';
 import { useAdmin } from './AdminAuth';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
+import { invalidateApiCache } from '../utils/apiCache';
 import {
   TMDB_IMG_BASE,
   FONT_MAP,
@@ -209,6 +209,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           headers: { 'Authorization': `Bearer ${password}` },
         });
         if (res.ok || res.status === 204) {
+          // The collection has moved: the shelf, the featured list, the stats and —
+          // above all — the catalogue numbers (every № after this film shifts down).
+          invalidateApiCache();
           addToast(t('deleteSuccess'), 'success');
           onDeleted?.();
           navigate('/');

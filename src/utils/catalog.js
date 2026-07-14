@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { API_URL } from './constants';
+import { cachedJson, onInvalidate } from './apiCache';
 
 /**
  * 館藏編號 — the Criterion-style number on a case's spine.
@@ -25,16 +26,28 @@ import { API_URL } from './constants';
 
 const PAGE = 100;
 
-async function loadCatalog() {
+/**
+ * The whole collection, unfiltered, oldest first. Shared through the API cache, so the
+ * shelf, the stats page and anything else that wants it pay for exactly one set of
+ * requests between them — and a back-navigation pays for none.
+ */
+export async function loadAllReviews() {
   const rows = [];
   for (let offset = 0; ; offset += PAGE) {
-    const res = await fetch(`${API_URL}/api/reviews?limit=${PAGE}&offset=${offset}&sort=newest`);
-    if (!res.ok) break;
-    const data = await res.json();
+    // NOT `if (!res.ok) break` — a partial load here is worse than no load. Page 1
+    // succeeding and page 2 failing would leave us numbering the newest 100 from 1,
+    // so the oldest of those becomes №1 and every spine on the shelf quietly shows the
+    // wrong number. A confidently wrong catalogue is worse than none: throw.
+    const data = await cachedJson(`${API_URL}/api/reviews?limit=${PAGE}&offset=${offset}&sort=newest`);
     const page = data.reviews || [];
     rows.push(...page);
     if (page.length < PAGE) break;
   }
+  return rows;
+}
+
+async function loadCatalog() {
+  const rows = await loadAllReviews();
 
   // Acquisition order. №1 is the first review you ever wrote — and stays №1 forever,
   // whatever you add. (created_at is a Postgres TIMESTAMPTZ string, and they're all
@@ -47,20 +60,30 @@ async function loadCatalog() {
   return byId;
 }
 
-/**
- * Map of review id → catalogue number, or null until it lands. Not cached across
- * mounts on purpose: delete a film and come back to the shelf, and the numbers behind
- * it have to have closed up. One request for the whole collection is cheap enough to
- * pay for that being true.
- */
+// Kicked off at module load, NOT when the shelf mounts. The shelf only mounts once the
+// feed's first page has landed, so hanging the catalogue off it put the two whole-
+// collection reads in a strict waterfall — the numbers arrived a full round-trip late,
+// against a backend that may have been asleep. They're independent; run them together.
+let catalogPromise = loadCatalog();
+
+// The catalogue is DERIVED from the collection, so clearing the response cache isn't
+// enough — this map has to be rebuilt. Which is exactly the 遞補 behaviour: delete a
+// film and every number after it shifts down.
+onInvalidate(() => { catalogPromise = loadCatalog(); });
+
+/** Map of review id → catalogue number, or null until it lands (or if it failed). */
 export function useCatalogNumbers() {
   const [numbers, setNumbers] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    loadCatalog()
+    catalogPromise
       .then((m) => { if (!cancelled) setNumbers(m); })
-      .catch((err) => console.error('Failed to build catalogue numbers:', err));
+      .catch((err) => {
+        console.error('Failed to build catalogue numbers:', err);
+        // Retry on the next mount rather than leaving the shelf permanently numberless.
+        catalogPromise = loadCatalog();
+      });
     return () => { cancelled = true; };
   }, []);
 

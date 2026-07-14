@@ -288,7 +288,11 @@ export default function ShareCard({ review, className }) {
             title: `CineRooms: ${review.title}`,
             text: `Check out my review of ${review.title}!`,
           });
-        } catch {
+        } catch (err) {
+          // Dismissing the OS share sheet rejects with AbortError. That's the user
+          // saying "no", not a failure — falling back to a download meant backing out
+          // of the share sheet quietly dropped a PNG into their Downloads folder.
+          if (err?.name === 'AbortError') return;
           downloadBlob(blob, file.name);
         }
       } else {
