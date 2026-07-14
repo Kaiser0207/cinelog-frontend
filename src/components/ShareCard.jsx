@@ -55,28 +55,31 @@ function quad(ctx, pts, fill) {
   ctx.fill();
 }
 
-/** Film grain, as a tiled noise pattern — a canvas filter can only reshape the
- *  pixels that are already there, it can't add any. */
-function grain(ctx, alpha) {
-  const n = 220;
+/** The weave — the same warp-and-weft the real case carries (see SpineShelf.css),
+ *  drawn as a tiled 3px grid. This is a photo of a printed, folded sheet, so the
+ *  texture is the one thing that has to survive; the film grain that used to be here
+ *  was reshaping artwork someone else had already art-directed. */
+function weave(ctx, x, y, w, h, alpha) {
+  const n = 12;   // 4 cells of 3px — a whole number of periods, so the tile seams don't show
   const tile = document.createElement('canvas');
   tile.width = n;
   tile.height = n;
   const tctx = tile.getContext('2d');
-  const img = tctx.createImageData(n, n);
-  for (let i = 0; i < img.data.length; i += 4) {
-    const v = 90 + Math.random() * 130;
-    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-    img.data[i + 3] = 255;
+  for (let i = 0; i < n; i += 3) {
+    tctx.fillStyle = 'rgba(255,255,255,0.5)';   // warp — vertical threads
+    tctx.fillRect(i, 0, 1, n);
+    tctx.fillStyle = 'rgba(0,0,0,0.5)';         // weft — horizontal threads
+    tctx.fillRect(0, i, n, 1);
   }
-  tctx.putImageData(img, 0, 0);
 
   ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, y, w, h);
+  ctx.clip();
   ctx.globalAlpha = alpha;
   ctx.globalCompositeOperation = 'overlay';
-  const pat = ctx.createPattern(tile, 'repeat');
-  ctx.fillStyle = pat;
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = ctx.createPattern(tile, 'repeat');
+  ctx.fillRect(x, y, w, h);
   ctx.restore();
 }
 
@@ -151,30 +154,17 @@ async function drawCase(ctx, review, total) {
   ctx.clip();
 
   if (poster) {
-    ctx.save();
-    ctx.filter = 'saturate(0.8) contrast(1.14) sepia(0.16) brightness(1.03)';
-    // The art gets everything to the RIGHT of the band — the band sits beside it,
-    // never on top, so the poster is never cropped to make room.
+    // No filter. The art gets everything to the RIGHT of the band — the band sits
+    // beside it, never on top, so the poster is never cropped to make room.
     const artW = COVER_W - WRAP;
     const scale = Math.max(artW / poster.width, COVER_H / poster.height);
     const dw = poster.width * scale;
     const dh = poster.height * scale;
     ctx.drawImage(poster, x0 + WRAP + (artW - dw) / 2, y0 + (COVER_H - dh) / 2, dw, dh);
-    ctx.restore();
   } else {
     ctx.fillStyle = body;
     ctx.fillRect(x0 + WRAP, y0, COVER_W - WRAP, COVER_H);
   }
-
-  // vignette over the art
-  const vg = ctx.createRadialGradient(
-    x0 + COVER_W / 2, y0 + COVER_H * 0.45, COVER_W * 0.25,
-    x0 + COVER_W / 2, y0 + COVER_H * 0.45, COVER_W * 0.85
-  );
-  vg.addColorStop(0, 'rgba(0,0,0,0)');
-  vg.addColorStop(1, 'rgba(0,0,0,0.35)');
-  ctx.fillStyle = vg;
-  ctx.fillRect(x0, y0, COVER_W, COVER_H);
 
   // the wrapped band — the same three bands as the spine, at the same heights
   ctx.fillStyle = body;
@@ -238,6 +228,10 @@ export default function ShareCard({ review, className }) {
       ctx.fillRect(0, 0, W, H);
 
       const { foot } = await drawCase(ctx, review, total);
+      // The weave stays on the CASE — this is a photo of an object sitting on a
+      // surface, and the surface isn't made of paper. Before the type goes down, not
+      // after: the score has no business being woven.
+      weave(ctx, COVER_X, COVER_Y, COVER_W, COVER_H, 0.3);
 
       // ── the score: the loudest thing on the card after the artwork ──
       const scoreY = COVER_Y + COVER_H + 210;
@@ -279,7 +273,6 @@ export default function ShareCard({ review, className }) {
       ctx.fillStyle = foot;
       ctx.fillRect(W - 90 - 56, H - 112, 56, 34);
 
-      grain(ctx, 0.09);
 
       const blob = await new Promise((r) => cv.toBlob(r, 'image/png'));
       if (!blob) throw new Error('toBlob returned nothing');

@@ -196,16 +196,15 @@ const DeckCard = memo(function DeckCard({ review, i, n, pos, isFront, isFeatured
       }}
     >
       {poster ? (
-        <>
-          <img
-            src={poster}
-            alt={review.title}
-            className="absolute inset-0 w-full h-full object-cover film-img"
-            decoding="async"
-          />
-          <span className="absolute inset-0 film-grain pointer-events-none" />
-          <span className="absolute inset-0 film-vignette pointer-events-none" />
-        </>
+        // No film look. The poster is the poster — the grain, the vignette and the
+        // sepia were three composited layers per card, on a stack of transformed cards,
+        // and they were reshaping artwork that someone had already art-directed.
+        <img
+          src={poster}
+          alt={review.title}
+          className="absolute inset-0 w-full h-full object-cover"
+          decoding="async"
+        />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-bg-card to-bg-elevated" />
       )}

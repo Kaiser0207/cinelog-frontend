@@ -112,30 +112,11 @@ body {
   }
 }
 
-/* ── Custom Scrollbar ── */
-/* ── Film look for posters ──────────────────────────────────────────────
-   A whisper of photochemistry, not an Instagram filter: pull the saturation
-   back, warm it slightly, firm up the contrast — then grain and a vignette on
-   top as separate layers (a CSS `filter` can't add grain, only reshape what's
-   already there). Applied as three cheap layers rather than one heavy one.
-   ────────────────────────────────────────────────────────────────────── */
-.film-img {
-  filter: saturate(0.78) contrast(1.16) sepia(0.2) brightness(1.04) hue-rotate(-4deg);
-}
-
-.film-grain {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.75'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
-  opacity: 0.38;
-}
-
-/* Vignette + the lifted, slightly warm blacks of a print — film never reaches
-   true black, and that milkiness is most of what reads as "film" to the eye. */
-.film-vignette {
-  background:
-    radial-gradient(ellipse at 50% 45%, transparent 42%, rgba(0, 0, 0, 0.45) 100%),
-    linear-gradient(0deg, rgba(120, 92, 60, 0.14), rgba(120, 92, 60, 0.14));
-}
+/* The film look (.film-img / .film-grain / .film-vignette) is gone. It was three
+   composited layers over every poster in the app — two of them mix-blend-mode:
+   overlay — to reshape artwork that had already been art-directed by someone else.
+   The texture that survives is the case's weave, and it lives on the case (see
+   SpineShelf.css), because the case is a printed sheet and a poster isn't. */
 
 /* Tailwind v4 ships NO scrollbar utilities (that's a third-party plugin), yet
    `scrollbar-none` / `scrollbar-hide` are used all over this app — they have been
