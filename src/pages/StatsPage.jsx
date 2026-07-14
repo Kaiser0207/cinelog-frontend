@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import StaggeredMenu from '../components/StaggeredMenu';
 import { useLanguage } from '../components/LanguageContext';
-import { API_URL, getReviewTotal, flattenReview } from '../utils/constants';
+import { getReviewTotal, flattenReview } from '../utils/constants';
+import { loadAllReviews } from '../utils/catalog';
 
 /**
  * 觀影統計 — a real page (/stats), not a floating card.
@@ -58,17 +59,10 @@ export default function StatsPage() {
     let cancelled = false;
     (async () => {
       try {
-        const acc = [];
-        const PAGE = 100; // backend caps limit at 100; paginate for the rest
-        for (let guard = 0; guard < 50; guard++) {
-          const res = await fetch(`${API_URL}/api/reviews?limit=${PAGE}&offset=${acc.length}&sort=newest`);
-          if (!res.ok) break;
-          const json = await res.json();
-          const items = json.reviews || (Array.isArray(json) ? json : []);
-          acc.push(...items);
-          const total = json.total ?? acc.length;
-          if (items.length === 0 || acc.length >= total) break;
-        }
+        // The same whole-collection walk the shelf's catalogue does — down to a
+        // byte-identical URL — so it used to be a second full download of everything.
+        // One function, one cache: coming here from the shelf now costs nothing.
+        const acc = await loadAllReviews();
         if (!cancelled) setData(acc.map(flattenReview));
       } catch {
         if (!cancelled) setData([]);

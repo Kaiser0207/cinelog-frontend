@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { API_URL } from '../utils/constants';
+import { cachedJson } from '../utils/apiCache';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
 
@@ -34,10 +35,11 @@ export default function ReactionBar({ reviewId }) {
 
   // The accepted emoji set is owned by the backend — fetch it so the buttons
   // can never offer an emoji the API would reject. Falls back to DEFAULT_EMOJI.
+  // Through the cache: this is a static config list, and it was being re-fetched from
+  // scratch on every mount of every ReactionBar — i.e. every single review you open.
   useEffect(() => {
     let cancelled = false;
-    fetch(`${API_URL}/api/reviews/reactions/palette`)
-      .then((res) => (res.ok ? res.json() : null))
+    cachedJson(`${API_URL}/api/reviews/reactions/palette`)
       .then((data) => {
         if (!cancelled && Array.isArray(data?.emoji) && data.emoji.length) setEmojis(data.emoji);
       })
