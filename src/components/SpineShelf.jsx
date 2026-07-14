@@ -97,10 +97,20 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   // We keep the element itself, not just the rect, so the case can ask the shelf
   // where its slot is NOW when it's time to go back — see PullOut.putBack().
   const [pulled, setPulled] = useState(null);
-  // Set once the case is on its way down into its slot — the shelf closes the gap
-  // around it from here, instead of waiting for the overlay to unmount and then doing
-  // twenty springs in the same frame as the repaint.
-  const [settling, setSettling] = useState(false);
+
+  // The GAP the case left behind, as an index: everything after it is shuffled over.
+  //
+  // Deliberately its own state, and not just `pulled != null`. The gap outlives the
+  // case being in your hand: the shelf has to go on holding it open until the case is
+  // actually seated, and only THEN close, slowly. While the two shared a state the gap
+  // snapped shut on the very frame the overlay handed the case back — which is both
+  // the wrong order (the neighbours were closing over a case that hadn't landed yet)
+  // and the hitch, because that one frame was also unmounting the overlay, un-hiding
+  // the case in the slot, repainting a shelf that had been under an opaque veil, and
+  // kicking off a spring on twenty-odd cases. All at once.
+  const [gapAfter, setGapAfter] = useState(null);
+  const closeTimer = useRef(null);
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
 
   // SHELF_H is a clamp(): only the browser knows what it actually works out to, and
   // the case's whole geometry hangs off it. Measure it once, pre-paint.
@@ -124,8 +134,18 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   const catalog = useCatalogNumbers();
 
   const pull = useCallback((review, el, colors, index) => {
-    setSettling(false);
+    clearTimeout(closeTimer.current);
+    setGapAfter(index);
     setPulled({ review, el, rect: el.getBoundingClientRect(), colors, index });
+  }, []);
+
+  // The case has landed. Drop the overlay — and let the shelf stand there with the gap
+  // still open for a beat before the neighbours drift back in. The pause is the whole
+  // point: you see it seated, and then the row closes around it.
+  const seat = useCallback(() => {
+    setPulled(null);
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setGapAfter(null), 220);
   }, []);
 
   if (reviews.length === 0) return null;
@@ -181,7 +201,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
               // Everything to the RIGHT of the case in your hand shuffles over to
               // make room, and closes back up once it's slotted in. A shelf where
               // the neighbours don't move is a shelf of pictures, not of objects.
-              nudged={pulled != null && !settling && i > pulled.index}
+              nudged={gapAfter != null && i > gapAfter}
               // While it's in your hand it is NOT also on the shelf.
               held={pulled != null && i === pulled.index}
               onPull={pull}
@@ -215,8 +235,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
             getHome={() => (pulled.el?.isConnected ? pulled.el.getBoundingClientRect() : pulled.rect)}
             colors={pulled.colors}
             onOpen={() => navigate(`/review/${pulled.review.id}`, { state: { review: pulled.review } })}
-            onSettling={() => setSettling(true)}
-            onClose={() => { setPulled(null); setSettling(false); }}
+            onClose={seat}
           />
         )}
       </AnimatePresence>
@@ -541,7 +560,13 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, ca
       className="case-slot relative shrink-0"
       initial={false}
       animate={{ x: nudged ? NUDGE : 0 }}
-      transition={{ type: 'spring', stiffness: 220, damping: 24 }}
+      // The two directions are not the same gesture, so they don't get the same spring.
+      // Getting OUT OF THE WAY is a reflex — it has to be gone by the time the case is
+      // clear of the shelf. Coming BACK is the row settling: it starts only once the
+      // case is seated (see gapAfter) and it takes its time about it.
+      transition={nudged
+        ? { type: 'spring', stiffness: 220, damping: 24 }
+        : { type: 'spring', stiffness: 60, damping: 18, mass: 1.1 }}
       style={{
         // Perspective PER CASE, not on the row: the row is a scroller thousands of
         // pixels wide, and one shared vanishing point would shear the far cases.
@@ -656,11 +681,9 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, ca
  * COVER dead centre, the box has to be parked left of centre by exactly
  * (spine width + half a cover).
  */
-function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, onOpen, onSettling, onClose }) {
+function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, onOpen, onClose }) {
   const [settled, setSettled] = useState(false);
   const [body, foot] = colors || fallbackFor(0);
-  const timers = useRef([]);
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
   const h = rect.height;
   const spineW = rect.width;
@@ -737,17 +760,6 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
     // beside its slot instead of in it.
     const home = getHome?.() || rect;
     const t = { duration: 0.8, times: [0, 0.6, 1], ease: [0.4, 0, 0.2, 1] };
-
-    // Tell the shelf to close the gap while the case is still coming DOWN into it,
-    // rather than the instant the overlay unmounts. Two reasons, and they're both
-    // real: the frame where the case is handed back was doing everything at once —
-    // unmount the overlay, un-hide the case in the slot, repaint the whole un-veiled
-    // shelf AND kick off a spring on every one of the twenty-odd cases to the right of
-    // it. That's the hitch. And it's the wrong order anyway: a shelf closes AROUND a
-    // case as you push it in, not half a second after it's already seated.
-    const closeGap = setTimeout(() => onSettling?.(), 430);
-    timers.current.push(closeGap);
-
     animate(veil, 0, { duration: 0.65 });
     animate(dim, SHELF_DIM, { duration: 0.65 });
     animate(grow, 0, { duration: 0.45 });
