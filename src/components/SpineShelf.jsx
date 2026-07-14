@@ -548,6 +548,10 @@ function CoverFace({
       {art && (
         <span className="absolute inset-y-0 right-0 block overflow-hidden" style={{ left: wrap }}>
           {artFallback && (
+            // Blurred, and scaled up just enough to keep the blur's soft edge outside
+            // the frame. A 92px-wide bitmap stretched to 350 IS ugly — but blurred it
+            // stops reading as "bad quality" and starts reading as out of focus, which
+            // is the whole trick: the thing you're about to look at is arriving.
             <img
               src={artFallback}
               alt=""
@@ -555,6 +559,7 @@ function CoverFace({
               crossOrigin="anonymous"
               decoding="async"
               className="absolute inset-0 w-full h-full object-cover"
+              style={{ filter: 'blur(12px)', transform: 'scale(1.08)' }}
             />
           )}
           <img
@@ -564,6 +569,11 @@ function CoverFace({
             crossOrigin="anonymous"
             decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
+            // Fade in ON LOAD rather than appearing the instant the bytes land. The hard
+            // swap from the thumbnail to the real poster was the "很差然後突然變清楚" —
+            // same two images, but a 400ms dissolve reads as pulling focus.
+            style={{ opacity: 0, transition: 'opacity 400ms ease-out' }}
+            onLoad={(e) => { e.currentTarget.style.opacity = 1; }}
             // If the big one ever fails, get out of the way and let the thumbnail show
             // through. A soft cover beats a broken-image icon painted over a good one.
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
