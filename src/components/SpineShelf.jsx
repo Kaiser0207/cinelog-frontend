@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useMotionTemplate, animate } f
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, getReviewTotal } from '../utils/constants';
 import { getPosterColors, cachedColors, fallbackFor, isDark } from '../utils/posterColors';
+import { useCatalogNumbers, formatCatalogNo } from '../utils/catalog';
 import './SpineShelf.css';
 
 /**
@@ -102,6 +103,10 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   // Memoised: a fresh object every render would break every Case's memo().
   const geom = useMemo(() => caseGeometry(caseH), [caseH]);
 
+  // 館藏編號. Global — a film's number is its place in the whole collection, not its
+  // place in whatever the shelf happens to be filtered down to right now.
+  const catalog = useCatalogNumbers();
+
   const pull = useCallback((review, el, colors, index) => {
     setPulled({ review, el, rect: el.getBoundingClientRect(), colors, index });
   }, []);
@@ -155,6 +160,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
               // slapped across the front of the one beside it.
               depthOrder={i + 1}
               isFeatured={!!featuredIds?.has(review.id)}
+              catalogNo={formatCatalogNo(catalog?.get(review.id))}
               // Everything to the RIGHT of the case in your hand shuffles over to
               // make room, and closes back up once it's slotted in. A shelf where
               // the neighbours don't move is a shelf of pictures, not of objects.
@@ -186,6 +192,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
             rect={pulled.rect}
             geom={geom}
             isFeatured={!!featuredIds?.has(pulled.review.id)}
+            catalogNo={formatCatalogNo(catalog?.get(pulled.review.id))}
             // Ask the shelf where the slot is when it's time to go back, rather than
             // trusting a rect we measured a rotation ago.
             getHome={() => (pulled.el?.isConnected ? pulled.el.getBoundingClientRect() : pulled.rect)}
@@ -251,10 +258,15 @@ function WrapBand({ body, foot, total, width }) {
  * difference between them is a pop you can see.
  *
  * Foot of the spine, bottom-up: a colour block, then a white block above it. That's
- * the real layout of a case: the barcode panel sits above the format block, and the
- * barcode panel is the taller of the two. The score lives in the white panel.
+ * the real layout of a case — the barcode panel sits above the format block, and the
+ * barcode panel is the taller of the two — and both of them earn their keep:
+ *
+ *   white panel  →  the score, a hairline rule, the year. A spec sheet.
+ *   colour block →  the 館藏編號, Criterion-style.
  */
-function SpineFace({ review, body, foot, total, isFeatured }) {
+function SpineFace({ review, body, foot, total, isFeatured, catalogNo }) {
+  const year = review.release_date ? String(review.release_date).slice(0, 4) : null;
+
   return (
     <span
       className="absolute inset-0 flex flex-col items-center case-face overflow-hidden shadow-[-3px_2px_10px_rgba(0,0,0,0.28)]"
@@ -303,22 +315,49 @@ function SpineFace({ review, body, foot, total, isFeatured }) {
           block came out as flat digital blocks stuck on a textured spine. */}
       {total != null && (
         <span
-          className="relative w-full flex items-center justify-center bg-[#F5F1E6] text-[#1A1A1A] shrink-0"
+          className="relative w-full flex flex-col items-center justify-center gap-[3px] bg-[#F5F1E6] text-[#1A1A1A] shrink-0"
           style={{ height: PANEL_H }}
         >
           <span className="absolute inset-0 spine-weave pointer-events-none" />
-          <span className="relative text-[15px] font-black tabular-nums leading-none">
+          <span className="relative text-[17px] font-black tabular-nums leading-none">
             {total.toFixed(1)}
           </span>
+          {year && (
+            <>
+              {/* the rule is what makes the pair read as a spec sheet rather than as
+                  two numbers that happen to be stacked */}
+              <span className="relative w-4 h-px bg-[#1A1A1A]/25" />
+              <span className="relative text-[9px] font-bold tabular-nums tracking-[0.08em] leading-none text-[#1A1A1A]/55">
+                {year}
+              </span>
+            </>
+          )}
         </span>
       )}
 
-      {/* colour block at the very foot */}
+      {/* colour block at the very foot — the catalogue number lives here. Criterion
+          puts its spine number in exactly this block, and it's what turns a row of
+          cases into a COLLECTION: you can see at a glance that you own №1 through
+          №30, and that they're in order. */}
       <span
-        className="relative w-full shrink-0"
-        style={{ height: FOOT_H, background: foot }}
+        className="relative w-full shrink-0 flex items-center justify-center gap-[2px]"
+        style={{
+          height: FOOT_H,
+          background: foot,
+          // The foot colour is picked off the poster, so it can come back anything
+          // from near-black to pale cream. Ask it which ink it needs.
+          color: isDark(foot) ? 'rgba(255,255,255,0.92)' : 'rgba(26,26,26,0.82)',
+        }}
       >
         <span className="absolute inset-0 spine-weave pointer-events-none" />
+        {catalogNo && (
+          <>
+            <span className="relative text-[8px] font-bold leading-none opacity-55">№</span>
+            <span className="relative text-[12px] font-black tabular-nums tracking-[0.04em] leading-none">
+              {catalogNo}
+            </span>
+          </>
+        )}
       </span>
     </span>
   );
@@ -440,7 +479,7 @@ function CoverFace({
   );
 }
 
-const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, nudged, held, onPull }) {
+const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, catalogNo, nudged, held, onPull }) {
   const colors = useSpineColors(review.poster_path, seed);
   const [body, foot] = colors;
   const total = getReviewTotal(review);
@@ -538,6 +577,7 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, nu
           foot={foot}
           total={total}
           isFeatured={isFeatured}
+          catalogNo={catalogNo}
         />
       </motion.button>
     </motion.div>
@@ -562,7 +602,7 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, nu
  * COVER dead centre, the box has to be parked left of centre by exactly
  * (spine width + half a cover).
  */
-function PullOut({ review, rect, geom, isFeatured, getHome, colors, onOpen, onClose }) {
+function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, onOpen, onClose }) {
   const [settled, setSettled] = useState(false);
   const [body, foot] = colors || fallbackFor(0);
 
@@ -751,6 +791,7 @@ function PullOut({ review, rect, geom, isFeatured, getHome, colors, onOpen, onCl
           foot={foot}
           total={total}
           isFeatured={isFeatured}
+          catalogNo={catalogNo}
         />
       </motion.div>
 
