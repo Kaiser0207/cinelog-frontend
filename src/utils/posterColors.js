@@ -105,6 +105,17 @@ function extractPair(data) {
   return [cssRgb(primary.col), cssRgb(secondary)];
 }
 
+/**
+ * The exact URL this module fetches. Anything that wants to DISPLAY the same bitmap has
+ * to request this string, with crossOrigin — one cache entry, one download. Exported
+ * rather than duplicated so the two can't drift: if the sampler's size ever changes and
+ * the shelf's doesn't, the shelf silently starts paying for a second copy of every
+ * poster on the site, and nothing anywhere would say so.
+ */
+export function samplerSrc(posterPath) {
+  return posterPath ? `${TMDB_IMG_BASE}w92${posterPath}` : null;
+}
+
 export function cachedColors(posterPath) {
   return posterPath ? cache.get(posterPath) : undefined;
 }
@@ -140,6 +151,6 @@ export function getPosterColors(posterPath, seed = 0) {
       resolve(fallbackFor(seed));
     };
     img.onerror = () => resolve(fallbackFor(seed));
-    img.src = `${TMDB_IMG_BASE}w92${posterPath}`;
+    img.src = samplerSrc(posterPath);
   });
 }

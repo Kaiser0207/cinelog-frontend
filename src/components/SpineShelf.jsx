@@ -2,7 +2,7 @@ import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback, mem
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, getReviewTotal } from '../utils/constants';
-import { getPosterColors, cachedColors, fallbackFor, isDark } from '../utils/posterColors';
+import { getPosterColors, cachedColors, fallbackFor, isDark, samplerSrc } from '../utils/posterColors';
 import { useCatalogNumbers, formatCatalogNo } from '../utils/catalog';
 import './SpineShelf.css';
 
@@ -33,6 +33,26 @@ const TILT = 3;          // resting X rotation: you're looking slightly DOWN at 
 // projected one way in its slot and another way in your hand, and the hand-off at
 // each end of the animation visibly jumps.
 const CAMERA = 1200;
+
+/**
+ * The poster size for the case IN YOUR HAND. Two constraints pick this, and both of
+ * them rule out w500 (which is what it used to be):
+ *
+ *  - CORS. Every image on a case is fetched with crossOrigin, because the thumbnail is
+ *    the same bitmap the colour sampler reads pixels off. But WebKit will serve a CACHED
+ *    NO-CORS response to a CORS request and then fail the CORS check on it — so any URL
+ *    the app has ever fetched plainly can never be fetched with crossOrigin again in
+ *    that browser. CardDeck paints w500 plainly. w780 is fetched by exactly one place,
+ *    ShareCard, and always with crossOrigin. It is the only clean size.
+ *
+ *  - Size. The cover lands ~350 CSS px wide, which is ~1050 device px on a 3× phone.
+ *    w500 was a 2.1× upscale — that's most of why it looked soft even when it did load.
+ *
+ * And it pays a dividend: pulling a case now warms the exact bitmap Share to Story
+ * needs, so sharing the film you're looking at costs no download at all.
+ */
+const HAND_SIZE = 'w780';
+
 const NUDGE = 60;        // how far the cases to the right shuffle over to make room
 // ...and how many of them bother. Only ~7 cases fit on a phone, and while a case is in
 // your hand the page is frozen and the overlay eats every tap, so nobody can scroll to
@@ -493,30 +513,37 @@ function CoverFace({
       }}
     >
       {/*
-        Real <img>s, NOT a CSS background-image — and every one of them crossOrigin.
+        Real <img>s, NOT a CSS background-image, and EVERY image the case touches is
+        crossOrigin. Both halves of that matter, and the second one is a trap.
 
-        This is the same URL that posterColors.js samples the case's two colours from,
-        and that sampler needs `crossOrigin = 'anonymous'` or the canvas taints and
-        getImageData() throws. But a CSS background is ALWAYS fetched no-CORS, and the
-        browser will not reuse a cached response whose CORS mode differs — so the shelf
-        was downloading every single poster TWICE: once no-CORS to paint it, once CORS
-        to read six hundred pixels off it. 30 films = 60 requests where 30 would do, and
-        it scales linearly with the collection.
+        The <img> half: the thumbnail here is the same URL posterColors.js samples the
+        case's two colours from, and that sampler must set crossOrigin or the canvas
+        taints and getImageData() throws. But a CSS background is ALWAYS fetched no-CORS,
+        and a cached response whose CORS mode differs is not reusable — so the shelf was
+        downloading every poster TWICE: once no-CORS to paint, once CORS to read six
+        hundred pixels off it. Matching the modes collapses that to one request.
 
-        Matching the CORS mode collapses them into one cache entry and one request. (It
-        also gives us decoding="async", which a background image can never carry.)
+        The trap: WebKit will hand a CACHED no-CORS response to a CORS request and then
+        fail the CORS check on it. So the moment a URL has been fetched no-CORS anywhere
+        in the app, it can never be fetched with crossOrigin again in that browser — it
+        just breaks. w500 is exactly that URL (CardDeck paints it plainly, and this cover
+        used to as a background), which is why asking for it with crossOrigin came back as
+        a broken-image icon over a 3.8×-upscaled thumbnail.
 
-        Two of them, stacked: the big one on top, the thumbnail underneath. The w500 is
-        a fresh request the moment you pull a case, and until it lands the cover would
-        otherwise be a blank slab of spine colour — a poster popping in mid-turn is
-        exactly the kind of seam we've spent all this time killing. Same picture
-        throughout, just sharpening.
+        So the big poster is w780 — the ONE size nothing in the app has ever fetched
+        no-CORS (ShareCard uses it, always with crossOrigin). Which is a better size here
+        anyway: the cover renders ~350 CSS px wide, so on a 3× phone w500 was a 2.1×
+        upscale. And it means pulling a case warms the exact bitmap Share to Story needs.
 
-        NOT loading="lazy", deliberately: these faces are rotated 90° inside a
-        preserve-3d group, and lazy loading is driven by intersection geometry that 3D
-        transforms make a liar of. A cover that never loads is a much worse bug than one
-        that loads early — and the bytes are in cache from the colour sampler anyway, so
-        there is nothing to save.
+        Two of them, stacked: the big one on top, the sampler's thumbnail underneath, so
+        the cover is never a blank slab of spine colour while the big one is in flight — a
+        poster popping in mid-turn is the kind of seam we've spent all this time killing.
+
+        NOT loading="lazy", deliberately: these faces are rotated 90° inside a preserve-3d
+        group, and lazy loading is driven by intersection geometry that 3D transforms make
+        a liar of. A cover that never loads is a far worse bug than one that loads early —
+        and the bytes are already in cache from the colour sampler, so there is nothing to
+        save.
       */}
       {art && (
         <span className="absolute inset-y-0 right-0 block overflow-hidden" style={{ left: wrap }}>
@@ -537,6 +564,9 @@ function CoverFace({
             crossOrigin="anonymous"
             decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
+            // If the big one ever fails, get out of the way and let the thumbnail show
+            // through. A soft cover beats a broken-image icon painted over a good one.
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         </span>
       )}
@@ -566,7 +596,7 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, ca
   const total = getReviewTotal(review);
   // Already fetched for the colour sampling, so it's cached — the cover along the
   // case's edge costs nothing, and at this angle it's foreshortened to ~40px anyway.
-  const thumb = review.poster_path ? `${TMDB_IMG_BASE}w92${review.poster_path}` : null;
+  const thumb = samplerSrc(review.poster_path);
 
   return (
     // The shuffle lives on the WRAPPER, not the button: the button's transform is
@@ -733,8 +763,8 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
   // centre, so the case's centre projects to itself, whatever k is.
   const targetY = Math.max(16, (window.innerHeight - h) / 2);
   const projBottom = targetY + h / 2 + (h / 2) * k;
-  const poster = review.poster_path ? `${TMDB_IMG_BASE}w500${review.poster_path}` : null;
-  const thumb = review.poster_path ? `${TMDB_IMG_BASE}w92${review.poster_path}` : null;
+  const poster = review.poster_path ? `${TMDB_IMG_BASE}${HAND_SIZE}${review.poster_path}` : null;
+  const thumb = samplerSrc(review.poster_path);
   const total = getReviewTotal(review);
 
   // Driven as motion values (not the `animate` prop) so that once the intro is
