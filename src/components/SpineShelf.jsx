@@ -210,8 +210,11 @@ const isDark = (c) => lum((c.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
 
 // Shared by the spine and by the band that wraps round onto the cover — they have
 // to line up to the pixel, because on a real case they're the same printed strip.
-const PANEL_H = 'clamp(84px, 15vw, 116px)';
-const FOOT_H = 'clamp(56px, 10vw, 78px)';
+// Proportions, not pixels: the two panels together own the bottom 35% of the spine,
+// whatever the shelf's height works out to. A fixed px block would swallow a short
+// spine and look like a stripe on a tall one.
+const PANEL_H = '21%';   // white panel (the barcode's slot) — carries the score
+const FOOT_H = '14%';    // colour block at the very foot
 
 /** Every non-printed face of the case: milky white, translucent, softly out of
  *  focus — the cut edge of a stack of paper behind a slab of clear plastic. */
