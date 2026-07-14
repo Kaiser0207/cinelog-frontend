@@ -113,6 +113,22 @@ body {
 }
 
 /* ── Custom Scrollbar ── */
+/* Tailwind v4 ships NO scrollbar utilities (that's a third-party plugin), yet
+   `scrollbar-none` / `scrollbar-hide` are used all over this app — they have been
+   silently doing nothing, which is why the shelf's horizontal bar was sitting on
+   top of the cases. Define them for real. */
+.scrollbar-none,
+.scrollbar-hide {
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* legacy Edge */
+}
+.scrollbar-none::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }

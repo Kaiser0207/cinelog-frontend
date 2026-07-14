@@ -136,12 +136,12 @@ function useSpineColors(posterPath, seed) {
 
 export default function SpineShelf({ reviews = [], featuredIds }) {
   const navigate = useNavigate();
-  // The case being taken off the shelf: { review, rect }. rect is its on-screen
-  // box at click time — that's where the pull-out animation starts from.
+  // The case being taken off the shelf: { review, rect, colors }. rect is its
+  // on-screen box at click time — that's where the pull-out starts from.
   const [pulled, setPulled] = useState(null);
 
-  const pull = useCallback((review, el) => {
-    setPulled({ review, rect: el.getBoundingClientRect() });
+  const pull = useCallback((review, el, colors) => {
+    setPulled({ review, rect: el.getBoundingClientRect(), colors });
   }, []);
 
   if (reviews.length === 0) return null;
@@ -178,6 +178,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
             key={pulled.review.id}
             review={pulled.review}
             rect={pulled.rect}
+            colors={pulled.colors}
             onOpen={() => navigate(`/review/${pulled.review.id}`, { state: { review: pulled.review } })}
             onClose={() => setPulled(null)}
           />
@@ -188,10 +189,14 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
 }
 
 const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }) {
-  const [body, foot] = useSpineColors(review.poster_path, seed);
+  const colors = useSpineColors(review.poster_path, seed);
+  const [body, foot] = colors;
   const darkBody = lum((body.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
   const darkFoot = lum((foot.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
   const total = getReviewTotal(review);
+  // Already fetched for the colour sampling, so it's cached — the sliver of art
+  // you see along the case's edge costs nothing.
+  const thumb = review.poster_path ? `${TMDB_IMG_BASE}w92${review.poster_path}` : null;
 
   return (
     <div
@@ -207,7 +212,7 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
     >
       <motion.button
         type="button"
-        onClick={(e) => onPull(review, e.currentTarget)}
+        onClick={(e) => onPull(review, e.currentTarget, colors)}
         initial={false}
         animate={{ rotateY: TURN, rotateX: TILT, y: 0, z: 0 }}
         whileHover={{ rotateY: -30, rotateX: TILT, y: -18, z: 40 }}
@@ -217,15 +222,19 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
         style={{ transformStyle: 'preserve-3d' }}
         title={review.title}
       >
-        {/* ── side face: the case's thickness, running back from its right edge ── */}
+        {/* ── the front cover: the case's big face, running back from the spine's
+             right edge. It IS the poster — this is the face that swings round to
+             meet you when you take the case off the shelf. On the shelf you only
+             catch its edge, which is exactly right. ── */}
         <span
-          className="absolute top-0 left-full h-full block rounded-r-[2px]"
+          className="absolute top-0 left-full h-full block rounded-r-[2px] bg-cover bg-center"
           style={{
             width: DEPTH,
             transformOrigin: 'left center',
             transform: 'rotateY(90deg)',
-            background: `linear-gradient(90deg, ${foot}, ${body})`,
-            filter: 'brightness(0.62)',
+            backgroundColor: foot,
+            backgroundImage: thumb ? `url(${thumb})` : undefined,
+            filter: 'brightness(0.66)',
           }}
         >
           <span className="absolute inset-0 spine-weave" />
@@ -288,23 +297,37 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
 });
 
 /**
- * Off the shelf and turned to face you: starts as the case's exact on-screen box,
- * edge-on (hinged on its left edge — the one facing into the shelf), and swings
- * flat while flying to the centre and widening into the full poster.
+ * Taking the case off the shelf. This is the SAME 3D object as on the shelf — a
+ * spine, a cover and a top — not a picture of the poster flying in. Two beats:
  *
- * It STOPS there. A second tap opens the review — you get to look at the cover
- * first, which is the whole point of taking it off the shelf.
+ *   1. it floats forward off the shelf (translateZ) and lifts, still spine-on
+ *   2. the whole case turns (rotateY → -90°) about the spine's right edge, which
+ *      is the hinge, and the cover swings round into view
+ *
+ * That's the motion of your hand: pull it out, then turn it over. It STOPS there —
+ * a second tap opens the review, because looking at the cover is the entire point
+ * of having taken it off the shelf.
+ *
+ * The maths: the box pivots on its right edge, so after the -90° turn the cover
+ * occupies the screen from that hinge rightwards by its own width. To land the
+ * COVER dead centre, the box has to be parked left of centre by exactly
+ * (spine width + half a cover).
  */
-function PullOut({ review, rect, onOpen, onClose }) {
+function PullOut({ review, rect, colors, onOpen, onClose }) {
   const [settled, setSettled] = useState(false);
+  const [body, foot] = colors || FALLBACK[0];
+  const darkBody = lum((body.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
+
   const h = rect.height;
-  const w = h * POSTER_RATIO;
-  const targetX = (window.innerWidth - w) / 2;
+  const spineW = rect.width;
+  const coverW = h * POSTER_RATIO;
+  const targetX = window.innerWidth / 2 - coverW / 2 - spineW;
   const targetY = Math.max(16, (window.innerHeight - h) / 2);
   const poster = review.poster_path ? `${TMDB_IMG_BASE}w500${review.poster_path}` : null;
+  const total = getReviewTotal(review);
 
   return (
-    <div className="fixed inset-0 z-[300]" onClick={onClose}>
+    <div className="fixed inset-0 z-[300]" style={{ perspective: 1600 }} onClick={onClose}>
       <motion.div
         className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
         initial={{ opacity: 0 }}
@@ -313,26 +336,82 @@ function PullOut({ review, rect, onOpen, onClose }) {
       />
 
       <motion.div
-        className="absolute rounded-xl overflow-hidden shadow-2xl cursor-pointer"
+        className="absolute cursor-pointer"
         style={{
           top: 0,
           left: 0,
+          width: spineW,
           height: h,
-          transformPerspective: 1400,
-          transformOrigin: 'left center',
+          transformStyle: 'preserve-3d',
+          transformOrigin: 'right center', // the hinge: the spine's right edge
         }}
-        initial={{ x: rect.left, y: rect.top, width: rect.width, rotateY: -80 }}
-        animate={{ x: targetX, y: targetY, width: w, rotateY: 0 }}
+        initial={{ x: rect.left, y: rect.top, z: 0, rotateY: TURN, rotateX: TILT }}
+        animate={{
+          x: [rect.left, rect.left, targetX],
+          y: [rect.top, rect.top - 28, targetY],
+          z: [0, 170, 90],
+          rotateY: [TURN, TURN, -90],
+          rotateX: [TILT, TILT, 0],
+        }}
         exit={{ opacity: 0, scale: 0.94 }}
-        transition={{ duration: 0.62, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 1.0, times: [0, 0.36, 1], ease: [0.22, 1, 0.36, 1] }}
         onAnimationComplete={() => setSettled(true)}
-        onClick={(e) => { e.stopPropagation(); onOpen(); }}
+        onClick={(e) => { e.stopPropagation(); if (settled) onOpen(); }}
       >
-        {poster ? (
-          <img src={poster} alt={review.title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-bg-card" />
-        )}
+        {/* front cover — the poster, hinged off the spine's right edge */}
+        <span
+          className="absolute top-0 left-full h-full block rounded-r-lg overflow-hidden shadow-2xl bg-cover bg-center"
+          style={{
+            width: coverW,
+            transformOrigin: 'left center',
+            transform: 'rotateY(90deg)',
+            backgroundColor: body,
+            backgroundImage: poster ? `url(${poster})` : undefined,
+          }}
+        />
+
+        {/* top edge */}
+        <span
+          className="absolute top-0 left-0 w-full block"
+          style={{
+            height: coverW,
+            transformOrigin: 'center top',
+            transform: 'rotateX(-90deg)',
+            background: `linear-gradient(180deg, ${body}, ${foot})`,
+            filter: 'brightness(0.8)',
+          }}
+        >
+          <span className="absolute inset-0 spine-weave" />
+        </span>
+
+        {/* spine */}
+        <span
+          className="absolute inset-0 flex flex-col items-center rounded-l-lg overflow-hidden shadow-2xl"
+          style={{ background: body, color: darkBody ? '#FFFFFF' : '#1A1A1A' }}
+        >
+          <span className="absolute inset-0 spine-weave pointer-events-none" />
+          <span className="absolute inset-0 spine-edges pointer-events-none" />
+          <span
+            className="relative flex-1 min-h-0 flex items-center justify-center px-1 py-3 font-black tracking-tight text-center"
+            style={{
+              writingMode: 'vertical-rl',
+              textOrientation: 'mixed',
+              fontSize: 'clamp(14px, 3.4vw, 19px)',
+              lineHeight: 1.05,
+              overflow: 'hidden',
+            }}
+          >
+            {review.title}
+          </span>
+          {total != null && (
+            <span
+              className="relative w-full py-2 text-[11px] font-black tabular-nums text-center"
+              style={{ background: foot }}
+            >
+              {total.toFixed(1)}
+            </span>
+          )}
+        </span>
       </motion.div>
 
       <AnimatePresence>
@@ -342,7 +421,7 @@ function PullOut({ review, rect, onOpen, onClose }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             className="absolute inset-x-0 text-center text-white/85 text-sm font-bold pointer-events-none"
-            style={{ top: targetY + h + 16 }}
+            style={{ top: Math.min(targetY + h + 16, window.innerHeight - 32) }}
           >
             再點一次 → 進入影評
           </motion.p>
