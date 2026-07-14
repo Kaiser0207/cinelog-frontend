@@ -29,6 +29,7 @@ const TILT = 3;          // resting X rotation: you're looking slightly DOWN at 
 // projected one way in its slot and another way in your hand, and the hand-off at
 // each end of the animation visibly jumps.
 const CAMERA = 1200;
+const NUDGE = 18;        // how far the cases to the right shuffle over to make room
 
 function useSpineColors(posterPath, seed) {
   const [pair, setPair] = useState(() => cachedColors(posterPath) || null);
@@ -55,8 +56,8 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   // the true slot on the shelf, which is the thing the case has to go back into.
   const [pulled, setPulled] = useState(null);
 
-  const pull = useCallback((review, el, colors) => {
-    setPulled({ review, rect: el.getBoundingClientRect(), colors });
+  const pull = useCallback((review, el, colors, index) => {
+    setPulled({ review, rect: el.getBoundingClientRect(), colors, index });
   }, []);
 
   if (reviews.length === 0) return null;
@@ -92,6 +93,10 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
               seed={i}
               depthOrder={reviews.length - i}
               isFeatured={!!featuredIds?.has(review.id)}
+              // Everything to the RIGHT of the case in your hand shuffles over to
+              // make room, and closes back up once it's slotted in. A shelf where
+              // the neighbours don't move is a shelf of pictures, not of objects.
+              nudged={pulled != null && i > pulled.index}
               onPull={pull}
             />
           ))}
@@ -353,7 +358,7 @@ function CoverFace({ art, body, foot, total, width, wrap, radius = 'rounded-r-[2
   );
 }
 
-const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }) {
+const Case = memo(function Case({ review, seed, depthOrder, isFeatured, nudged, onPull }) {
   const colors = useSpineColors(review.poster_path, seed);
   const [body, foot] = colors;
   const total = getReviewTotal(review);
@@ -362,8 +367,15 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
   const thumb = review.poster_path ? `${TMDB_IMG_BASE}w92${review.poster_path}` : null;
 
   return (
-    <div
+    // The shuffle lives on the WRAPPER, not the button: the button's transform is
+    // the case's 3D pose (and its hover lift), and the two would fight over it.
+    // The wrapper stays untransformed in every other respect, which also keeps it
+    // usable as the ruler for measuring the slot.
+    <motion.div
       className="relative shrink-0"
+      initial={false}
+      animate={{ x: nudged ? NUDGE : 0 }}
+      transition={{ type: 'spring', stiffness: 220, damping: 24 }}
       style={{
         // Perspective PER CASE, not on the row: the row is a scroller thousands of
         // pixels wide, and one shared vanishing point would shear the far cases.
@@ -378,7 +390,7 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
     >
       <motion.button
         type="button"
-        onClick={(e) => onPull(review, e.currentTarget.parentElement, colors)}
+        onClick={(e) => onPull(review, e.currentTarget.parentElement, colors, seed)}
         initial={false}
         animate={{ rotateY: TURN, rotateX: TILT, y: 0, z: 0 }}
         whileHover={{ rotateY: -19, rotateX: TILT, y: -18, z: 40 }}
@@ -437,7 +449,7 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
           isFeatured={isFeatured}
         />
       </motion.button>
-    </div>
+    </motion.div>
   );
 });
 

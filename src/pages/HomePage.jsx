@@ -416,10 +416,16 @@ export default function HomePage() {
           <div className="w-full space-y-1">
             {/* The wordmark runs on a curve, endlessly. Drag it and it follows your
                 finger, then keeps going the way you threw it. */}
-            <h2 className="w-full text-[#D480C0]" aria-label="CINEROOMS">
+            {/* Full-bleed, like the shelf: the wordmark has to enter at the true
+                right edge of the SCREEN and leave at the true left edge. Confined to
+                the footer's max-width it just looped inside a box. */}
+            <h2
+              className="relative w-screen left-1/2 -ml-[50vw] text-[#D480C0]"
+              aria-label="CINEROOMS"
+            >
               <CurvedLoop
                 marqueeText="CINEROOMS ✦ "
-                speed={1.1}
+                speed={2.2}
                 curveAmount={90}
                 className="curved-loop-mark"
               />
