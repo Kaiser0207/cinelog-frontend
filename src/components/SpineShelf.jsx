@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback, memo } from 'react';
+import { motion, AnimatePresence, useMotionValue, useMotionTemplate, animate } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, getReviewTotal } from '../utils/constants';
 import { getPosterColors, cachedColors, fallbackFor, isDark } from '../utils/posterColors';
@@ -9,10 +9,11 @@ import './SpineShelf.css';
  * 書脊牆 — the collection as a shelf of cases (A24 blu-ray style).
  *
  * These are REAL 3D boxes, not pictures of boxes: each case is a spine face, a
- * side face (its thickness) and a top face, assembled in CSS 3D and turned a few
- * degrees so you actually see the depth and the top edge. Perspective lives on
- * each case rather than the row — a shared perspective across a scroller that's
- * thousands of pixels wide would smear the cases at the far ends into nonsense.
+ * cover face (which is also its thickness, because a case is exactly as deep as its
+ * cover is wide) and a top face, assembled in CSS 3D and turned a few degrees so you
+ * actually see the depth and the top edge. Perspective lives on each case rather than
+ * the row — a shared perspective across a scroller that's thousands of pixels wide
+ * would smear the cases at the far ends into nonsense.
  *
  * Click once: the case pulls off the shelf and turns to face you (its poster).
  * Click again: it opens into the review.
@@ -21,8 +22,6 @@ import './SpineShelf.css';
 const SHELF_H = 'clamp(340px, 62svh, 580px)';
 const CASE_W = 'clamp(52px, 12vw, 72px)';
 const POSTER_RATIO = 2 / 3;
-const DEPTH = 64;        // case thickness, px — how far the side face runs back
-const SHELF_WRAP = 8;    // how far the printed band wraps onto the cover, on the shelf
 const TURN = -8;         // resting Y rotation: brings the right edge forward
 const TILT = 3;          // resting X rotation: you're looking slightly DOWN at it
 // One camera for both the shelf and the pull-out. If they differ, the case is
@@ -30,6 +29,33 @@ const TILT = 3;          // resting X rotation: you're looking slightly DOWN at 
 // each end of the animation visibly jumps.
 const CAMERA = 1200;
 const NUDGE = 60;        // how far the cases to the right shuffle over to make room
+
+const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+
+// How lit the poster is on the shelf vs. in your hand. It ANIMATES between the two
+// (see PullOut) rather than switching: the same object can't change its exposure in
+// a single frame just because you picked it up.
+const SHELF_DIM = 0.66;
+const HAND_DIM = 1.04;
+const filmFilter = (b) =>
+  `brightness(${b}) saturate(0.78) contrast(1.16) sepia(0.2) hue-rotate(-4deg)`;
+
+/**
+ * THE case's geometry, derived in ONE place from its height.
+ *
+ * A DVD case is as deep as its cover is wide — spine 14mm, cover 135mm, and that
+ * 135mm IS the box's depth. The shelf used to build a 64px-deep box while the
+ * pull-out built a ~310px-deep one, so the instant your hand took the case (and again
+ * the instant the shelf took it back) it silently swapped for a DIFFERENT object: a
+ * 40px band of poster appeared along its edge out of nowhere, or was sliced off. That
+ * is the "側邊海報突然被切斷". One geometry, both places, and the hand-off is a
+ * non-event because nothing about the case changes.
+ */
+function caseGeometry(h) {
+  const artW = h * POSTER_RATIO;
+  const wrapW = clamp(Math.round(artW * 0.07), 8, 24);
+  return { artW, wrapW, faceW: artW + wrapW };
+}
 
 function useSpineColors(posterPath, seed) {
   const [pair, setPair] = useState(() => cachedColors(posterPath) || null);
@@ -46,7 +72,7 @@ function useSpineColors(posterPath, seed) {
 
 export default function SpineShelf({ reviews = [], featuredIds }) {
   const navigate = useNavigate();
-  // The case being taken off the shelf: { review, rect, colors }.
+  // The case being taken off the shelf: { review, el, rect, colors, index }.
   //
   // `el` is the case's PERSPECTIVE WRAPPER, not the button inside it. The button
   // carries the 3D transform (and, on a mouse, the hover lift), and
@@ -54,10 +80,30 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   // handed us a slot that was a few px wide of where the case actually lives, and
   // 18px high whenever you'd hovered it. The wrapper is untransformed: its rect is
   // the true slot on the shelf, which is the thing the case has to go back into.
+  //
+  // We keep the element itself, not just the rect, so the case can ask the shelf
+  // where its slot is NOW when it's time to go back — see PullOut.putBack().
   const [pulled, setPulled] = useState(null);
 
+  // SHELF_H is a clamp(): only the browser knows what it actually works out to, and
+  // the case's whole geometry hangs off it. Measure it once, pre-paint.
+  const rulerRef = useRef(null);
+  const [caseH, setCaseH] = useState(0);
+  useLayoutEffect(() => {
+    const el = rulerRef.current;
+    if (!el) return undefined;
+    const read = () => setCaseH(el.getBoundingClientRect().height);
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Memoised: a fresh object every render would break every Case's memo().
+  const geom = useMemo(() => caseGeometry(caseH), [caseH]);
+
   const pull = useCallback((review, el, colors, index) => {
-    setPulled({ review, rect: el.getBoundingClientRect(), colors, index });
+    setPulled({ review, el, rect: el.getBoundingClientRect(), colors, index });
   }, []);
 
   if (reviews.length === 0) return null;
@@ -82,21 +128,39 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
         them inside, so the whole shelf ranks as one layer below the controls.
       */}
       <div className="relative z-0 -mt-[3vh] w-screen left-1/2 -ml-[50vw]">
+        {/* the ruler — nothing to look at, it just tells us what clamp() decided */}
+        <span
+          ref={rulerRef}
+          aria-hidden="true"
+          className="absolute left-0 top-0 w-0 opacity-0 pointer-events-none"
+          style={{ height: SHELF_H }}
+        />
+
         <div
-          className="flex items-end gap-[7px] overflow-x-auto overflow-y-hidden scrollbar-none pl-10 pt-8"
-          style={{ height: `calc(${SHELF_H} + 2.5rem)` }}
+          className="flex items-end gap-[7px] overflow-x-auto overflow-y-hidden scrollbar-none pl-10 pt-10"
+          style={{ height: `calc(${SHELF_H} + 3rem)` }}
         >
           {reviews.map((review, i) => (
             <Case
               key={review.id}
               review={review}
               seed={i}
-              depthOrder={reviews.length - i}
+              geom={geom}
+              // Paint LEFT-under-RIGHT. Now that a case is as deep as its cover is
+              // wide, its cover recedes ~40px to the right — straight through where
+              // the next case's spine is standing. On a packed shelf the next case
+              // WINS that overlap: you see its spine, and only a glimpse of its
+              // neighbour's cover in the gap between them. Painting left-over-right
+              // (what we did when the box was a thin 64px) had every case's cover
+              // slapped across the front of the one beside it.
+              depthOrder={i + 1}
               isFeatured={!!featuredIds?.has(review.id)}
               // Everything to the RIGHT of the case in your hand shuffles over to
               // make room, and closes back up once it's slotted in. A shelf where
               // the neighbours don't move is a shelf of pictures, not of objects.
               nudged={pulled != null && i > pulled.index}
+              // While it's in your hand it is NOT also on the shelf.
+              held={pulled != null && i === pulled.index}
               onPull={pull}
             />
           ))}
@@ -120,6 +184,11 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
             key={pulled.review.id}
             review={pulled.review}
             rect={pulled.rect}
+            geom={geom}
+            isFeatured={!!featuredIds?.has(pulled.review.id)}
+            // Ask the shelf where the slot is when it's time to go back, rather than
+            // trusting a rect we measured a rotation ago.
+            getHome={() => (pulled.el?.isConnected ? pulled.el.getBoundingClientRect() : pulled.rect)}
             colors={pulled.colors}
             onOpen={() => navigate(`/review/${pulled.review.id}`, { state: { review: pulled.review } })}
             onClose={() => setPulled(null)}
@@ -130,8 +199,6 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   );
 }
 
-
-const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 
 // Shared by the spine and by the band that wraps round onto the cover — they have
 // to line up to the pixel, because on a real case they're the same printed strip.
@@ -179,16 +246,18 @@ function WrapBand({ body, foot, total, width }) {
 
 /**
  * The spine artwork — one component, so the case on the shelf and the case in your
- * hand are literally the same object.
+ * hand are literally the same object. Same type size, same 精選 mark, same score, in
+ * both: the spine faces you square-on at the moment of the hand-off, so ANY
+ * difference between them is a pop you can see.
  *
  * Foot of the spine, bottom-up: a colour block, then a white block above it. That's
  * the real layout of a case: the barcode panel sits above the format block, and the
  * barcode panel is the taller of the two. The score lives in the white panel.
  */
-function SpineFace({ review, body, foot, total, isFeatured, big }) {
+function SpineFace({ review, body, foot, total, isFeatured }) {
   return (
     <span
-      className="absolute inset-0 flex flex-col items-center case-face overflow-hidden shadow-[3px_2px_10px_rgba(0,0,0,0.28)]"
+      className="absolute inset-0 flex flex-col items-center case-face overflow-hidden shadow-[-3px_2px_10px_rgba(0,0,0,0.28)]"
       style={{ background: body, color: isDark(body) ? '#FFFFFF' : '#1A1A1A' }}
     >
       <span className="absolute inset-0 spine-weave pointer-events-none" />
@@ -212,7 +281,7 @@ function SpineFace({ review, body, foot, total, isFeatured, big }) {
         style={{
           writingMode: 'vertical-rl',
           textOrientation: 'mixed',
-          fontSize: big ? 'clamp(15px, 3.6vw, 21px)' : 'clamp(14px, 3.4vw, 19px)',
+          fontSize: 'clamp(14px, 3.4vw, 19px)',
           lineHeight: 1.05,
           overflow: 'hidden',
         }}
@@ -255,10 +324,6 @@ function SpineFace({ review, body, foot, total, isFeatured, big }) {
   );
 }
 
-/**
- * The front cover. The wrapped band sits alongside the artwork, never on top of it —
- * the poster gets everything to the right of the fold, uncropped and unshadowed.
- */
 /**
  * The two faces the box was missing: its underside, and the open edge opposite the
  * spine. Without them, tilt the case and you look straight through a hollow shell.
@@ -310,14 +375,35 @@ function PaperEdges({ depth, hit = true }) {
  * every poster into a narrower box, and `bg-cover` cropped the difference off the
  * sides. That crop is the "海報被遮到" you kept seeing: the band was never on top
  * of the art, it was eating the art's width.
+ *
+ * `artFilter` may be a plain string (the shelf) or a MotionValue (the pull-out,
+ * where the exposure travels with the case instead of switching in one frame).
  */
-function CoverFace({ art, body, foot, total, width, wrap, radius = 'rounded-r-[2px]', dim, hit = true }) {
+function CoverFace({
+  art,
+  artFallback,
+  body,
+  foot,
+  total,
+  width,
+  wrap,
+  radius = 'rounded-r-[2px]',
+  artFilter,
+  hit = true,
+}) {
+  // Two bitmaps, stacked as CSS background layers: the big one on top, the shelf's
+  // already-cached thumbnail underneath. The w500 is a fresh request the moment you
+  // pull a case, and until it lands the cover would otherwise be a blank slab of
+  // spine colour — a poster popping in mid-turn is exactly the kind of seam we're
+  // here to kill. This way it's the same picture throughout, just sharpening.
+  const layers = [art, artFallback].filter(Boolean).map((u) => `url("${u}")`).join(', ');
+
   return (
     <span
       // On the shelf this face must NOT take clicks. It's turned into the screen,
-      // but it still projects a sliver over the case to its right — and since the
-      // left cases sit on top in the stack, that sliver was swallowing taps meant
-      // for the next case. In your hand it's the opposite: it has to take the drag.
+      // but it still projects a sliver over the case to its right — and that sliver
+      // was swallowing taps meant for the next case. In your hand it's the opposite:
+      // it has to take the drag.
       className={`absolute top-0 left-full h-full block overflow-hidden case-face ${radius} ${hit ? '' : 'pointer-events-none'}`}
       style={{
         width: width + wrap,
@@ -326,18 +412,14 @@ function CoverFace({ art, body, foot, total, width, wrap, radius = 'rounded-r-[2
         backgroundColor: body,
       }}
     >
-      {art && (
+      {layers && (
         <>
-          {/* The dim belongs to the ART, not to the whole face. Dimming the face
-              darkened the wrapped band too, so the spine and its own wrap came out
-              as two different colours — which is the one thing they can never be. */}
-          <span
-            className="absolute inset-y-0 right-0 block bg-cover bg-center film-img"
-            style={{
-              left: wrap,
-              backgroundImage: `url(${art})`,
-              filter: dim ? `brightness(${dim}) saturate(0.88) contrast(1.12) sepia(0.16)` : undefined,
-            }}
+          {/* The film look belongs to the ART, not to the whole face. Filtering the
+              face darkened the wrapped band too, so the spine and its own wrap came
+              out as two different colours — the one thing they can never be. */}
+          <motion.span
+            className="absolute inset-y-0 right-0 block bg-cover bg-center"
+            style={{ left: wrap, backgroundImage: layers, filter: artFilter }}
           />
           <span
             className="absolute inset-y-0 right-0 block film-grain pointer-events-none"
@@ -358,12 +440,12 @@ function CoverFace({ art, body, foot, total, width, wrap, radius = 'rounded-r-[2
   );
 }
 
-const Case = memo(function Case({ review, seed, depthOrder, isFeatured, nudged, onPull }) {
+const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, nudged, held, onPull }) {
   const colors = useSpineColors(review.poster_path, seed);
   const [body, foot] = colors;
   const total = getReviewTotal(review);
-  // Already fetched for the colour sampling, so it's cached — the sliver of art
-  // along the case's edge costs nothing.
+  // Already fetched for the colour sampling, so it's cached — the cover along the
+  // case's edge costs nothing, and at this angle it's foreshortened to ~40px anyway.
   const thumb = review.poster_path ? `${TMDB_IMG_BASE}w92${review.poster_path}` : null;
 
   return (
@@ -372,7 +454,7 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, nudged, 
     // The wrapper stays untransformed in every other respect, which also keeps it
     // usable as the ruler for measuring the slot.
     <motion.div
-      className="relative shrink-0"
+      className="case-slot relative shrink-0"
       initial={false}
       animate={{ x: nudged ? NUDGE : 0 }}
       transition={{ type: 'spring', stiffness: 220, damping: 24 }}
@@ -386,6 +468,12 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, nudged, 
         width: CASE_W,
         height: SHELF_H,
         zIndex: depthOrder,
+        // A case in your hand is not also on the shelf. Leaving the shelf copy behind
+        // meant that for the last 150ms of the put-back — after the veil has faded —
+        // you saw both of them at once, the held one a few percent larger and a few px
+        // in front, its poster edge sliding across its own twin's. `visibility` rather
+        // than unmounting, so the slot stays open and nothing reflows.
+        visibility: held ? 'hidden' : 'visible',
       }}
     >
       <motion.button
@@ -393,8 +481,11 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, nudged, 
         onClick={(e) => onPull(review, e.currentTarget.parentElement, colors, seed)}
         initial={false}
         animate={{ rotateY: TURN, rotateX: TILT, y: 0, z: 0 }}
-        whileHover={{ rotateY: -19, rotateX: TILT, y: -18, z: 40 }}
-        whileTap={{ rotateY: -19, y: -8, z: 20 }}
+        // A gentler lean than before, on purpose: the box is now as deep as the poster
+        // is wide, so every extra degree of turn swings a lot more cover out over the
+        // case beside it. The lift does most of the talking.
+        whileHover={{ rotateY: -12, rotateX: TILT, y: -20, z: 50 }}
+        whileTap={{ rotateY: -12, y: -8, z: 20 }}
         transition={{ type: 'spring', stiffness: 320, damping: 26 }}
         className="absolute inset-0 border-none bg-transparent p-0 cursor-pointer"
         style={{
@@ -406,16 +497,16 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, nudged, 
         }}
         title={review.title}
       >
-        <PaperEdges depth={DEPTH} hit={false} />
+        <PaperEdges depth={geom.faceW} hit={false} />
 
         <CoverFace
           art={thumb}
           body={body}
           foot={foot}
           total={total}
-          width={DEPTH - SHELF_WRAP}
-          wrap={SHELF_WRAP}
-          dim={0.66}
+          width={geom.artW}
+          wrap={geom.wrapW}
+          artFilter={filmFilter(SHELF_DIM)}
           hit={false}
         />
 
@@ -431,7 +522,7 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, nudged, 
         <span
           className="absolute bottom-full left-0 w-full block pointer-events-none rounded-t-[3px]"
           style={{
-            height: DEPTH,
+            height: geom.faceW,
             transformOrigin: 'center bottom',
             transform: 'rotateX(90deg)',
             background: EDGE_WHITE,
@@ -455,7 +546,8 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, nudged, 
 
 /**
  * Taking the case off the shelf. This is the SAME 3D object as on the shelf — a
- * spine, a cover and a top — not a picture of the poster flying in. Two beats:
+ * spine, a cover and a top, built from the same caseGeometry() — not a picture of the
+ * poster flying in. Two beats:
  *
  *   1. it floats forward off the shelf (translateZ) and lifts, still spine-on
  *   2. the whole case turns (rotateY → -90°) about the spine's right edge — the
@@ -470,20 +562,17 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, nudged, 
  * COVER dead centre, the box has to be parked left of centre by exactly
  * (spine width + half a cover).
  */
-function PullOut({ review, rect, colors, onOpen, onClose }) {
+function PullOut({ review, rect, geom, isFeatured, getHome, colors, onOpen, onClose }) {
   const [settled, setSettled] = useState(false);
   const [body, foot] = colors || fallbackFor(0);
 
   const h = rect.height;
   const spineW = rect.width;
-  // The ART is a true 2:3 poster. The FACE is that plus the wrap band beside it,
-  // so the poster is never squeezed to make room for the band.
-  const artW = h * POSTER_RATIO;
-  const wrapW = clamp(Math.round(artW * 0.07), 8, 24);
-  const faceW = artW + wrapW;
+  const { artW, wrapW, faceW } = geom;
   const targetX = window.innerWidth / 2 - faceW / 2 - spineW;
   const targetY = Math.max(16, (window.innerHeight - h) / 2);
   const poster = review.poster_path ? `${TMDB_IMG_BASE}w500${review.poster_path}` : null;
+  const thumb = review.poster_path ? `${TMDB_IMG_BASE}w92${review.poster_path}` : null;
   const total = getReviewTotal(review);
 
   // Driven as motion values (not the `animate` prop) so that once the intro is
@@ -494,6 +583,11 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
   const rotY = useMotionValue(TURN);
   const rotX = useMotionValue(TILT);
   const veil = useMotionValue(0);
+  // The exposure travels with the case. It starts at exactly the shelf's, so the
+  // frame where the held case replaces the shelf one is identical, and only then
+  // does it come up into the light.
+  const dim = useMotionValue(SHELF_DIM);
+  const artFilter = useMotionTemplate`brightness(${dim}) saturate(0.78) contrast(1.16) sepia(0.2) hue-rotate(-4deg)`;
 
   useEffect(() => {
     const t = { duration: 1.0, times: [0, 0.36, 1], ease: [0.22, 1, 0.36, 1] };
@@ -503,6 +597,7 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
       animate(z, [0, 170, 90], t),
       animate(rotY, [TURN, TURN, -90], t),
       animate(rotX, [TILT, TILT, 0], t),
+      animate(dim, HAND_DIM, { duration: 0.85, ease: 'easeOut' }),
       animate(veil, 1, { duration: 0.4 }),
     ];
     let cancelled = false;
@@ -526,10 +621,17 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
     if (closing.current) return;
     closing.current = true;
     setSettled(false);
+    // Ask the shelf where the slot is NOW, rather than trusting the rect we took a
+    // rotation ago. Freezing <body> to stop the page scrolling behind the case takes
+    // the scrollbar away on a desktop browser, and that alone shifts the whole
+    // centred layout sideways by half a scrollbar — enough for the case to land
+    // beside its slot instead of in it.
+    const home = getHome?.() || rect;
     const t = { duration: 0.8, times: [0, 0.6, 1], ease: [0.4, 0, 0.2, 1] };
     animate(veil, 0, { duration: 0.65 });
-    animate(x, [x.get(), rect.left, rect.left], t);
-    animate(y, [y.get(), rect.top - 28, rect.top], t);
+    animate(dim, SHELF_DIM, { duration: 0.65 });
+    animate(x, [x.get(), home.left, home.left], t);
+    animate(y, [y.get(), home.top - 28, home.top], t);
     animate(z, [z.get(), 170, 0], t);
     animate(rotX, [rotX.get(), TILT, TILT], t);
     animate(rotY, [rotY.get(), TURN, TURN], t).then(onClose).catch(() => {});
@@ -618,11 +720,13 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
 
         <CoverFace
           art={poster}
+          artFallback={thumb}
           body={body}
           foot={foot}
           total={total}
           width={artW}
           wrap={wrapW}
+          artFilter={artFilter}
           radius="rounded-r-lg"
         />
 
@@ -641,7 +745,13 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
           <span className="absolute inset-0 spine-weave" />
         </span>
 
-        <SpineFace review={review} body={body} foot={foot} total={total} big />
+        <SpineFace
+          review={review}
+          body={body}
+          foot={foot}
+          total={total}
+          isFeatured={isFeatured}
+        />
       </motion.div>
 
       <AnimatePresence>

@@ -47,3 +47,14 @@
     linear-gradient(0deg, rgba(0, 0, 0, 0.18), transparent 14px);
   border-radius: 5px;
 }
+
+/* The shelf paints LEFT-under-RIGHT, so each case's cover recedes behind the spine
+   of the case beside it — the way a packed shelf actually occludes. The one you're
+   pointing at has to break that rule and come forward, or it leans out from
+   underneath its own neighbour.
+
+   !important because the slot's z-index is an inline style, and in the cascade an
+   important author rule outranks a normal inline one. */
+.case-slot:hover {
+  z-index: 400 !important;
+}
