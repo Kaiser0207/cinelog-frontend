@@ -165,9 +165,10 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
           ))}
         </div>
 
-        {/* The shelf the cases stand on. */}
-        <div className="mx-6 h-2 rounded-full bg-[#1A1A1A]/18 shadow-[0_8px_20px_rgba(0,0,0,0.14)]" />
-        <p className="mt-4 text-center text-xs text-[#1A1A1A]/45">
+        {/* The cases just sit on a soft contact shadow. The grey bar that used to
+            be here read as a scrollbar, which is the last thing it should look like. */}
+        <div className="mx-6 h-5 -mt-1 bg-[radial-gradient(ellipse_at_top,rgba(26,26,26,0.20),transparent_70%)]" />
+        <p className="mt-2 text-center text-xs text-[#1A1A1A]/45">
           ← 左右滑動瀏覽 · 點一片抽出來 →
         </p>
       </div>
@@ -203,20 +204,27 @@ const isDark = (c) => lum((c.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
 function SpineFace({ review, body, foot, total, isFeatured, big }) {
   return (
     <span
-      className="absolute inset-0 flex flex-col items-center rounded-l-[3px] overflow-hidden shadow-[3px_2px_10px_rgba(0,0,0,0.28)]"
+      className="absolute inset-0 flex flex-col items-center case-face overflow-hidden shadow-[3px_2px_10px_rgba(0,0,0,0.28)]"
       style={{ background: body, color: isDark(body) ? '#FFFFFF' : '#1A1A1A' }}
     >
       <span className="absolute inset-0 spine-weave pointer-events-none" />
       <span className="absolute inset-0 spine-edges pointer-events-none" />
+      <span className="absolute inset-0 case-bevel pointer-events-none" />
 
-      {isFeatured && (
-        <span className="relative mt-2.5 text-[12px] leading-none" aria-hidden="true">⭐</span>
-      )}
+      {/* Real spines read top-to-bottom, and the title starts AT THE TOP — it isn't
+          floated in the middle of the panel. vertical-rl + mixed orientation rotates
+          latin and keeps CJK upright, which is exactly the convention.
 
-      {/* Real spines read top-to-bottom. vertical-rl + mixed orientation rotates
-          latin and keeps CJK upright — exactly the convention. */}
+          The 精選 mark sits after the title in the same run of text, so it reads as
+          part of the typesetting rather than a sticker dropped on top. ★ is a text
+          glyph (U+2605), not the emoji — an emoji would render as a colour bitmap
+          and break the spine's palette. */}
+      {/* In vertical-rl the INLINE axis runs top→bottom, so for a row-flex the main
+          axis is vertical: justify-start is what pins the title to the top, and
+          items-center is what centres it across the spine's width. (Reaching for
+          items-start here would shove the text against the spine's right edge.) */}
       <span
-        className="relative flex-1 min-h-0 flex items-center justify-center px-1 py-3 font-black tracking-tight text-center"
+        className="relative flex-1 min-h-0 w-full flex items-center justify-start px-1 pt-4 pb-3 font-black tracking-tight"
         style={{
           writingMode: 'vertical-rl',
           textOrientation: 'mixed',
@@ -226,6 +234,14 @@ function SpineFace({ review, body, foot, total, isFeatured, big }) {
         }}
       >
         {review.title}
+        {isFeatured && (
+          <span
+            className="font-bold tracking-[0.18em] whitespace-nowrap"
+            style={{ fontSize: '0.62em', opacity: 0.72, marginInlineStart: '0.9em' }}
+          >
+            ★ 精選
+          </span>
+        )}
       </span>
 
       {/* white panel — the barcode's slot on a real case; here it carries the score */}
@@ -254,47 +270,63 @@ function SpineFace({ review, body, foot, total, isFeatured, big }) {
  * are one continuous sheet folded round the hinge, so the colour doesn't stop dead
  * at the corner. The poster art starts after that band.
  */
-function CoverFace({ art, body, width, radius = 'rounded-r-[2px]', dim }) {
+function CoverFace({ art, body, width, radius = 'rounded-r-[2px]', dim, hit = true }) {
+  const WRAP = 'clamp(6px, 7%, 22px)';
   return (
     <span
-      className={`absolute top-0 left-full h-full block overflow-hidden ${radius}`}
+      // On the shelf this face must NOT take clicks. It's turned into the screen,
+      // but it still projects a sliver over the case to its right — and since the
+      // left cases sit on top in the stack, that sliver was swallowing taps meant
+      // for the next case. In your hand it's the opposite: it has to take the drag.
+      className={`absolute top-0 left-full h-full block overflow-hidden case-face ${radius} ${hit ? '' : 'pointer-events-none'}`}
       style={{
         width,
         transformOrigin: 'left center',
         transform: 'rotateY(90deg)',
         backgroundColor: body,
-        filter: dim ? `brightness(${dim})` : undefined,
       }}
     >
       {art && (
         <>
+          {/* The dim belongs to the ART, not to the whole face. Dimming the face
+              darkened the wrapped band too, so the spine and its own wrap came out
+              as two different colours — which is the one thing they can never be. */}
           <span
             className="absolute inset-y-0 right-0 block bg-cover bg-center film-img"
-            style={{ left: 'clamp(6px, 7%, 22px)', backgroundImage: `url(${art})` }}
+            style={{
+              left: WRAP,
+              backgroundImage: `url(${art})`,
+              filter: dim ? `brightness(${dim}) saturate(0.88) contrast(1.12) sepia(0.16)` : undefined,
+            }}
           />
           <span
             className="absolute inset-y-0 right-0 block film-grain pointer-events-none"
-            style={{ left: 'clamp(6px, 7%, 22px)' }}
+            style={{ left: WRAP }}
           />
           <span
             className="absolute inset-y-0 right-0 block film-vignette pointer-events-none"
-            style={{ left: 'clamp(6px, 7%, 22px)' }}
+            style={{ left: WRAP }}
           />
         </>
       )}
-      {/* the wrapped spine colour + the crease where the sheet folds */}
+
+      {/* the wrapped spine colour — same paper, same weave, same colour */}
       <span
         className="absolute inset-y-0 left-0 block spine-weave"
-        style={{ width: 'clamp(6px, 7%, 22px)', background: body }}
+        style={{ width: WRAP, background: body }}
       />
+      {/* the crease where the sheet folds round the hinge */}
       <span
         className="absolute inset-y-0 block"
         style={{
-          left: 'clamp(6px, 7%, 22px)',
+          left: WRAP,
           width: 6,
           background: 'linear-gradient(90deg, rgba(0,0,0,0.28), transparent)',
         }}
       />
+      {/* the case is ONE printed sheet: the weave runs across the cover too */}
+      <span className="absolute inset-0 spine-weave pointer-events-none" />
+      <span className="absolute inset-0 case-bevel pointer-events-none" />
     </span>
   );
 }
@@ -331,11 +363,12 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
         style={{ transformStyle: 'preserve-3d' }}
         title={review.title}
       >
-        <CoverFace art={thumb} body={body} width={DEPTH} dim={0.66} />
+        <CoverFace art={thumb} body={body} width={DEPTH} dim={0.66} hit={false} />
 
-        {/* top face — the edge you look down on */}
+        {/* top face — the edge you look down on. Also non-hit: it juts up over the
+            case beside it and would steal that case's taps. */}
         <span
-          className="absolute top-0 left-0 w-full block"
+          className="absolute top-0 left-0 w-full block pointer-events-none rounded-t-[3px]"
           style={{
             height: DEPTH,
             transformOrigin: 'center top',
@@ -414,6 +447,15 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Freeze the page underneath. Without this the shelf (and the whole feed) keeps
+  // scrolling behind the case you're holding — and worse, the pull-out's start
+  // rect was measured against a page that's since moved.
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   const grab = useRef(null);
   const travelled = useRef(0);
 
@@ -430,10 +472,12 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
     const dx = e.clientX - grab.current.px;
     const dy = e.clientY - grab.current.py;
     travelled.current = Math.max(travelled.current, Math.hypot(dx, dy));
-    // Bounded: you can turn it enough to see the spine and the edge of the art,
-    // but not spin it past its own back — there's no face there to look at.
-    rotY.set(clamp(grab.current.ry + dx * 0.4, -150, -32));
-    rotX.set(clamp(grab.current.rx - dy * 0.3, -30, 30));
+    // Tightly bounded, and half as sensitive as before. Turned far enough, the case
+    // stops reading as a case: you're looking down the length of a 380px-deep slab,
+    // and the honest geometry just looks broken. A ±20° nudge is the whole point —
+    // it says "this is an object", it isn't a turntable.
+    rotY.set(clamp(grab.current.ry + dx * 0.18, -112, -68));
+    rotX.set(clamp(grab.current.rx - dy * 0.14, -13, 13));
   };
 
   const release = (e) => {
@@ -452,8 +496,11 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[300]" style={{ perspective: 1600 }} onClick={onClose}>
+      {/* Opaque enough that the title and the genre pills genuinely go away — at
+          55% they were still legible through it, so the case never felt like it had
+          the stage to itself. */}
       <motion.div
-        className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[#12100E]/92 backdrop-blur-md"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

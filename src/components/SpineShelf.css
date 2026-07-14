@@ -32,3 +32,18 @@
     linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0 2px, transparent 2px 5px),
     linear-gradient(270deg, rgba(0, 0, 0, 0.28) 0 3px, transparent 3px 8px);
 }
+
+/* Softened corners. A CSS 3D box meets at a mathematically perfect 90°, which is
+   the one thing no printed, folded object ever does — that razor edge is what was
+   reading as "computer graphics". Rounding every face and lifting a highlight along
+   the seams gives the corner a radius your eye will accept. */
+.case-face {
+  border-radius: 5px;
+}
+
+.case-bevel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 12px),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.18), transparent 14px);
+  border-radius: 5px;
+}
