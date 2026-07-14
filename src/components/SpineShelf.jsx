@@ -137,7 +137,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   const seat = useCallback(() => {
     setPulled(null);
     clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => setGapAfter(null), 120);
+    closeTimer.current = setTimeout(() => setGapAfter(null), 70);
   }, []);
 
   if (reviews.length === 0) return null;

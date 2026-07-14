@@ -419,8 +419,11 @@ export default function HomePage() {
             {/* Full-bleed, like the shelf: the wordmark has to enter at the true
                 right edge of the SCREEN and leave at the true left edge. Confined to
                 the footer's max-width it just looped inside a box. */}
+            {/* Pulled up: the viewBox is tall enough to hold the sag of the curve, and
+                the letters sit low in it — so the box reserves a band of empty space
+                above the type that reads as a gap the design never asked for. */}
             <h2
-              className="relative w-screen left-1/2 -ml-[50vw] text-[#D480C0]"
+              className="relative w-screen left-1/2 -ml-[50vw] -mt-6 md:-mt-12 text-[#D480C0]"
               aria-label="CINEROOMS"
             >
               <CurvedLoop
