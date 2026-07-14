@@ -113,6 +113,26 @@ body {
 }
 
 /* ── Custom Scrollbar ── */
+/* ── Film look for posters ──────────────────────────────────────────────
+   A whisper of photochemistry, not an Instagram filter: pull the saturation
+   back, warm it slightly, firm up the contrast — then grain and a vignette on
+   top as separate layers (a CSS `filter` can't add grain, only reshape what's
+   already there). Applied as three cheap layers rather than one heavy one.
+   ────────────────────────────────────────────────────────────────────── */
+.film-img {
+  filter: saturate(0.88) contrast(1.07) sepia(0.1) brightness(1.02);
+}
+
+.film-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.6'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.17;
+}
+
+.film-vignette {
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.32) 100%);
+}
+
 /* Tailwind v4 ships NO scrollbar utilities (that's a third-party plugin), yet
    `scrollbar-none` / `scrollbar-hide` are used all over this app — they have been
    silently doing nothing, which is why the shelf's horizontal bar was sitting on

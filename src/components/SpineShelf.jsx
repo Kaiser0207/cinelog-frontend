@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { TMDB_IMG_BASE, getReviewTotal } from '../utils/constants';
 import './SpineShelf.css';
@@ -188,14 +188,123 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   );
 }
 
+
+const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+const isDark = (c) => lum((c.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
+
+/**
+ * The spine artwork — one component, so the case on the shelf and the case in your
+ * hand are literally the same object.
+ *
+ * Foot of the spine, bottom-up: a colour block, then a white block above it. That's
+ * the real layout of a case: the barcode panel sits above the format block, and the
+ * barcode panel is the taller of the two. The score lives in the white panel.
+ */
+function SpineFace({ review, body, foot, total, isFeatured, big }) {
+  return (
+    <span
+      className="absolute inset-0 flex flex-col items-center rounded-l-[3px] overflow-hidden shadow-[3px_2px_10px_rgba(0,0,0,0.28)]"
+      style={{ background: body, color: isDark(body) ? '#FFFFFF' : '#1A1A1A' }}
+    >
+      <span className="absolute inset-0 spine-weave pointer-events-none" />
+      <span className="absolute inset-0 spine-edges pointer-events-none" />
+
+      {isFeatured && (
+        <span className="relative mt-2.5 text-[12px] leading-none" aria-hidden="true">⭐</span>
+      )}
+
+      {/* Real spines read top-to-bottom. vertical-rl + mixed orientation rotates
+          latin and keeps CJK upright — exactly the convention. */}
+      <span
+        className="relative flex-1 min-h-0 flex items-center justify-center px-1 py-3 font-black tracking-tight text-center"
+        style={{
+          writingMode: 'vertical-rl',
+          textOrientation: 'mixed',
+          fontSize: big ? 'clamp(15px, 3.6vw, 21px)' : 'clamp(14px, 3.4vw, 19px)',
+          lineHeight: 1.05,
+          overflow: 'hidden',
+        }}
+      >
+        {review.title}
+      </span>
+
+      {/* white panel — the barcode's slot on a real case; here it carries the score */}
+      {total != null && (
+        <span
+          className="relative w-full flex items-center justify-center bg-[#F5F1E6] text-[#1A1A1A] shrink-0"
+          style={{ height: 'clamp(50px, 9vw, 66px)' }}
+        >
+          <span className="text-[15px] font-black tabular-nums leading-none">
+            {total.toFixed(1)}
+          </span>
+        </span>
+      )}
+
+      {/* colour block at the very foot */}
+      <span
+        className="relative w-full shrink-0"
+        style={{ height: 'clamp(30px, 5.5vw, 42px)', background: foot }}
+      />
+    </span>
+  );
+}
+
+/**
+ * The front cover. The spine's colour wraps a little way onto it — printed cases
+ * are one continuous sheet folded round the hinge, so the colour doesn't stop dead
+ * at the corner. The poster art starts after that band.
+ */
+function CoverFace({ art, body, width, radius = 'rounded-r-[2px]', dim }) {
+  return (
+    <span
+      className={`absolute top-0 left-full h-full block overflow-hidden ${radius}`}
+      style={{
+        width,
+        transformOrigin: 'left center',
+        transform: 'rotateY(90deg)',
+        backgroundColor: body,
+        filter: dim ? `brightness(${dim})` : undefined,
+      }}
+    >
+      {art && (
+        <>
+          <span
+            className="absolute inset-y-0 right-0 block bg-cover bg-center film-img"
+            style={{ left: 'clamp(6px, 7%, 22px)', backgroundImage: `url(${art})` }}
+          />
+          <span
+            className="absolute inset-y-0 right-0 block film-grain pointer-events-none"
+            style={{ left: 'clamp(6px, 7%, 22px)' }}
+          />
+          <span
+            className="absolute inset-y-0 right-0 block film-vignette pointer-events-none"
+            style={{ left: 'clamp(6px, 7%, 22px)' }}
+          />
+        </>
+      )}
+      {/* the wrapped spine colour + the crease where the sheet folds */}
+      <span
+        className="absolute inset-y-0 left-0 block spine-weave"
+        style={{ width: 'clamp(6px, 7%, 22px)', background: body }}
+      />
+      <span
+        className="absolute inset-y-0 block"
+        style={{
+          left: 'clamp(6px, 7%, 22px)',
+          width: 6,
+          background: 'linear-gradient(90deg, rgba(0,0,0,0.28), transparent)',
+        }}
+      />
+    </span>
+  );
+}
+
 const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }) {
   const colors = useSpineColors(review.poster_path, seed);
   const [body, foot] = colors;
-  const darkBody = lum((body.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
-  const darkFoot = lum((foot.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
   const total = getReviewTotal(review);
   // Already fetched for the colour sampling, so it's cached — the sliver of art
-  // you see along the case's edge costs nothing.
+  // along the case's edge costs nothing.
   const thumb = review.poster_path ? `${TMDB_IMG_BASE}w92${review.poster_path}` : null;
 
   return (
@@ -222,25 +331,9 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
         style={{ transformStyle: 'preserve-3d' }}
         title={review.title}
       >
-        {/* ── the front cover: the case's big face, running back from the spine's
-             right edge. It IS the poster — this is the face that swings round to
-             meet you when you take the case off the shelf. On the shelf you only
-             catch its edge, which is exactly right. ── */}
-        <span
-          className="absolute top-0 left-full h-full block rounded-r-[2px] bg-cover bg-center"
-          style={{
-            width: DEPTH,
-            transformOrigin: 'left center',
-            transform: 'rotateY(90deg)',
-            backgroundColor: foot,
-            backgroundImage: thumb ? `url(${thumb})` : undefined,
-            filter: 'brightness(0.66)',
-          }}
-        >
-          <span className="absolute inset-0 spine-weave" />
-        </span>
+        <CoverFace art={thumb} body={body} width={DEPTH} dim={0.66} />
 
-        {/* ── top face: the edge you look down on ── */}
+        {/* top face — the edge you look down on */}
         <span
           className="absolute top-0 left-0 w-full block"
           style={{
@@ -254,43 +347,13 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
           <span className="absolute inset-0 spine-weave" />
         </span>
 
-        {/* ── spine face ── */}
-        <span
-          className="absolute inset-0 flex flex-col items-center rounded-[3px] overflow-hidden shadow-[3px_2px_10px_rgba(0,0,0,0.28)]"
-          style={{ background: body, color: darkBody ? '#FFFFFF' : '#1A1A1A' }}
-        >
-          <span className="absolute inset-0 spine-weave pointer-events-none" />
-          <span className="absolute inset-0 spine-edges pointer-events-none" />
-
-          {isFeatured && (
-            <span className="relative mt-2.5 text-[12px] leading-none" aria-hidden="true">⭐</span>
-          )}
-
-          {/* Real spines read top-to-bottom. vertical-rl + mixed orientation rotates
-              latin and keeps CJK upright — which is exactly the convention. */}
-          <span
-            className="relative flex-1 min-h-0 flex items-center justify-center px-1 py-3 font-black tracking-tight text-center"
-            style={{
-              writingMode: 'vertical-rl',
-              textOrientation: 'mixed',
-              fontSize: 'clamp(14px, 3.4vw, 19px)',
-              lineHeight: 1.05,
-              overflow: 'hidden',
-            }}
-          >
-            {review.title}
-          </span>
-
-          {/* The block at the foot — A24 puts its logo here; you get the score. */}
-          {total != null && (
-            <span
-              className="relative w-full py-2 text-[11px] font-black tabular-nums"
-              style={{ background: foot, color: darkFoot ? '#FFFFFF' : '#1A1A1A' }}
-            >
-              {total.toFixed(1)}
-            </span>
-          )}
-        </span>
+        <SpineFace
+          review={review}
+          body={body}
+          foot={foot}
+          total={total}
+          isFeatured={isFeatured}
+        />
       </motion.button>
     </div>
   );
@@ -301,12 +364,12 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
  * spine, a cover and a top — not a picture of the poster flying in. Two beats:
  *
  *   1. it floats forward off the shelf (translateZ) and lifts, still spine-on
- *   2. the whole case turns (rotateY → -90°) about the spine's right edge, which
- *      is the hinge, and the cover swings round into view
+ *   2. the whole case turns (rotateY → -90°) about the spine's right edge — the
+ *      hinge — and the cover swings round into view
  *
- * That's the motion of your hand: pull it out, then turn it over. It STOPS there —
- * a second tap opens the review, because looking at the cover is the entire point
- * of having taken it off the shelf.
+ * Then it's YOURS: drag it and it turns under your finger, and springs back when
+ * you let go. That's the difference between holding an object and looking at a
+ * picture of one.
  *
  * The maths: the box pivots on its right edge, so after the -90° turn the cover
  * occupies the screen from that hinge rightwards by its own width. To land the
@@ -316,7 +379,6 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
 function PullOut({ review, rect, colors, onOpen, onClose }) {
   const [settled, setSettled] = useState(false);
   const [body, foot] = colors || FALLBACK[0];
-  const darkBody = lum((body.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
 
   const h = rect.height;
   const spineW = rect.width;
@@ -325,6 +387,68 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
   const targetY = Math.max(16, (window.innerHeight - h) / 2);
   const poster = review.poster_path ? `${TMDB_IMG_BASE}w500${review.poster_path}` : null;
   const total = getReviewTotal(review);
+
+  // Driven as motion values (not the `animate` prop) so that once the intro is
+  // done, the very same values can be handed over to your finger.
+  const x = useMotionValue(rect.left);
+  const y = useMotionValue(rect.top);
+  const z = useMotionValue(0);
+  const rotY = useMotionValue(TURN);
+  const rotX = useMotionValue(TILT);
+
+  useEffect(() => {
+    const t = { duration: 1.0, times: [0, 0.36, 1], ease: [0.22, 1, 0.36, 1] };
+    const runs = [
+      animate(x, [rect.left, rect.left, targetX], t),
+      animate(y, [rect.top, rect.top - 28, targetY], t),
+      animate(z, [0, 170, 90], t),
+      animate(rotY, [TURN, TURN, -90], t),
+      animate(rotX, [TILT, TILT, 0], t),
+    ];
+    let cancelled = false;
+    runs[0].then(() => { if (!cancelled) setSettled(true); }).catch(() => {});
+    return () => {
+      cancelled = true;
+      runs.forEach((r) => r.stop());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const grab = useRef(null);
+  const travelled = useRef(0);
+
+  const onPointerDown = (e) => {
+    if (!settled) return;
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    grab.current = { px: e.clientX, py: e.clientY, ry: rotY.get(), rx: rotX.get() };
+    travelled.current = 0;
+  };
+
+  const onPointerMove = (e) => {
+    if (!grab.current) return;
+    const dx = e.clientX - grab.current.px;
+    const dy = e.clientY - grab.current.py;
+    travelled.current = Math.max(travelled.current, Math.hypot(dx, dy));
+    // Bounded: you can turn it enough to see the spine and the edge of the art,
+    // but not spin it past its own back — there's no face there to look at.
+    rotY.set(clamp(grab.current.ry + dx * 0.4, -150, -32));
+    rotX.set(clamp(grab.current.rx - dy * 0.3, -30, 30));
+  };
+
+  const release = (e) => {
+    if (!grab.current) return;
+    e.stopPropagation();
+    const wasTap = travelled.current < 6;
+    grab.current = null;
+    if (wasTap) {
+      onOpen();
+      return;
+    }
+    const spring = { type: 'spring', stiffness: 130, damping: 15 };
+    animate(rotY, -90, spring);
+    animate(rotX, 0, spring);
+  };
 
   return (
     <div className="fixed inset-0 z-[300]" style={{ perspective: 1600 }} onClick={onClose}>
@@ -336,39 +460,29 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
       />
 
       <motion.div
-        className="absolute cursor-pointer"
+        className="absolute cursor-grab active:cursor-grabbing"
         style={{
           top: 0,
           left: 0,
           width: spineW,
           height: h,
+          x,
+          y,
+          z,
+          rotateY: rotY,
+          rotateX: rotX,
           transformStyle: 'preserve-3d',
           transformOrigin: 'right center', // the hinge: the spine's right edge
-        }}
-        initial={{ x: rect.left, y: rect.top, z: 0, rotateY: TURN, rotateX: TILT }}
-        animate={{
-          x: [rect.left, rect.left, targetX],
-          y: [rect.top, rect.top - 28, targetY],
-          z: [0, 170, 90],
-          rotateY: [TURN, TURN, -90],
-          rotateX: [TILT, TILT, 0],
+          touchAction: 'none',             // the finger turns the case, not the page
         }}
         exit={{ opacity: 0, scale: 0.94 }}
-        transition={{ duration: 1.0, times: [0, 0.36, 1], ease: [0.22, 1, 0.36, 1] }}
-        onAnimationComplete={() => setSettled(true)}
-        onClick={(e) => { e.stopPropagation(); if (settled) onOpen(); }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={release}
+        onPointerCancel={release}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* front cover — the poster, hinged off the spine's right edge */}
-        <span
-          className="absolute top-0 left-full h-full block rounded-r-lg overflow-hidden shadow-2xl bg-cover bg-center"
-          style={{
-            width: coverW,
-            transformOrigin: 'left center',
-            transform: 'rotateY(90deg)',
-            backgroundColor: body,
-            backgroundImage: poster ? `url(${poster})` : undefined,
-          }}
-        />
+        <CoverFace art={poster} body={body} width={coverW} radius="rounded-r-lg" />
 
         {/* top edge */}
         <span
@@ -384,34 +498,7 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
           <span className="absolute inset-0 spine-weave" />
         </span>
 
-        {/* spine */}
-        <span
-          className="absolute inset-0 flex flex-col items-center rounded-l-lg overflow-hidden shadow-2xl"
-          style={{ background: body, color: darkBody ? '#FFFFFF' : '#1A1A1A' }}
-        >
-          <span className="absolute inset-0 spine-weave pointer-events-none" />
-          <span className="absolute inset-0 spine-edges pointer-events-none" />
-          <span
-            className="relative flex-1 min-h-0 flex items-center justify-center px-1 py-3 font-black tracking-tight text-center"
-            style={{
-              writingMode: 'vertical-rl',
-              textOrientation: 'mixed',
-              fontSize: 'clamp(14px, 3.4vw, 19px)',
-              lineHeight: 1.05,
-              overflow: 'hidden',
-            }}
-          >
-            {review.title}
-          </span>
-          {total != null && (
-            <span
-              className="relative w-full py-2 text-[11px] font-black tabular-nums text-center"
-              style={{ background: foot }}
-            >
-              {total.toFixed(1)}
-            </span>
-          )}
-        </span>
+        <SpineFace review={review} body={body} foot={foot} total={total} big />
       </motion.div>
 
       <AnimatePresence>
@@ -423,7 +510,7 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
             className="absolute inset-x-0 text-center text-white/85 text-sm font-bold pointer-events-none"
             style={{ top: Math.min(targetY + h + 16, window.innerHeight - 32) }}
           >
-            再點一次 → 進入影評
+            拖曳可以轉動 · 再點一次 → 進入影評
           </motion.p>
         )}
       </AnimatePresence>
