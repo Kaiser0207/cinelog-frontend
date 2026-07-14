@@ -487,16 +487,23 @@ const Case = memo(function Case({ review, seed, depthOrder, isFeatured, onPull }
           hit={false}
         />
 
-        {/* top face — the edge you look down on. Also non-hit: it juts up over the
-            case beside it and would steal that case's taps. */}
+        {/* top face — the edge you look down on.
+
+            Hung from ABOVE the box (bottom-full) and folded back with +90°, not
+            hung inside it and folded with −90°. Both land the face in the same
+            plane, but the second one leaves its normal pointing DOWN — so from a
+            camera that's looking down at the shelf you were seeing the BACK of the
+            top face, which is why it read as hollow. This way it faces up.
+
+            Also non-hit: it juts over the case beside it and would steal its taps. */}
         <span
-          className="absolute top-0 left-0 w-full block pointer-events-none rounded-t-[3px]"
+          className="absolute bottom-full left-0 w-full block pointer-events-none rounded-t-[3px]"
           style={{
             height: DEPTH,
-            transformOrigin: 'center top',
-            transform: 'rotateX(-90deg)',
+            transformOrigin: 'center bottom',
+            transform: 'rotateX(90deg)',
             background: EDGE_WHITE,
-            filter: 'blur(0.4px) brightness(0.92)',
+            filter: 'blur(0.4px) brightness(0.98)',
           }}
         >
           <span className="absolute inset-0 spine-weave" />
@@ -621,12 +628,12 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
     const dx = e.clientX - grab.current.px;
     const dy = e.clientY - grab.current.py;
     travelled.current = Math.max(travelled.current, Math.hypot(dx, dy));
-    // Room to really turn it now. The box only survives this because it finally has
-    // all six sides — before the paper edges existed, swinging it round revealed a
-    // hollow shell, which is why the range had to be nailed shut. It still stops
-    // short of its own back: there's no artwork there to look at.
-    rotY.set(clamp(grab.current.ry + dx * 0.32, -152, -28));
-    rotX.set(clamp(grab.current.rx - dy * 0.24, -26, 26));
+    // ±22.5° off face-on, both axes, and a gentle hand: it's a nudge that says
+    // "this is an object", not a turntable. Swung much further and you're looking
+    // down the length of a slab as deep as the poster is wide — geometrically
+    // honest, and it just looks broken.
+    rotY.set(clamp(grab.current.ry + dx * 0.16, -112.5, -67.5));
+    rotX.set(clamp(grab.current.rx - dy * 0.12, -22.5, 22.5));
   };
 
   const release = (e) => {
@@ -687,15 +694,16 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
           radius="rounded-r-lg"
         />
 
-        {/* top edge */}
+        {/* top edge — hung from above and folded back, so its face points UP
+            (see the shelf case for why the other way round reads as hollow) */}
         <span
-          className="absolute top-0 left-0 w-full block"
+          className="absolute bottom-full left-0 w-full block"
           style={{
             height: faceW,
-            transformOrigin: 'center top',
-            transform: 'rotateX(-90deg)',
+            transformOrigin: 'center bottom',
+            transform: 'rotateX(90deg)',
             background: EDGE_WHITE,
-            filter: 'blur(0.4px) brightness(0.94)',
+            filter: 'blur(0.4px)',
           }}
         >
           <span className="absolute inset-0 spine-weave" />
