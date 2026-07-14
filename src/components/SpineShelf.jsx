@@ -73,8 +73,14 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
         The negative top margin pulls it up under the controls row for a bigger peek.
         Safe only because that row carries `relative z-20` — otherwise this would sit
         on top of it and eat every tap on the view buttons.
+
+        z-0 matters more than it looks: each case carries `zIndex: depthOrder`, which
+        runs to 100+ on a full shelf. Without a stacking context of its own here, those
+        z-indexes compete in the PAGE's context — where they beat the controls row's
+        z-20 outright, and the shelf paints straight over the sort dropdown. z-0 seals
+        them inside, so the whole shelf ranks as one layer below the controls.
       */}
-      <div className="relative -mt-[3vh] w-screen left-1/2 -ml-[50vw]">
+      <div className="relative z-0 -mt-[3vh] w-screen left-1/2 -ml-[50vw]">
         <div
           className="flex items-end gap-[7px] overflow-x-auto overflow-y-hidden scrollbar-none pl-10 pt-8"
           style={{ height: `calc(${SHELF_H} + 2.5rem)` }}

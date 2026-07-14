@@ -100,7 +100,7 @@ export default function CardDeck({ reviews = [], featuredIds }) {
     // this element.
     <div
       ref={sectionRef}
-      className="relative -mt-[8vh] pointer-events-none"
+      className="relative z-0 -mt-[8vh] pointer-events-none"
       style={{ height: `${Math.max(n, 2) * SCROLL_PER_CARD}vh` }}
     >
       {/*
