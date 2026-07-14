@@ -216,9 +216,10 @@ const isDark = (c) => lum((c.match(/\d+/g) || [0, 0, 0]).map(Number)) < 0.55;
 const PANEL_H = '21%';   // white panel (the barcode's slot) — carries the score
 const FOOT_H = '14%';    // colour block at the very foot
 
-/** Every non-printed face of the case: milky white, translucent, softly out of
- *  focus — the cut edge of a stack of paper behind a slab of clear plastic. */
-const EDGE_WHITE = 'linear-gradient(180deg, rgba(250,247,240,0.72), rgba(228,222,208,0.66))';
+/** Every non-printed face of the case — top, underside, open edge. A cool, misty
+ *  white-grey, and nearly solid: these are the cut edge of a stack of paper behind
+ *  clear plastic, not a piece of gauze. */
+const EDGE_WHITE = 'linear-gradient(180deg, rgba(247,247,245,0.95), rgba(214,214,212,0.92))';
 
 /**
  * The strip that wraps round the hinge onto the cover. A case is ONE printed sheet
@@ -620,12 +621,12 @@ function PullOut({ review, rect, colors, onOpen, onClose }) {
     const dx = e.clientX - grab.current.px;
     const dy = e.clientY - grab.current.py;
     travelled.current = Math.max(travelled.current, Math.hypot(dx, dy));
-    // Tightly bounded, and half as sensitive as before. Turned far enough, the case
-    // stops reading as a case: you're looking down the length of a 380px-deep slab,
-    // and the honest geometry just looks broken. A ±20° nudge is the whole point —
-    // it says "this is an object", it isn't a turntable.
-    rotY.set(clamp(grab.current.ry + dx * 0.18, -112, -68));
-    rotX.set(clamp(grab.current.rx - dy * 0.14, -13, 13));
+    // Room to really turn it now. The box only survives this because it finally has
+    // all six sides — before the paper edges existed, swinging it round revealed a
+    // hollow shell, which is why the range had to be nailed shut. It still stops
+    // short of its own back: there's no artwork there to look at.
+    rotY.set(clamp(grab.current.ry + dx * 0.32, -152, -28));
+    rotX.set(clamp(grab.current.rx - dy * 0.24, -26, 26));
   };
 
   const release = (e) => {
