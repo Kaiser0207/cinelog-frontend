@@ -15,11 +15,12 @@
   background-size: 340px auto;   /* a touch larger than a spine, so the grain reads as paper, not pattern */
   mix-blend-mode: multiply;
   opacity: 1;
-  /* Opacity was already near the top, so it can't do much more — the scan is nearly
-     white and under multiply white does nothing. To make the paper READ stronger you
-     have to deepen the texture itself: contrast pushes its fibres and shadows darker
-     (the light areas stay white = still transparent), so multiply bites harder. */
-  filter: contrast(1.7);
+  /* NO filter here. The scan's fibre detail spans only 228–255 once composited over
+     white (the rest was hiding in a max-50% alpha channel), so a runtime contrast()
+     just pushed it all to white and the texture vanished — and on Safari a filter on
+     the same element as mix-blend-mode isolates the blend and kills it outright. The
+     contrast is baked into paper.png instead (its range stretched to 140–255), so a
+     plain multiply now shows real fibres. Re-bake to change the strength. */
 }
 
 /* The physical case: a lit fold on the shelf-facing edge, shadow on the other. */
