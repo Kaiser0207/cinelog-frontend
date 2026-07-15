@@ -1,29 +1,20 @@
 /* ─────────────────────────────────────────────────────────────
-   Spine material — generated, not downloaded.
+   Spine material — a real paper scan.
 
-   A bitmap texture would cost a request, need a licence, and blur when scaled.
-   This is an SVG fractal-noise tile (the paper grain) laid over two hairline
-   gradients (the weave: one weft, one warp), all inline. Infinitely crisp,
-   zero bytes over the wire.
+   The case is a printed sheet, so it's textured with an actual photo of paper
+   (public/textures/paper.png). One texture flows everywhere .spine-weave already
+   sits — spine, wrap band, cover, top face — so the whole object reads as one sheet.
+
+   multiply, NOT overlay: the scan is near-white, and under overlay all that white
+   would just wash the spine's colour out. Under multiply the white goes transparent
+   (white × colour = colour) and only the paper's fibres and shadows press into the
+   art — which is exactly what "printed on this paper" looks like.
    ───────────────────────────────────────────────────────────── */
 .spine-weave {
-  background-image:
-    /* warp — vertical threads */
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.07) 0 1px,
-      transparent 1px 3px
-    ),
-    /* weft — horizontal threads */
-    repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.07) 0 1px,
-      transparent 1px 3px
-    ),
-    /* paper grain */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
-  opacity: 0.42;
+  background-image: url("/textures/paper.png");
+  background-size: 340px auto;   /* a touch larger than a spine, so the grain reads as paper, not pattern */
+  mix-blend-mode: multiply;
+  opacity: 0.9;
 }
 
 /* The physical case: a lit fold on the shelf-facing edge, shadow on the other. */
