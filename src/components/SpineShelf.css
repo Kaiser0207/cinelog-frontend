@@ -14,7 +14,12 @@
   background-image: url("/textures/paper.png");
   background-size: 340px auto;   /* a touch larger than a spine, so the grain reads as paper, not pattern */
   mix-blend-mode: multiply;
-  opacity: 0.9;
+  opacity: 1;
+  /* Opacity was already near the top, so it can't do much more — the scan is nearly
+     white and under multiply white does nothing. To make the paper READ stronger you
+     have to deepen the texture itself: contrast pushes its fibres and shadows darker
+     (the light areas stay white = still transparent), so multiply bites harder. */
+  filter: contrast(1.7);
 }
 
 /* The physical case: a lit fold on the shelf-facing edge, shadow on the other. */
