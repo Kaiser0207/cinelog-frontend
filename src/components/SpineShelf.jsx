@@ -409,7 +409,11 @@ function SpineFace({ review, body, foot, total, isFeatured, catalogNo }) {
           className="relative w-full flex flex-col items-center justify-center gap-[3px] bg-[#F5F1E6] text-[#1A1A1A] shrink-0"
           style={{ height: PANEL_H }}
         >
-          <span className="absolute inset-0 spine-weave spine-weave-face pointer-events-none" />
+          {/* The white panel needs far less texture than the coloured spine. multiply
+              barely touches a dark spine, but on this near-white block every fibre bites
+              — so at the spine's strength it came out grubby/speckled. Much lighter here:
+              clean, but not a flat digital slab. */}
+          <span className="absolute inset-0 spine-weave spine-weave-panel pointer-events-none" />
           <span className="relative text-[17px] font-black tabular-nums leading-none">
             {total.toFixed(1)}
           </span>
