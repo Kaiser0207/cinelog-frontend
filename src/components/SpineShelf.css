@@ -14,13 +14,20 @@
   background-image: url("/textures/paper.png");
   background-size: 340px auto;   /* a touch larger than a spine, so the grain reads as paper, not pattern */
   mix-blend-mode: multiply;
-  opacity: 1;
+  opacity: var(--weave-o, 1);
   /* NO filter here. The scan's fibre detail spans only 228–255 once composited over
      white (the rest was hiding in a max-50% alpha channel), so a runtime contrast()
      just pushed it all to white and the texture vanished — and on Safari a filter on
      the same element as mix-blend-mode isolates the blend and kills it outright. The
      contrast is baked into paper.png instead (its range stretched to 140–255), so a
      plain multiply now shows real fibres. Re-bake to change the strength. */
+}
+
+/* The spine wants the paper a touch lighter than the cover does — same texture, less
+   of it. Only the spine face reads it: the cover and the pull-out drive their weave
+   through an inline (animated) opacity, which overrides this variable entirely. */
+.spine-weave-face {
+  --weave-o: 0.8;
 }
 
 /* The physical case: a lit fold on the shelf-facing edge, shadow on the other. */

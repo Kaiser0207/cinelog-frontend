@@ -363,7 +363,7 @@ function SpineFace({ review, body, foot, total, isFeatured, catalogNo }) {
       className="absolute inset-0 flex flex-col items-center case-face overflow-hidden shadow-[-3px_2px_10px_rgba(0,0,0,0.28)]"
       style={{ background: body, color: isDark(body) ? '#FFFFFF' : '#1A1A1A' }}
     >
-      <span className="absolute inset-0 spine-weave pointer-events-none" />
+      <span className="absolute inset-0 spine-weave spine-weave-face pointer-events-none" />
       <span className="absolute inset-0 spine-edges pointer-events-none" />
       <span className="absolute inset-0 case-bevel pointer-events-none" />
 
@@ -409,7 +409,7 @@ function SpineFace({ review, body, foot, total, isFeatured, catalogNo }) {
           className="relative w-full flex flex-col items-center justify-center gap-[3px] bg-[#F5F1E6] text-[#1A1A1A] shrink-0"
           style={{ height: PANEL_H }}
         >
-          <span className="absolute inset-0 spine-weave pointer-events-none" />
+          <span className="absolute inset-0 spine-weave spine-weave-face pointer-events-none" />
           <span className="relative text-[17px] font-black tabular-nums leading-none">
             {total.toFixed(1)}
           </span>
@@ -440,7 +440,7 @@ function SpineFace({ review, body, foot, total, isFeatured, catalogNo }) {
           color: isDark(foot) ? 'rgba(255,255,255,0.92)' : 'rgba(26,26,26,0.82)',
         }}
       >
-        <span className="absolute inset-0 spine-weave pointer-events-none" />
+        <span className="absolute inset-0 spine-weave spine-weave-face pointer-events-none" />
         {catalogNo && (
           <>
             <span className="relative text-[8px] font-bold leading-none opacity-55">№</span>
