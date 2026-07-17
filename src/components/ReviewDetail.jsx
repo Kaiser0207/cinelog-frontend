@@ -7,6 +7,7 @@ import ScoreSlider from './ScoreSlider';
 import EpisodeHeatmap from './EpisodeHeatmap';
 import SpotifyEmbed from './SpotifyEmbed';
 import ShareCard from './ShareCard';
+import CopyLinkButton from './CopyLinkButton';
 import CurvedLoop from './CurvedLoop';
 import TLDRButton from './TLDRButton';
 import ReactionBar from './ReactionBar';
@@ -832,10 +833,17 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               </button>
             )}
 
-            <ShareCard 
-              review={review} 
-              className="group flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95" 
-            />
+            {/* The two of them are one control, so they ride in their own row: the outer
+                row is flex-col on a phone, and left to itself the copy button would drop
+                onto a line of its own — a lone circle floating under the share pill. */}
+            <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
+              <ShareCard
+                review={review}
+                isFeatured={isFeatured}
+                className="group flex flex-1 sm:flex-none items-center justify-center gap-2 px-8 py-3 rounded-full bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white font-extrabold transition-all duration-300 cursor-pointer border-none shadow-sm w-full sm:w-auto text-xs md:text-sm active:scale-95"
+              />
+              <CopyLinkButton review={review} />
+            </div>
 
             {isAdmin && (
               <button
