@@ -49,20 +49,33 @@ const FOOT_TOP = 0.90;   // colour block at the foot (FOOT_H: 10%)
  *
  *   TURN — how far the case is turned, and the one dial worth touching. It trades the
  *          spine against the poster: at −46° the spine is easy to read but the poster is
- *          squashed to 73% of its width; at −70° the poster is almost square-on and the
- *          spine is a 35px sliver. −64° keeps the poster at ~90% and still gives the
- *          spine ~6% of the case's width, which is about what a real one looks like
- *          turned this far.
+ *          squashed to 73% of its width; at −70° the poster is all but square-on and the
+ *          spine is down to ~4% of the case's width — still a legible band of colour,
+ *          because the spine's stripes carry it even when its type can't.
  *   VY   — the camera's height, ABOVE the top of the case (the case's centre is y=0).
- *          That's what puts its top edge in view and sends the far side receding
- *          up-and-away: you're looking down at an object, not at a diagram of one.
+ *          That's what puts the top edge in view.
  *   CAM  — camera distance. Gentle: enough that the box's far edge is visibly smaller
  *          than its near one, not so much that it looks fisheyed.
  *
  * The last two are proportions of the case, not pixels, so CASE_H stays a pure size
  * dial — make the case bigger and the shot is the same shot, just closer.
+ *
+ * On the case looking like it leans back: it doesn't, and it can't. There's no rotateX
+ * here and the image plane is parallel to the case's vertical axis, so a vertical edge
+ * projects to a vertical line — sx comes out independent of y. No keystone, ever.
+ *
+ * What you actually see is the camera being ABOVE the case, and with a real camera
+ * "you can see the top of it" and "its base recedes upward" are the SAME fact — the top
+ * face only has any height on screen because the perspective divide shrinks the far side,
+ * and that same divide is what lifts the far end of the base. You cannot have one without
+ * the other. (The old share card had a flat base AND a visible top, which is why it read
+ * as upright — but that wasn't a camera, it was a shear: it displaced the back of the box
+ * by a fixed vector. No photograph can do that.) TURN is the lever: the flatter the case
+ * is turned, the less depth its cover spans, and the less the base can rise across it —
+ * −64° raised the far corner of the base 122px, −70° raises it 74px. Lowering VY barely
+ * touches that and costs the top face most of its thickness, which is a bad trade.
  */
-const TURN = -64;
+const TURN = -70;
 const CAM = CASE_H * 2.55;
 const VY = -CASE_H * 0.8;
 
