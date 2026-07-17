@@ -19,7 +19,7 @@ import { useCatalogNumbers, formatCatalogNo } from '../utils/catalog';
  */
 
 const W = 1080;
-const H = 1920;          // 9:16 — it's a story
+const H = 1920;          // 9:16 — the story frame, so it drops in already positioned
 
 /**
  * THE case, from one number — exactly the rule SpineShelf's caseGeometry() follows.
@@ -27,8 +27,11 @@ const H = 1920;          // 9:16 — it's a story
  * IS the box's depth), so its height fixes the whole box. Same ratios as the shelf, at
  * print scale, which is what makes this read as the same object rather than a diagram
  * of one.
+ *
+ * It gets the whole frame: nothing else is printed on this card, so the only limit is
+ * the margin.
  */
-const CASE_H = 940;
+const CASE_H = 1250;
 const ART_W = CASE_H * (2 / 3);          // the poster: 2:3
 const WRAP_W = Math.round(ART_W * 0.07); // the printed band that folds onto the cover
 const FACE_W = ART_W + WRAP_W;           // the cover's width — and the box's depth
@@ -44,23 +47,26 @@ const FOOT_TOP = 0.90;   // colour block at the foot (FOOT_H: 10%)
 /**
  * THE CAMERA.
  *
- *   TURN — how far the case is turned. It is the one dial worth touching: at −70° the
- *          spine is a 30px sliver you can't read, at −46° the poster is squashed to 73%
- *          of its width. −55° is where both survive.
- *   VY   — the camera's height, ABOVE the top of the case (the case's centre is y=0),
- *          which is what puts its top edge in view and sends the far side of the box
- *          receding up-and-away. You're looking down at an object on a table.
+ *   TURN — how far the case is turned, and the one dial worth touching. It trades the
+ *          spine against the poster: at −46° the spine is easy to read but the poster is
+ *          squashed to 73% of its width; at −70° the poster is almost square-on and the
+ *          spine is a 35px sliver. −64° keeps the poster at ~90% and still gives the
+ *          spine ~6% of the case's width, which is about what a real one looks like
+ *          turned this far.
+ *   VY   — the camera's height, ABOVE the top of the case (the case's centre is y=0).
+ *          That's what puts its top edge in view and sends the far side receding
+ *          up-and-away: you're looking down at an object, not at a diagram of one.
  *   CAM  — camera distance. Gentle: enough that the box's far edge is visibly smaller
- *          than its near one, not so much that a 9:16 card looks fisheyed.
+ *          than its near one, not so much that it looks fisheyed.
+ *
+ * The last two are proportions of the case, not pixels, so CASE_H stays a pure size
+ * dial — make the case bigger and the shot is the same shot, just closer.
  */
-const TURN = -55;
-const CAM = 2400;
-const VY = -750;
-const PIVOT_X = 558;     // lands the projected case's centre on the card's centre
-const PIVOT_Y = 660;
+const TURN = -64;
+const CAM = CASE_H * 2.55;
+const VY = -CASE_H * 0.8;
 
 const INK = '#1A1A1A';
-const RED = '#FE494A';
 const PANEL_CREAM = '#F5F1E6';
 
 // The paper's grain has to be the same physical size on the card as on the shelf, where
@@ -104,17 +110,50 @@ const surface = (w, h) => {
 const TC = Math.cos((TURN * Math.PI) / 180);
 const TS = Math.sin((TURN * Math.PI) / 180);
 
-/** A point on the case → the point on the card. Origin is the box's centre. */
-function project([x, y, z]) {
+/** Rotate and project about the box's own centre — before it's placed on the card. */
+function raw([x, y, z]) {
   const rx = x * TC + z * TS;          // rotateY
   const rz = -x * TS + z * TC;
   const k = CAM / (CAM - rz);          // ...and the perspective divide
-  return [PIVOT_X + rx * k, PIVOT_Y + VY + (y - VY) * k];
+  return [rx * k, VY + (y - VY) * k];
 }
 
 const HW = SPINE_W / 2;
 const HH = CASE_H / 2;
 const HD = FACE_W / 2;
+
+const CORNERS = [];
+for (const sx of [-1, 1]) {
+  for (const sy of [-1, 1]) {
+    for (const sz of [-1, 1]) CORNERS.push([sx * HW, sy * HH, sz * HD]);
+  }
+}
+
+/**
+ * Where the case lands — SOLVED, not tuned.
+ *
+ * A turned box's projected centre is nowhere near its pivot: it's rotated, and the
+ * perspective divide magnifies its near side and shrinks its far one, so the picture
+ * drifts. Hand-picking a pivot to compensate means re-picking it every time the angle
+ * moves. So project all eight corners, take the bounding box of that, and shift by
+ * whatever lands it dead centre. TURN and CASE_H are free variables now — change either
+ * and the case is still centred, with no second number to remember.
+ */
+const [OX, OY] = (() => {
+  const P = CORNERS.map(raw);
+  const xs = P.map((p) => p[0]);
+  const ys = P.map((p) => p[1]);
+  return [
+    W / 2 - (Math.min(...xs) + Math.max(...xs)) / 2,
+    H / 2 - (Math.min(...ys) + Math.max(...ys)) / 2,
+  ];
+})();
+
+/** A point on the case → the point on the card. */
+function project(p) {
+  const [x, y] = raw(p);
+  return [x + OX, y + OY];
+}
 
 // Each face's corners in the order its texture's are: (0,0), (w,0), (w,h), (0,h).
 // The cover is the box's RIGHT WALL, receding backwards — that's not a quirk of this
@@ -258,30 +297,6 @@ function verticalText(ctx, text, cx, top, limit, size) {
     }
   }
   return y;
-}
-
-function wrapText(ctx, text, maxWidth, maxLines) {
-  const chars = [...text];
-  const lines = [];
-  let line = '';
-  for (const ch of chars) {
-    const next = line + ch;
-    if (ctx.measureText(next).width > maxWidth && line) {
-      lines.push(line);
-      line = ch;
-      if (lines.length === maxLines) break;
-    } else {
-      line = next;
-    }
-  }
-  if (lines.length < maxLines && line) lines.push(line);
-  if (lines.length === maxLines && chars.length) {
-    const joined = lines.join('');
-    if (joined.length < chars.length) {
-      lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…';
-    }
-  }
-  return lines;
 }
 
 // ───────────────────────── the faces ─────────────────────────
@@ -453,33 +468,82 @@ function topTexture(tile) {
   return cv;
 }
 
-/** The shadow the case casts on the table. A radial gradient, NOT ctx.filter — Safari
- *  only grew filter in 17.4, and where it's missing a blur silently becomes a
- *  hard-edged black ellipse under the case. */
-function contactShadow(ctx) {
-  const feet = [[-HW, HH, HD], [HW, HH, HD], [HW, HH, -HD], [-HW, HH, -HD]].map(project);
-  const xs = feet.map((p) => p[0]);
-  const ys = feet.map((p) => p[1]);
-  const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
-  const cy = (Math.min(...ys) + Math.max(...ys)) / 2 + 14;
-  const rx = (Math.max(...xs) - Math.min(...xs)) / 2 + 30;
-  const ry = (Math.max(...ys) - Math.min(...ys)) / 2 + 34;
+// ───────────────────────── the case's outline ─────────────────────────
 
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.scale(1, ry / rx);
-  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
-  g.addColorStop(0, 'rgba(26,26,26,0.34)');
-  g.addColorStop(0.55, 'rgba(26,26,26,0.16)');
-  g.addColorStop(1, 'rgba(26,26,26,0)');
-  ctx.fillStyle = g;
+/**
+ * The case's silhouette: the convex hull of its eight projected corners.
+ *
+ * For a convex box that IS the outline — the three visible faces tile it exactly, and
+ * the hull's vertices are precisely the box's outer corners (the hinge and the other
+ * internal edges fall inside it). So it's both the shape to round off and the shape to
+ * throw a shadow from.
+ */
+const HULL = (() => {
+  const pts = CORNERS.map(project).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const chain = (src) => {
+    const out = [];
+    for (const p of src) {
+      // <= 0 drops collinear points too, which matters: three corners of a turned box
+      // very nearly line up, and a hull with a 0.4px edge in it can't be rounded.
+      while (out.length >= 2 && cross(out[out.length - 2], out[out.length - 1], p) <= 0) out.pop();
+      out.push(p);
+    }
+    out.pop();
+    return out;
+  };
+  return [...chain(pts), ...chain([...pts].reverse())];
+})();
+
+// A real case's corners are radiused — about 4mm on a 190mm case. It's a small thing,
+// and it's most of what reads as moulded plastic rather than as a rectangle.
+const RADIUS = CASE_H * 0.021;
+
+/** The silhouette as a path, with its corners taken off. */
+function outline(ctx) {
+  const n = HULL.length;
+  const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  const half = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]) / 2;
+
   ctx.beginPath();
-  ctx.arc(0, 0, rx, 0, Math.PI * 2);
-  ctx.fill();
+  const [sx, sy] = mid(HULL[n - 1], HULL[0]);
+  ctx.moveTo(sx, sy);
+  for (let i = 0; i < n; i++) {
+    const cur = HULL[i];
+    const nxt = HULL[(i + 1) % n];
+    const m = mid(cur, nxt);
+    // Clamped PER CORNER, never once for the whole shape: turned this far the hull has
+    // one very short edge (the spine, ~57px) and one very long one, and a single radius
+    // small enough to fit the spine would leave the cover's corners nearly square.
+    // Arcing between edge MIDPOINTS is what guarantees each arc has room to land.
+    const r = Math.min(RADIUS, half(HULL[(i - 1 + n) % n], cur), half(cur, nxt));
+    ctx.arcTo(cur[0], cur[1], m[0], m[1], r);
+    ctx.lineTo(m[0], m[1]);
+  }
+  ctx.closePath();
+}
+
+/**
+ * The shadow the case throws.
+ *
+ * A DROP shadow, not the contact ellipse this used to draw: there's no table any more.
+ * The card is transparent and this is going on top of whatever photo you choose, so the
+ * shadow has to belong to the object rather than to a surface that isn't there.
+ *
+ * ctx.shadowBlur, NOT ctx.filter — Safari only grew filter in 17.4, and where it's
+ * missing the blur silently becomes a hard black shape sitting behind the case.
+ */
+function dropShadow(ctx) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(12,10,8,0.5)';
+  ctx.shadowBlur = 46;
+  ctx.shadowOffsetY = 22;
+  ctx.fillStyle = '#000';
+  outline(ctx);
+  ctx.fill();          // covered by the faces a moment later; only its shadow survives
   ctx.restore();
 }
 
-/** Paints the case and reports the two poster colours and where it landed. */
 async function drawCase(ctx, review, total, catalogNo, isFeatured) {
   const [body, foot] = await getPosterColors(review.poster_path);
   const [poster, paper] = await Promise.all([
@@ -488,16 +552,19 @@ async function drawCase(ctx, review, total, catalogNo, isFeatured) {
   ]);
   const tile = paperTile(paper);
 
-  contactShadow(ctx);
+  dropShadow(ctx);
 
+  // Every face is clipped to the rounded silhouette as well as to its own quad, which is
+  // what takes the corners off the object rather than off three separate rectangles.
+  ctx.save();
+  outline(ctx);
+  ctx.clip();
   // Back to front. At this angle the far wall, the back cover and the underside are all
   // turned away — the three faces below are the whole visible box.
   warp(ctx, topTexture(tile), TOP_QUAD);
   warp(ctx, spineTexture({ review, body, foot, total, catalogNo, isFeatured, tile }), SPINE_QUAD);
   warp(ctx, coverTexture({ body, foot, total, poster, tile }), COVER_QUAD);
-
-  const bottom = Math.max(...[...SPINE_QUAD, ...COVER_QUAD].map((p) => project(p)[1]));
-  return { body, foot, bottom };
+  ctx.restore();
 }
 
 // ───────────────────────── the button ─────────────────────────
@@ -524,58 +591,14 @@ export default function ShareCard({ review, className, isFeatured = false }) {
       cv.height = H;
       const ctx = cv.getContext('2d');
 
-      // ── backdrop ──
-      const bg = ctx.createLinearGradient(0, 0, W * 0.4, H);
-      bg.addColorStop(0, '#F2ECDD');
-      bg.addColorStop(1, '#D9CFBB');
-      ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, W, H);
+      // NO backdrop, and no type. The card is the case and nothing else, on
+      // transparency — it's a sticker to drop onto your own still, and the score, the
+      // title and the watermark all used to have to be cropped off before it could be.
+      // (The canvas starts fully transparent, so this is an absence, not a step.)
+      await drawCase(ctx, review, total, catalogNo, isFeatured);
 
-      const { foot, bottom } = await drawCase(ctx, review, total, catalogNo, isFeatured);
-
-      // ── the score: the loudest thing on the card after the artwork ──
-      const scoreY = bottom + 242;
-      if (total != null) {
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        ctx.font = face(208);
-        const s = total.toFixed(1);
-        const sw = ctx.measureText(s).width;
-
-        ctx.fillStyle = RED;
-        ctx.fillText(s, 90, scoreY);
-
-        ctx.font = face(30);
-        ctx.fillStyle = 'rgba(26,26,26,0.55)';
-        ctx.fillText('CINEROOMS SCORE', 100 + sw + 24, scoreY - 118);
-
-        // a rule that runs from the score out to the edge, like a spec sheet
-        ctx.fillStyle = 'rgba(26,26,26,0.18)';
-        ctx.fillRect(100 + sw + 24, scoreY - 92, W - (100 + sw + 24) - 90, 3);
-
-        ctx.font = '700 26px "Noto Sans TC", sans-serif';
-        ctx.fillStyle = 'rgba(26,26,26,0.45)';
-        ctx.fillText('/ 10.0', 100 + sw + 26, scoreY - 24);
-      }
-
-      // ── title ──
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'alphabetic';
-      ctx.font = face(66);
-      ctx.fillStyle = INK;
-      const lines = wrapText(ctx, review.title || '', W - 180, 2);
-      lines.forEach((line, i) => {
-        ctx.fillText(line, 90, scoreY + 110 + i * 76);
-      });
-
-      // ── watermark ──
-      ctx.font = face(34);
-      ctx.fillStyle = 'rgba(26,26,26,0.35)';
-      ctx.fillText('CINEROOMS', 90, H - 80);
-
-      ctx.fillStyle = foot;
-      ctx.fillRect(W - 90 - 56, H - 112, 56, 34);
-
+      // PNG, which is not a detail: JPEG has no alpha channel and would flatten the
+      // whole thing onto black.
       const blob = await new Promise((r) => cv.toBlob(r, 'image/png'));
       if (!blob) throw new Error('toBlob returned nothing');
 
