@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import ReviewFeed from '../components/ReviewFeed';
 import StaggeredMenu from '../components/StaggeredMenu';
 import SearchOverlay from '../components/SearchOverlay';
@@ -16,7 +16,7 @@ const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
 export default function HomePage() {
   const [sort, setSort] = useState('watched');
   const [genre, setGenre] = useState('');
-  const [mediaFilter, setMediaFilter] = useState('movie'); // 'movie' | 'tv' | 'anime' — always one media type, defaults to 電影 (no 'all')
+  const [mediaFilter, setMediaFilter] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -26,6 +26,7 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchMode, setSearchMode] = useState('standard');
   const searchTimeoutRef = useRef(null);
+  const desktopSearchRef = useRef(null);
 
   const { lang, toggleLanguage, t } = useLanguage();
   const { isAdmin, requireAuth, openDeviceManager } = useAdmin();
@@ -35,7 +36,10 @@ export default function HomePage() {
   // 書脊牆 is the feed. 疊卡 is the alternative; the old grid and list views are
   // gone, so anyone carrying either of those in localStorage lands on the shelf.
   const [viewMode, setViewMode] = useState(
-    () => (localStorage.getItem('cinelog_view_mode') === 'deck' ? 'deck' : 'shelf')
+    () => {
+      const stored = localStorage.getItem('cinelog_view_mode');
+      return stored === 'deck' || stored === 'compact' ? stored : 'shelf';
+    }
   );
   
   const activeGenreRef = useRef(null);
@@ -55,7 +59,11 @@ export default function HomePage() {
   // later back/forward doesn't silently reopen it.
   useEffect(() => {
     if (location.state?.openSearch) {
-      setShowSearchOverlay(true);
+      if (window.matchMedia('(min-width: 768px)').matches) {
+        requestAnimationFrame(() => desktopSearchRef.current?.focus());
+      } else {
+        setShowSearchOverlay(true);
+      }
       navigate('.', { replace: true, state: null });
     }
   }, [location.state, navigate]);
@@ -181,6 +189,17 @@ export default function HomePage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleOpenSearch = () => {
+    if (window.matchMedia('(min-width: 768px)').matches) {
+      setShowSearchOverlay(false);
+      desktopSearchRef.current?.focus();
+    } else {
+      setShowSearchOverlay(true);
+    }
+  };
+
+  const isSearching = !showSearchOverlay && Boolean(searchQuery.trim());
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -199,6 +218,9 @@ export default function HomePage() {
           <span className="md:hidden">CINE<br/>ROOMS</span>
           <span className="hidden md:inline">CINEROOMS</span>
         </motion.h1>
+        <p className="relative z-10 mt-4 max-w-2xl text-sm md:text-lg font-bold text-[#1A1A1A]/70 md:text-center">
+          {t('heroTagline')}
+        </p>
         
         <div className="absolute top-6 right-5 md:right-6 z-[60] flex flex-col md:flex-row items-end md:items-center gap-3" data-cursor="FILTER">
           {/* Top Row: Language */}
@@ -207,21 +229,23 @@ export default function HomePage() {
             <div className="hidden md:flex relative items-center bg-[#E8E2D2] border border-[#1A1A1A]/10 rounded-full p-1 shadow-sm h-12 transition-all focus-within:ring-2 focus-within:ring-[#FE494A]/20 focus-within:border-[#FE494A]/30">
               <span className="pl-3 md:pl-4 pr-2 md:pr-3 text-[#1A1A1A]/50 text-xs md:text-sm">🔍</span>
               <input
+                ref={desktopSearchRef}
                 type="text"
                 value={searchInput}
                 onChange={handleSearchChange}
-                placeholder={searchMode === 'ai' ? '描述你想看的感覺...' : '搜尋電影...'}
+                placeholder={searchMode === 'ai' ? t('searchAiPlaceholder') : t('searchPlaceholder')}
+                aria-label={searchMode === 'ai' ? 'AI movie search' : 'Search movie reviews'}
                 className="bg-transparent border-none outline-none focus:ring-0 focus:outline-none text-base font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-28 sm:w-32 md:w-48 py-2 md:py-2.5"
               />
               <button
                 onClick={() => setSearchMode(prev => prev === 'standard' ? 'ai' : 'standard')}
                 className={`ml-1 md:ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-black font-jetbrains uppercase transition-all shrink-0 mr-0.5 md:mr-1 ${
                   searchMode === 'ai' 
-                    ? 'bg-[#FE494A] text-[#E8E2D2] hover:bg-[#FE494A] shadow-sm' 
+                    ? 'bg-[#FE494A] text-[#1A1A1A] hover:bg-[#FE494A] shadow-sm'
                     : 'bg-[#E8E2D2] shadow-sm text-[#FE494A] hover:bg-[#FE494A]'
                 }`}
               >
-                {searchMode === 'ai' ? '✦ AI' : '一般'}
+                {searchMode === 'ai' ? '✦ AI' : t('standardMode')}
               </button>
             </div>
 
@@ -243,7 +267,12 @@ export default function HomePage() {
           (original design) via the negative top margin; everything below sits in
           normal flow after it, so the whole cluster rides up with it. */}
       <div className="relative z-10 w-full px-5 -mt-12 mb-5 overflow-hidden">
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full">
+        <div
+          className={`flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full ${isSearching ? 'opacity-45' : ''}`}
+          role="group"
+          aria-label={lang === 'zh' ? '電影類型篩選' : 'Genre filter'}
+          aria-describedby={isSearching ? 'search-filter-note' : undefined}
+        >
           {GENRE_PILLS.map((g) => {
             const isActive = genre === g || (g === '全部' && genre === '');
             return (
@@ -251,6 +280,8 @@ export default function HomePage() {
                 key={g}
                 ref={isActive ? activeGenreRef : null}
                 whileTap={{ scale: 0.9 }}
+                type="button"
+                disabled={isSearching}
                 data-cursor={isActive ? '' : 'FILTER'}
                 onClick={() => setGenre(g === '全部' ? '' : g)}
                 className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
@@ -260,7 +291,7 @@ export default function HomePage() {
                 }`}
               >
                 <span className={`inline-block text-sm font-bold font-jetbrains uppercase transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
-                  isActive ? 'text-white' : 'text-[#1A1A1A]/70'
+                  isActive ? 'text-[#1A1A1A]' : 'text-[#1A1A1A]/70'
                 }`}>
                   {t(genreToKey[g]) || g}
                 </span>
@@ -270,13 +301,16 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Media-type filter (影視) — three exclusive tabs (電影/影集/動漫), no '全部'
-          option: exactly one is always active and it defaults to 電影. Same pill
-          style and flex structure as the genre row above, so both share a left
-          edge and read as one consistent control group. */}
+      {/* Media-type filter (影視) */}
       <div className="relative z-10 w-full px-5 mb-7 overflow-hidden">
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full">
+        <div
+          className={`flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full ${isSearching ? 'opacity-45' : ''}`}
+          role="group"
+          aria-label={lang === 'zh' ? '媒體類型篩選' : 'Media type filter'}
+          aria-describedby={isSearching ? 'search-filter-note' : undefined}
+        >
           {[
+            { key: '', zh: '全部', en: 'All' },
             { key: 'movie', zh: '電影', en: 'Film' },
             { key: 'tv', zh: '影集', en: 'Series' },
             { key: 'anime', zh: '動漫', en: 'Anime' },
@@ -286,6 +320,7 @@ export default function HomePage() {
               <motion.button
                 key={opt.key}
                 type="button"
+                disabled={isSearching}
                 whileTap={{ scale: 0.9 }}
                 data-cursor={isActive ? '' : 'FILTER'}
                 onClick={() => setMediaFilter(opt.key)}
@@ -296,7 +331,7 @@ export default function HomePage() {
                 }`}
               >
                 <span className={`inline-block text-sm font-bold font-jetbrains uppercase whitespace-nowrap transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
-                  isActive ? 'text-white' : 'text-[#1A1A1A]/70'
+                  isActive ? 'text-[#1A1A1A]' : 'text-[#1A1A1A]/70'
                 }`}>
                   {lang === 'en' ? opt.en : opt.zh}
                 </span>
@@ -305,6 +340,12 @@ export default function HomePage() {
           })}
         </div>
       </div>
+
+      {isSearching && (
+        <p id="search-filter-note" role="status" className="-mt-4 mb-5 px-5 text-center text-xs font-bold text-[#1A1A1A]/65">
+          {t('searchFilterPaused')}
+        </p>
+      )}
 
       {/* Feed */}
       <main className="max-w-7xl mx-auto px-5 pb-32 md:pb-24" key={refreshKey}>
@@ -317,44 +358,78 @@ export default function HomePage() {
         */}
         <div className="relative z-20 flex justify-between items-center mb-6">
           {/* View Mode Toggle — 書脊牆 (default) or 疊卡 */}
-          <div className="flex bg-[#E8E2D2] rounded-full p-1 border border-border-subtle shadow-sm">
+          <div
+            className="flex bg-[#E8E2D2] rounded-full p-1 border border-border-subtle shadow-sm"
+            role="group"
+            aria-label={t('viewMode')}
+          >
             {/* 書脊牆 — the collection as a shelf of spines */}
             <button
               type="button"
+              aria-pressed={viewMode === 'shelf'}
+              aria-label={t('shelfView')}
               onClick={() => setViewMode('shelf')}
-              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'shelf' ? 'bg-[#FE494A] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
-              title="Shelf View (書脊牆)"
+              className={`px-3 py-2 rounded-full transition-all duration-200 flex items-center gap-2 ${viewMode === 'shelf' ? 'bg-[#FE494A] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/55 hover:text-[#1A1A1A]'}`}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" viewBox="0 0 24 24">
+              <svg aria-hidden="true" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" viewBox="0 0 24 24">
                 <rect x="3" y="4" width="4" height="16" rx="1"></rect>
                 <rect x="9" y="4" width="4" height="16" rx="1"></rect>
                 <rect x="15" y="4" width="4" height="16" rx="1"></rect>
               </svg>
+              <span className="hidden md:inline text-xs font-black">{t('shelfView')}</span>
             </button>
             <button
               type="button"
+              aria-pressed={viewMode === 'deck'}
+              aria-label={t('deckView')}
               onClick={() => setViewMode('deck')}
-              className={`p-2 rounded-full transition-all duration-200 ${viewMode === 'deck' ? 'bg-[#FE494A] text-white shadow-sm' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]'}`}
-              title="Deck View (scroll to flip)"
+              className={`px-3 py-2 rounded-full transition-all duration-200 flex items-center gap-2 ${viewMode === 'deck' ? 'bg-[#FE494A] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/55 hover:text-[#1A1A1A]'}`}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" viewBox="0 0 24 24">
+              <svg aria-hidden="true" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" viewBox="0 0 24 24">
                 <rect x="3" y="6" width="11" height="13" rx="2"></rect>
                 <path d="M8 3h9a2 2 0 0 1 2 2v11"></path>
               </svg>
+              <span className="hidden md:inline text-xs font-black">{t('deckView')}</span>
+            </button>
+            <button
+              type="button"
+              aria-pressed={viewMode === 'compact'}
+              aria-label={t('compactView')}
+              onClick={() => setViewMode('compact')}
+              className={`px-3 py-2 rounded-full transition-all duration-200 flex items-center gap-2 ${viewMode === 'compact' ? 'bg-[#FE494A] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/55 hover:text-[#1A1A1A]'}`}
+            >
+              <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+              <span className="hidden md:inline text-xs font-black">{t('compactView')}</span>
             </button>
           </div>
 
           <div className="flex-1" />
 
           {/* Sort Dropdown aligned to the right */}
+          {isSearching ? (
+            <div className="h-10 md:h-11 flex items-center px-4 rounded-full bg-[#E8E2D2] text-xs font-black text-[#1A1A1A]/65">
+              {t('relevanceSort')}
+            </div>
+          ) : (
           <div className="relative" ref={sortRef}>
             <button
               type="button"
               onClick={() => setSortOpen(!sortOpen)}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') setSortOpen(false);
+              }}
+              aria-expanded={sortOpen}
+              aria-haspopup="menu"
+              aria-controls="review-sort-menu"
               className="appearance-none text-xs md:text-sm bg-[#E8E2D2] border border-border-subtle rounded-full pl-4 md:pl-5 pr-10 md:pr-12 py-2 md:py-2.5 h-10 md:h-11 font-bold uppercase tracking-wider focus:border-[#FE494A] outline-none text-[#1A1A1A] transition-all cursor-pointer flex items-center gap-2 shadow-sm"
             >
               <span>{t(sort)}</span>
-              <svg className={`w-4 h-4 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg aria-hidden="true" className={`w-4 h-4 absolute right-3 md:right-4 top-1/2 -translate-y-1/2 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -362,6 +437,9 @@ export default function HomePage() {
             <AnimatePresence>
               {sortOpen && (
                 <motion.div
+                  id="review-sort-menu"
+                  role="menu"
+                  aria-label={t('sortReviews')}
                   initial={{ opacity: 0, y: -8, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.96 }}
@@ -374,6 +452,8 @@ export default function HomePage() {
                       <button
                         key={opt.value}
                         type="button"
+                        role="menuitemradio"
+                        aria-checked={isActive}
                         onClick={() => { setSort(opt.value); setSortOpen(false); }}
                         className="relative w-full flex items-center px-4 py-3 text-left transition-colors"
                       >
@@ -397,6 +477,7 @@ export default function HomePage() {
               )}
             </AnimatePresence>
           </div>
+          )}
         </div>
 
         <ReviewFeed
@@ -526,7 +607,7 @@ export default function HomePage() {
 
       <StaggeredMenu
         onHomeClick={handleHomeClick}
-        onSearchClick={() => setShowSearchOverlay(true)}
+        onSearchClick={handleOpenSearch}
         searchOpen={showSearchOverlay}
       />
     </motion.div>

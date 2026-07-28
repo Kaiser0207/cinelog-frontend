@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { API_URL, TMDB_IMG_BASE, formatDateTime } from '../utils/constants';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
 import { useAdmin } from './AdminAuth';
 import MovieSearch from './MovieSearch';
 import { pressFx } from '../utils/motion';
+import { useDialogA11y } from '../utils/dialogA11y';
 
 // Heavy editor — lazy so it stays out of the main bundle until you adopt one.
 const ReviewEditor = lazy(() => import('./ReviewEditor'));
@@ -68,7 +69,8 @@ function SuggestForm({ onClose, page = false }) {
     setTitle(movie.title || '');
   };
 
-  const submit = async () => {
+  const submit = async (event) => {
+    event?.preventDefault();
     const finalTitle = title.trim();
     if (!finalTitle) {
       addToast(t('suggestEmptyTitle'), 'info');
@@ -104,7 +106,7 @@ function SuggestForm({ onClose, page = false }) {
       <h2 className="text-xl font-bold text-text-primary mb-1 flex items-center gap-2">🎬 {t('suggestTitle')}</h2>
       <p className="text-text-muted text-sm mb-5">{t('suggestSubtitle')}</p>
 
-      <div className="space-y-4">
+      <form className="space-y-4" onSubmit={submit}>
         <MovieSearch onSelect={handlePick} />
 
         <div>
@@ -112,7 +114,11 @@ function SuggestForm({ onClose, page = false }) {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              const nextTitle = e.target.value;
+              setTitle(nextTitle);
+              if (picked && nextTitle !== (picked.title || '')) setPicked(null);
+            }}
             placeholder={t('suggestTitlePlaceholder')}
             className="w-full"
           />
@@ -143,8 +149,8 @@ function SuggestForm({ onClose, page = false }) {
         </div>
 
         <motion.button
+          type="submit"
           {...pressFx}
-          onClick={submit}
           disabled={submitting || done}
           className={`fx-btn w-full py-3 rounded-full font-bold transition-colors disabled:opacity-60 border-none shadow-sm cursor-pointer ${
             done ? 'bg-emerald-500 text-white' : 'bg-[#FE494A] hover:bg-[#ff5e5f] text-black'
@@ -152,7 +158,7 @@ function SuggestForm({ onClose, page = false }) {
         >
           {done ? `✓ ${t('sentLabel')}` : submitting ? '...' : t('suggestSubmit')}
         </motion.button>
-      </div>
+      </form>
     </Backdrop>
   );
 }
@@ -280,7 +286,7 @@ function Inbox({ password, onClose, page = false }) {
       </div>
 
       {loading ? (
-        <p className="text-sm text-text-dim py-6 text-center">Loading...</p>
+        <p className="text-sm text-text-dim py-6 text-center">{t('loading')}</p>
       ) : shown.length === 0 ? (
         <p className="text-sm text-text-dim py-8 text-center">{t('inboxEmpty')}</p>
       ) : (
@@ -303,7 +309,7 @@ function Inbox({ password, onClose, page = false }) {
                 <p className="text-text-primary font-semibold text-base">{it.title}</p>
                 {it.note && <p className="text-text-muted text-sm mt-1 whitespace-pre-wrap">{it.note}</p>}
                 <p className="text-text-dim text-xs mt-1">
-                  {it.submitter_name || '匿名'} · {formatDateTime(it.created_at)}
+                  {it.submitter_name || t('anonymous')} · {formatDateTime(it.created_at)}
                 </p>
                 <div className="flex gap-4 mt-2 items-center">
                   {it.status === 'adopted' ? (
@@ -338,6 +344,8 @@ function Inbox({ password, onClose, page = false }) {
 // --------------------------------------------------------------------------
 
 function Backdrop({ children, onClose, wide = false, page = false }) {
+  const dialogRef = useRef(null);
+  useDialogA11y({ open: !page, containerRef: dialogRef, onClose });
   // Lock background scroll while the modal is open, otherwise touch-dragging
   // over the overlay scrolls the page behind it (mobile). A page isn't an
   // overlay — it IS the scroll container, so leave the body alone there.
@@ -366,11 +374,16 @@ function Backdrop({ children, onClose, wide = false, page = false }) {
       onClick={onClose}
     >
       <motion.div
+        ref={dialogRef}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 350 }}
         className={`bg-bg-surface border border-border-subtle p-6 rounded-2xl w-full shadow-2xl text-left text-text-primary ${wide ? 'max-w-xl' : 'max-w-md'}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Movie suggestion dialog"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

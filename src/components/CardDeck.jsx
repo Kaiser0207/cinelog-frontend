@@ -6,7 +6,7 @@ import {
   useMotionValueEvent,
   useReducedMotion,
 } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { TMDB_IMG_BASE, getReviewTotal } from '../utils/constants';
 
 /**
@@ -181,7 +181,10 @@ const DeckCard = memo(function DeckCard({ review, i, n, pos, isFront, isFeatured
   const total = getReviewTotal(review);
 
   return (
-    <motion.div
+    <motion.button
+      type="button"
+      aria-label={`閱讀《${review.title}》影評`}
+      tabIndex={isFront ? 0 : -1}
       className="absolute inset-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10"
       onClick={() => { if (isFront) onOpen(review); }}
       style={{
@@ -210,7 +213,7 @@ const DeckCard = memo(function DeckCard({ review, i, n, pos, isFront, isFeatured
       )}
 
       {isFeatured && (
-        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-[#FE494A] text-white text-[10px] font-black uppercase tracking-wider shadow-lg flex items-center gap-1">
+        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-[#FE494A] text-[#1A1A1A] text-[10px] font-black uppercase tracking-wider shadow-lg flex items-center gap-1">
           <span>⭐</span>
           <span>精選</span>
         </div>
@@ -232,6 +235,6 @@ const DeckCard = memo(function DeckCard({ review, i, n, pos, isFront, isFeatured
           {review.title}
         </h3>
       </div>
-    </motion.div>
+    </motion.button>
   );
 });

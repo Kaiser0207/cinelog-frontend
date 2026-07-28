@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { API_URL } from './constants';
 import { cachedJson, onInvalidate } from './apiCache';
+import { buildCatalogNumberMap } from './catalogData';
 
 /**
  * 館藏編號 — the Criterion-style number on a case's spine.
@@ -27,18 +28,19 @@ import { cachedJson, onInvalidate } from './apiCache';
 const PAGE = 100;
 
 /**
- * The whole collection, unfiltered, oldest first. Shared through the API cache, so the
- * shelf, the stats page and anything else that wants it pay for exactly one set of
- * requests between them — and a back-navigation pays for none.
+ * The whole collection, unfiltered. Summary is the lightweight default used by
+ * catalogue fallbacks; consumers such as statistics can explicitly request `full`
+ * when they need watch dates, genres, or other detail-only fields. Each URL/view is
+ * cached independently, so repeated navigation does not repeat its page walk.
  */
-export async function loadAllReviews() {
+export async function loadAllReviews({ view = 'summary' } = {}) {
   const rows = [];
   for (let offset = 0; ; offset += PAGE) {
     // NOT `if (!res.ok) break` — a partial load here is worse than no load. Page 1
     // succeeding and page 2 failing would leave us numbering the newest 100 from 1,
     // so the oldest of those becomes №1 and every spine on the shelf quietly shows the
     // wrong number. A confidently wrong catalogue is worse than none: throw.
-    const data = await cachedJson(`${API_URL}/api/reviews?limit=${PAGE}&offset=${offset}&sort=newest`);
+    const data = await cachedJson(`${API_URL}/api/reviews?limit=${PAGE}&offset=${offset}&sort=newest&view=${view}`);
     const page = data.reviews || [];
     rows.push(...page);
     if (page.length < PAGE) break;
@@ -47,17 +49,19 @@ export async function loadAllReviews() {
 }
 
 async function loadCatalog() {
-  const rows = await loadAllReviews();
-
-  // Acquisition order. №1 is the first review you ever wrote — and stays №1 forever,
-  // whatever you add. (created_at is a Postgres TIMESTAMPTZ string, and they're all
-  // UTC with the same shape, so a lexicographic compare IS a chronological one — no
-  // Date parsing, which Safari would only refuse to do anyway.)
-  rows.sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
-
-  const byId = new Map();
-  rows.forEach((r, i) => byId.set(r.id, i + 1));
-  return byId;
+  try {
+    // id + created_at/catalog_number only: no second homepage download of every
+    // review body, cast list and episode score.
+    const data = await cachedJson(`${API_URL}/api/reviews/catalog`);
+    const map = buildCatalogNumberMap(data);
+    if (map.size > 0) return map;
+    throw new Error('Catalog endpoint returned no rows');
+  } catch (err) {
+    // Vercel and Render deploy independently, so keep compatibility while the
+    // backend is rolling out or when an older local API is used.
+    console.warn('Lightweight catalog unavailable; using legacy collection fallback.', err);
+    return buildCatalogNumberMap(await loadAllReviews());
+  }
 }
 
 // Kicked off at module load, NOT when the shelf mounts. The shelf only mounts once the

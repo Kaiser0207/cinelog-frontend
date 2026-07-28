@@ -51,7 +51,9 @@ const DotField = memo(({
     //
     // On touch: build the grid, paint it ONCE, and never start the loop. Identical
     // picture, no listeners, no interval, no rAF.
-    const INTERACTIVE = window.matchMedia?.('(hover: hover)').matches ?? true;
+    const INTERACTIVE =
+      (window.matchMedia?.('(hover: hover)').matches ?? true) &&
+      !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
     function resize() {
       clearTimeout(resizeTimer);

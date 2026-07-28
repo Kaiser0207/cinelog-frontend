@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { motion, AnimatePresence, useDragControls, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, useDragControls, useMotionValue, useTransform, animate } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import ScoreSlider from './ScoreSlider';
 import EpisodeHeatmap from './EpisodeHeatmap';
 import SpotifyEmbed from './SpotifyEmbed';
@@ -15,6 +15,8 @@ import { useAdmin } from './AdminAuth';
 import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
 import { invalidateApiCache } from '../utils/apiCache';
+import { useReviewFont } from '../utils/reviewFonts';
+import { useDialogA11y } from '../utils/dialogA11y';
 import {
   TMDB_IMG_BASE,
   FONT_MAP,
@@ -33,7 +35,7 @@ function ColorStrip({ palette }) {
   if (!palette || palette.length === 0) return null;
 
   return (
-    <div className="w-full h-12 md:h-16 flex shadow-sm rounded-lg overflow-hidden border border-[#1A1A1A]/10">
+    <div aria-hidden="true" className="w-full h-12 md:h-16 flex shadow-sm rounded-lg overflow-hidden border border-[#1A1A1A]/10">
       {palette.map((hex, i) => (
         <ColorBlock key={i} hex={hex} />
       ))}
@@ -42,33 +44,38 @@ function ColorStrip({ palette }) {
 }
 
 function ColorBlock({ hex }) {
-  const [hovered, setHovered] = useState(false);
-
   return (
     <motion.div
-      className="relative cursor-pointer flex items-center justify-center overflow-hidden"
+      className="relative"
       style={{ backgroundColor: hex }}
       initial={{ flex: 1 }}
-      whileHover={{ flex: 1.5 }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
+      whileHover={{ flex: 1.15 }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-    >
-      <AnimatePresence>
-        {hovered && (
-          <motion.div
-            className="text-white font-black text-xs md:text-sm font-syne tracking-wider drop-shadow-md whitespace-nowrap"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.15 }}
-          >
-            HEX {hex.toUpperCase()}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+    />
   );
+}
+
+function parseArray(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== 'string') return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function estimateReadingMinutes(review) {
+  const text = [
+    review.review_text,
+    ...(review.season_reviews || []).map((season) => season.review_text),
+  ].filter(Boolean).join(' ');
+  if (!text.trim()) return null;
+
+  const latinWords = text.match(/[A-Za-z0-9]+(?:['’_-][A-Za-z0-9]+)*/g)?.length || 0;
+  const cjkCharacters = text.match(/[\u3400-\u9fff]/g)?.length || 0;
+  return Math.max(1, Math.ceil((latinWords / 220) + (cjkCharacters / 450)));
 }
 
 export default function ReviewDetail({ review, onEdit, onDeleted }) {
@@ -77,10 +84,18 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const { addToast } = useToast();
   const { lang, toggleLanguage, t } = useLanguage();
   const [mobileScoreOpen, setMobileScoreOpen] = useState(false);
+  useReviewFont(review.review_font || 'Outfit');
   const dragControls = useDragControls();
 
   // --- Finger-tracked mobile score sheet ---
   const sheetRef = useRef(null);
+  const sheetHandleRef = useRef(null);
+  useDialogA11y({
+    open: mobileScoreOpen,
+    containerRef: sheetRef,
+    initialFocusRef: sheetHandleRef,
+    onClose: () => setMobileScoreOpen(false),
+  });
   const sheetY = useMotionValue(0);        // live y; the finger drives this directly
   const closedYRef = useRef(600);          // travel distance (peek shows 85px)
   const [closedY, setClosedY] = useState(600);
@@ -130,9 +145,12 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
   const directors = review.directors_info || [];
   const writers = review.writers_info || [];
 
-  const watchDates = review.watch_dates 
-    ? (typeof review.watch_dates === 'string' ? JSON.parse(review.watch_dates) : review.watch_dates) 
-    : [];
+  const watchDates = parseArray(review.watch_dates);
+  const lastWatchDate = review.last_watched_date || [...watchDates]
+    .map(String)
+    .sort((a, b) => b.localeCompare(a))[0];
+  const readingMinutes = estimateReadingMinutes(review);
+  const displayLocale = lang === 'zh' ? 'zh-TW' : 'en-US';
   const fontFamily = FONT_MAP[review.review_font] || FONT_MAP['Outfit'];
 
   const backdropUrl = review.custom_backdrop_url
@@ -267,6 +285,15 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           </div>
         </>
       )}
+
+      <details className="glass rounded-lg border border-border-subtle p-4 text-sm text-text-muted">
+        <summary className="cursor-pointer font-bold text-text-primary marker:text-[#FE494A]">
+          {t('scoreMethod')}
+        </summary>
+        <p className="mt-3 leading-relaxed">
+          {isSeries ? t('scoreMethodSeries') : t('scoreMethodMovie')}
+        </p>
+      </details>
     </div>
   );
 
@@ -283,7 +310,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       <button
         onClick={() => navigate('/')}
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}
-        className="group fixed left-6 z-[130] px-5 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
+        className="group fixed left-6 z-[130] px-5 py-2 bg-[#FE494A] hover:bg-[#D480C0] text-[#1A1A1A] rounded-full shadow-lg transition-all flex items-center gap-2 border-none cursor-pointer"
       >
         <span className="inline-block font-bold font-syne text-sm transition-all duration-300 group-hover:scale-110 group-hover:font-black">
           {t('back')}
@@ -294,7 +321,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
       <button
         onClick={toggleLanguage}
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}
-        className="fixed right-6 z-[130] px-4 py-2 bg-[#FE494A] hover:bg-[#D480C0] hover:text-black text-white rounded-full shadow-lg transition-all border-none font-syne font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
+        className="fixed right-6 z-[130] px-4 py-2 bg-[#FE494A] hover:bg-[#D480C0] text-[#1A1A1A] rounded-full shadow-lg transition-all border-none font-syne font-bold text-xs cursor-pointer flex items-center gap-1 active:scale-95"
       >
         <span>🌐</span>
         <span>{lang === 'en' ? '繁' : 'EN'}</span>
@@ -379,10 +406,19 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
               {review.release_date && (
                 <span>{new Date(review.release_date).getFullYear()}</span>
               )}
-              {review.runtime && <span>· {review.runtime} min</span>}
+              {review.runtime && <span>· {review.runtime} {t('minutesShort')}</span>}
+              {review.created_at && (
+                <span>· {t('publishedDate')} {formatDate(review.created_at, displayLocale)}</span>
+              )}
+              {lastWatchDate && (
+                <span>· {t('lastWatched')} {formatDate(lastWatchDate, displayLocale)}</span>
+              )}
+              {readingMinutes && (
+                <span>· {readingMinutes} {t('minuteRead')}</span>
+              )}
               {isEdited && (
                 <span className="bg-accent-gold/20 text-accent-gold text-xs px-2 py-0.5 rounded-md drop-shadow-none">
-                  Edited
+                  {t('edited')}
                 </span>
               )}
             </motion.div>
@@ -397,6 +433,80 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           <div className="flex-1 min-w-0 space-y-10">
             {/* COLOR STRIP */}
             <ColorStrip palette={review.color_palette} />
+
+            {/* Review — movies: one write-up; series: per-season blocks */}
+            {!isSeries ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.65 }}
+              >
+                <div className="flex items-center justify-between mb-4 border-b-4 border-[#FE494A] pb-2">
+                  <h3 className="text-2xl font-bold font-syne text-[#FE494A] uppercase tracking-wider">
+                    {t('review')}
+                  </h3>
+                </div>
+                <TLDRButton
+                  reviewId={review.id}
+                  reviewText={review.review_text}
+                  movieTitle={review.title}
+                />
+
+                <div className="prose-cinelog" style={{ fontFamily }}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {(review.review_text || '').replace(/\n/g, '  \n')}
+                  </ReactMarkdown>
+                </div>
+              </motion.div>
+            ) : (
+              review.seasons && review.seasons.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.65 }}
+                  className="space-y-10"
+                >
+                  {review.seasons.map((season) => {
+                    const sr = (review.season_reviews || []).find(
+                      (s) => s.season_number === season.season_number,
+                    ) || {};
+                    const avg = seasonAverage(review.episode_scores, season.season_number);
+                    return (
+                      <div key={season.season_number} className="space-y-4">
+                        <div className="flex items-center justify-between border-b-4 border-[#FE494A] pb-2">
+                          <h3 className="text-2xl font-bold font-syne text-[#FE494A] uppercase tracking-wider">
+                            {lang === 'zh' ? `第 ${season.season_number} 季` : `Season ${season.season_number}`}
+                          </h3>
+                          {avg != null && (
+                            <span
+                              className="text-sm font-black tabular-nums px-2.5 py-1 rounded-full text-white"
+                              style={{ backgroundColor: getEpisodeColor(avg) }}
+                            >
+                              {t('averageShort')} {avg.toFixed(1)}
+                            </span>
+                          )}
+                        </div>
+                        {sr.review_text && (
+                          <div className="prose-cinelog" style={{ fontFamily }}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {sr.review_text.replace(/\n/g, '  \n')}
+                            </ReactMarkdown>
+                          </div>
+                        )}
+                        {sr.spotify_track_id && <SpotifyEmbed trackId={sr.spotify_track_id} />}
+                        <EpisodeHeatmap
+                          seasons={[season]}
+                          episodeScores={review.episode_scores || []}
+                        />
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              )
+            )}
+
+            <ReactionBar reviewId={review.id} />
+
             {/* Overview */}
             {review.overview && (
               <motion.div
@@ -490,75 +600,6 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 </div>
               </motion.div>
             )}
-
-            {/* Review — movies: one write-up; series: per-season blocks */}
-            {!isSeries ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.65 }}
-              >
-                <div className="flex items-center justify-between mb-4 border-b-4 border-[#FE494A] pb-2">
-                  <h3 className="text-2xl font-bold font-syne text-[#FE494A] uppercase tracking-wider">
-                    {t('review')}
-                  </h3>
-                </div>
-                <TLDRButton reviewText={review.review_text} movieTitle={review.title} />
-
-                <div className="prose-cinelog" style={{ fontFamily }}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {(review.review_text || '').replace(/\n/g, '  \n')}
-                  </ReactMarkdown>
-                </div>
-              </motion.div>
-            ) : (
-              review.seasons && review.seasons.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.65 }}
-                  className="space-y-10"
-                >
-                  {review.seasons.map((season) => {
-                    const sr = (review.season_reviews || []).find(
-                      (s) => s.season_number === season.season_number,
-                    ) || {};
-                    const avg = seasonAverage(review.episode_scores, season.season_number);
-                    return (
-                      <div key={season.season_number} className="space-y-4">
-                        <div className="flex items-center justify-between border-b-4 border-[#FE494A] pb-2">
-                          <h3 className="text-2xl font-bold font-syne text-[#FE494A] uppercase tracking-wider">
-                            第 {season.season_number} 季
-                          </h3>
-                          {avg != null && (
-                            <span
-                              className="text-sm font-black tabular-nums px-2.5 py-1 rounded-full text-white"
-                              style={{ backgroundColor: getEpisodeColor(avg) }}
-                            >
-                              平均 {avg.toFixed(1)}
-                            </span>
-                          )}
-                        </div>
-                        {sr.review_text && (
-                          <div className="prose-cinelog" style={{ fontFamily }}>
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {sr.review_text.replace(/\n/g, '  \n')}
-                            </ReactMarkdown>
-                          </div>
-                        )}
-                        {sr.spotify_track_id && <SpotifyEmbed trackId={sr.spotify_track_id} />}
-                        <EpisodeHeatmap
-                          seasons={[season]}
-                          episodeScores={review.episode_scores || []}
-                        />
-                      </div>
-                    );
-                  })}
-                </motion.div>
-              )
-            )}
-
-            <ReactionBar reviewId={review.id} />
 
             {/* AI Recommendation & Related Movies */}
             {(review.ai_recommendation || (review.ai_related_movies && review.ai_related_movies.length > 0)) && (
@@ -680,6 +721,9 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
         {/* Unified Bottom Sheet — tracks the finger 1:1 across the whole range */}
         <motion.div
           ref={sheetRef}
+          role={mobileScoreOpen ? 'dialog' : 'region'}
+          aria-modal={mobileScoreOpen ? 'true' : undefined}
+          aria-label={t('totalScore') || 'Score details'}
           style={{ y: sheetY }}
           drag="y"
           dragControls={dragControls}
@@ -699,8 +743,12 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           className="absolute bottom-0 left-0 right-0 w-full bg-bg-deep/95 backdrop-blur-2xl border-t border-white/10 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex flex-col pointer-events-auto"
         >
           {/* Top Handle / Mini Bar (Always visible) */}
-          <div 
-            className="h-[85px] w-full flex items-center justify-around px-6 cursor-grab active:cursor-grabbing touch-none shrink-0"
+          <button
+            ref={sheetHandleRef}
+            type="button"
+            aria-expanded={mobileScoreOpen}
+            aria-controls="mobile-score-content"
+            className="h-[85px] w-full flex items-center justify-around px-6 cursor-grab active:cursor-grabbing touch-none shrink-0 bg-transparent border-0"
             onClick={() => setMobileScoreOpen(!mobileScoreOpen)}
             onPointerDown={(e) => dragControls.start(e)}
             style={{ paddingBottom: mobileScoreOpen ? '0px' : 'env(safe-area-inset-bottom, 0px)' }}
@@ -735,16 +783,17 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                 {isSeries && (
                   <>
                     <div className="w-px h-8 bg-white/10" />
-                    <span className="text-sm font-bold text-text-muted">📺 影集</span>
+                    <span className="text-sm font-bold text-text-muted">📺 {t('seriesLabel')}</span>
                   </>
                 )}
                 <span className="text-text-dim text-sm ml-2 animate-bounce">▲</span>
               </>
             )}
-          </div>
+          </button>
 
           {/* Expandable Content (ScoreCards) */}
-          <div 
+          <div
+            id="mobile-score-content"
             className="px-5 pb-8 overflow-y-auto max-h-[70vh] overscroll-contain"
             style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
           >
@@ -802,7 +851,7 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
                     <span className="text-xs font-black uppercase text-[#D480C0] font-syne bg-[#D480C0]/15 px-2 py-0.5 rounded">
                       {['1st', '2nd', '3rd'][i] || `${i + 1}th`}
                     </span>
-                    <span className="text-base font-bold font-syne">{formatDate(date)}</span>
+                    <span className="text-base font-bold font-syne">{formatDate(date, displayLocale)}</span>
                   </motion.div>
                 ))}
               </div>
@@ -860,10 +909,10 @@ export default function ReviewDetail({ review, onEdit, onDeleted }) {
           {/* Timestamps */}
           <div className="text-[10px] md:text-xs font-bold font-syne text-white/50 flex flex-wrap justify-center gap-6 pt-8 border-t border-white/10 w-full">
             {review.created_at && (
-              <span>{t('created')} {formatDate(review.created_at)}</span>
+              <span>{t('created')} {formatDate(review.created_at, displayLocale)}</span>
             )}
             {isEdited && (
-              <span>{t('updated')} {formatDate(review.updated_at)}</span>
+              <span>{t('updated')} {formatDate(review.updated_at, displayLocale)}</span>
             )}
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useMemo, useId } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import './CurvedLoop.css';
 
 // The wordmark's separator. See the note in the component.
@@ -33,6 +34,7 @@ const CurvedLoop = ({
   const pathRef = useRef(null);
   const [spacing, setSpacing] = useState(0);
   const uid = useId();
+  const reduceMotion = useReducedMotion();
   const pathId = `curve-${uid}`;
   // The baseline sits low in a TALL viewBox so the letters (which rise from it) and
   // the sag of the curve both land INSIDE the box. The original ran the path at y=40
@@ -100,7 +102,7 @@ const CurvedLoop = ({
   }, []);
 
   useEffect(() => {
-    if (!spacing || !ready || !onScreen) return undefined;
+    if (!spacing || !ready || !onScreen || reduceMotion) return undefined;
     let frame = 0;
     const step = () => {
       if (!dragRef.current && textPathRef.current) {
@@ -118,10 +120,10 @@ const CurvedLoop = ({
     };
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
-  }, [spacing, speed, ready, onScreen]);
+  }, [spacing, speed, ready, onScreen, reduceMotion]);
 
   const onPointerDown = e => {
-    if (!interactive) return;
+    if (!interactive || reduceMotion) return;
     dragRef.current = true;
     lastXRef.current = e.clientX;
     velRef.current = 0;
@@ -129,7 +131,7 @@ const CurvedLoop = ({
   };
 
   const onPointerMove = e => {
-    if (!interactive || !dragRef.current || !textPathRef.current) return;
+    if (!interactive || reduceMotion || !dragRef.current || !textPathRef.current) return;
     const dx = e.clientX - lastXRef.current;
     lastXRef.current = e.clientX;
     velRef.current = dx;
@@ -146,12 +148,12 @@ const CurvedLoop = ({
   };
 
   const endDrag = () => {
-    if (!interactive) return;
+    if (!interactive || reduceMotion) return;
     dragRef.current = false;
     dirRef.current = velRef.current > 0 ? 'right' : 'left';
   };
 
-  const cursorStyle = interactive ? (dragRef.current ? 'grabbing' : 'grab') : 'auto';
+  const cursorStyle = interactive && !reduceMotion ? (dragRef.current ? 'grabbing' : 'grab') : 'auto';
 
   return (
     <div

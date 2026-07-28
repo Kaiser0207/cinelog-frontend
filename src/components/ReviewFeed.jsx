@@ -2,8 +2,10 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import CardDeck from './CardDeck';
 import SpineShelf from './SpineShelf';
+import CompactGrid from './CompactGrid';
 import { API_URL, flattenReview } from '../utils/constants';
 import { cachedJson } from '../utils/apiCache';
+import { useLanguage } from './LanguageContext';
 
 // The backend caps a page at 100. Both views want the WHOLE collection — a shelf
 // holding 12 of your 100 films isn't a shelf — so we just page through it.
@@ -20,12 +22,14 @@ function feedUrl({ searchQuery, searchMode, sort, genre, media, offset }) {
   p.set('offset', String(offset));
   p.set('limit', String(PAGE));
   p.set('sort', sort);
+  p.set('view', 'summary');
   if (genre) p.set('genre', genre);
   if (media) p.set('media', media);
   return `${API_URL}/api/reviews?${p}`;
 }
 
 export default function ReviewFeed({ sort = 'newest', genre = '', media = '', searchQuery = '', searchMode = 'standard', viewMode = 'shelf' }) {
+  const { t } = useLanguage();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
@@ -137,7 +141,7 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
 
   if (initialLoad) {
     return (
-      <div className="flex items-center justify-center" style={{ height: '70svh' }}>
+      <div className="flex items-center justify-center" style={{ height: '70svh' }} role="status" aria-label={t('loadingReviews')}>
         <div
           className="aspect-[2/3] rounded-2xl bg-[#1A1A1A]/10 animate-pulse"
           style={{ height: 'clamp(340px, 62svh, 580px)' }}
@@ -156,20 +160,21 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col items-center justify-center py-24 text-center"
+        role="alert"
       >
         <span className="text-6xl mb-4">📡</span>
         <h3 className="text-xl font-bold font-syne tracking-tighter text-[#1A1A1A] mb-2">
-          連不上片庫
+          {t('feedErrorTitle')}
         </h3>
         <p className="text-text-muted text-sm max-w-sm mb-5">
-          伺服器沒有回應。可能只是還在醒來 —— 等幾秒再試一次。
+          {t('feedErrorDesc')}
         </p>
         <button
           type="button"
           onClick={() => window.location.reload()}
           className="px-5 py-2.5 rounded-full bg-[#1A1A1A] text-white text-sm font-bold"
         >
-          重新載入
+          {t('retry')}
         </button>
       </motion.div>
     );
@@ -181,22 +186,38 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col items-center justify-center py-24 text-center"
+        role="status"
       >
         <span className="text-6xl mb-4">🎬</span>
         <h3 className="text-xl font-bold font-syne tracking-tighter text-[#1A1A1A] mb-2">
-          No Reviews Yet
+          {t('noReviewsTitle')}
         </h3>
         <p className="text-text-muted text-sm max-w-sm">
-          Start your cinematic journal by tapping the + button to write your first review.
+          {t('noReviewsDesc')}
         </p>
       </motion.div>
     );
   }
 
+  if (viewMode === 'compact' || searchQuery) {
+    return (
+      <section aria-label={`${t('reviewResults')}: ${items.length}`}>
+        <CompactGrid reviews={items} featuredIds={featuredIds} />
+      </section>
+    );
+  }
   // 疊卡 — flip through them one at a time.
   if (viewMode === 'deck') {
-    return <CardDeck reviews={items} featuredIds={featuredIds} />;
+    return (
+      <section aria-label={`${t('reviewResults')}: ${items.length}`}>
+        <CardDeck reviews={items} featuredIds={featuredIds} />
+      </section>
+    );
   }
   // 書脊牆 — the default: the whole collection, on a shelf.
-  return <SpineShelf reviews={items} featuredIds={featuredIds} />;
+  return (
+    <section aria-label={`${t('reviewResults')}: ${items.length}`}>
+      <SpineShelf reviews={items} featuredIds={featuredIds} />
+    </section>
+  );
 }

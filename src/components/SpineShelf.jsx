@@ -1,9 +1,11 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { TMDB_IMG_BASE, getReviewTotal } from '../utils/constants';
 import { getPosterColors, cachedColors, fallbackFor, isDark, samplerSrc } from '../utils/posterColors';
 import { useCatalogNumbers, formatCatalogNo } from '../utils/catalog';
+import { useLanguage } from './LanguageContext';
+import { useDialogA11y } from '../utils/dialogA11y';
 import './SpineShelf.css';
 
 /**
@@ -101,6 +103,7 @@ const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 // to a mouse.
 const CAN_HOVER = typeof window !== 'undefined'
   && window.matchMedia?.('(hover: hover)').matches;
+const SHELF_HINT_KEY = 'cinerooms_shelf_hint_seen';
 
 /**
  * THE case's geometry, derived in ONE place from its height.
@@ -134,6 +137,7 @@ function useSpineColors(posterPath, seed) {
 
 export default function SpineShelf({ reviews = [], featuredIds }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   // The case being taken off the shelf: { review, el, rect, colors, index }.
   //
   // `el` is the case's PERSPECTIVE WRAPPER, not the button inside it. The button
@@ -146,6 +150,20 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
   // We keep the element itself, not just the rect, so the case can ask the shelf
   // where its slot is NOW when it's time to go back — see PullOut.putBack().
   const [pulled, setPulled] = useState(null);
+  const [showHint, setShowHint] = useState(() => {
+    try {
+      return localStorage.getItem(SHELF_HINT_KEY) !== '1';
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    if (!showHint) return undefined;
+    try { localStorage.setItem(SHELF_HINT_KEY, '1'); } catch { /* storage unavailable */ }
+    const timer = window.setTimeout(() => setShowHint(false), 8000);
+    return () => window.clearTimeout(timer);
+  }, [showHint]);
 
   // The GAP the case left behind, as an index: everything after it is shuffled over.
   //
@@ -201,6 +219,28 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
 
   return (
     <>
+      <AnimatePresence>
+        {showHint && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            role="status"
+            className="relative z-20 mx-auto mb-3 flex w-fit max-w-[calc(100vw-2.5rem)] items-center gap-3 rounded-full bg-[#1A1A1A] px-4 py-2 text-sm font-bold text-white shadow-lg"
+          >
+            <span aria-hidden="true">💿</span>
+            <span>{t('shelfHint')}</span>
+            <button
+              type="button"
+              onClick={() => setShowHint(false)}
+              aria-label={t('dismissHint')}
+              className="grid h-7 w-7 place-items-center rounded-full bg-white/10 text-white"
+            >
+              ×
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/*
         Full-bleed: the shelf breaks out of <main>'s max-width and runs edge to edge,
         so cases are cut off by both sides of the screen and the row reads as a shelf
@@ -266,7 +306,7 @@ export default function SpineShelf({ reviews = [], featuredIds }) {
             be here read as a scrollbar, which is the last thing it should look like. */}
         <div className="h-5 -mt-1 bg-[radial-gradient(ellipse_at_top,rgba(26,26,26,0.20),transparent_70%)]" />
         <p className="mt-2 text-center text-xs text-[#1A1A1A]/45">
-          ← 左右滑動瀏覽 · 點一片抽出來 →
+          {t('shelfBrowseHint')}
         </p>
       </div>
 
@@ -637,6 +677,7 @@ function CoverFace({
 }
 
 const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, catalogNo, nudged, held, onPull }) {
+  const { t } = useLanguage();
   const colors = useSpineColors(review.poster_path, seed);
   const [body, foot] = colors;
   const total = getReviewTotal(review);
@@ -703,6 +744,7 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, ca
           transformOrigin: 'right center',
         }}
         title={review.title}
+        aria-label={`${t('pullFromShelf')}: ${review.title}`}
       >
         {/* No PaperEdges here. The underside and the far wall are the two faces a
             case on a shelf can never show you: you're looking slightly DOWN at it, so
@@ -782,6 +824,7 @@ const Case = memo(function Case({ review, seed, geom, depthOrder, isFeatured, ca
  * (spine width + half a cover).
  */
 function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, onOpen, onClose }) {
+  const { t } = useLanguage();
   const [settled, setSettled] = useState(false);
   const [body, foot] = colors || fallbackFor(0);
 
@@ -812,7 +855,6 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
   // Vertically it's already honest: the perspective origin sits at the case's own
   // centre, so the case's centre projects to itself, whatever k is.
   const targetY = Math.max(16, (window.innerHeight - h) / 2);
-  const projBottom = targetY + h / 2 + (h / 2) * k;
   const poster = handSrc(review.poster_path);
   const thumb = samplerSrc(review.poster_path);
   const total = getReviewTotal(review);
@@ -892,6 +934,8 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
   // case that's still sitting in mid-air. So the component stays mounted, plays the
   // reverse itself, and only then tells the shelf to drop it.
   const closing = useRef(false);
+  const dialogRef = useRef(null);
+  const readButtonRef = useRef(null);
   const putBack = () => {
     if (closing.current) return;
     closing.current = true;
@@ -920,6 +964,16 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = prev; };
   }, []);
+
+  useDialogA11y({
+    containerRef: dialogRef,
+    initialFocusRef: readButtonRef,
+    onClose: putBack,
+  });
+
+  useEffect(() => {
+    if (settled) readButtonRef.current?.focus();
+  }, [settled]);
 
   const grab = useRef(null);
   const travelled = useRef(0);
@@ -960,7 +1014,26 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
   };
 
   return (
-    <div className="fixed inset-0 z-[300]" onClick={putBack}>
+    <div
+      ref={dialogRef}
+      className="fixed inset-0 z-[300]"
+      onClick={putBack}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pulled-review-title"
+      tabIndex={-1}
+    >
+      <h2 id="pulled-review-title" className="sr-only">
+        {t('shelfDialogTitle')}: {review.title}
+      </h2>
+      <button
+        type="button"
+        onClick={(event) => { event.stopPropagation(); putBack(); }}
+        aria-label={t('closePreview')}
+        className="absolute right-5 top-[calc(1.25rem+env(safe-area-inset-top,0px))] z-20 grid h-11 w-11 place-items-center rounded-full bg-white/10 text-xl font-black text-white"
+      >
+        ×
+      </button>
       {/* Opaque enough that the title and the genre pills genuinely go away — at
           55% they were still legible through it, so the case never felt like it had
           the stage to itself.
@@ -1069,15 +1142,23 @@ function PullOut({ review, rect, geom, isFeatured, catalogNo, getHome, colors, o
 
       <AnimatePresence>
         {settled && (
-          <motion.p
+          <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-x-0 text-center text-white/85 text-sm font-bold pointer-events-none"
-            style={{ top: Math.min(projBottom + 32, window.innerHeight - 34) }}
+            className="absolute inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] z-20 flex flex-col items-center gap-2 px-5 text-center text-white/85 text-sm font-bold"
+            onClick={(event) => event.stopPropagation()}
           >
-            拖曳可以轉動 · 再點一次 → 進入影評
-          </motion.p>
+            <p>{t('shelfDragHint')}</p>
+            <button
+              ref={readButtonRef}
+              type="button"
+              onClick={onOpen}
+              className="rounded-full bg-[#FE494A] px-6 py-3 text-sm font-black text-[#1A1A1A] shadow-xl"
+            >
+              {t('readReview')} →
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

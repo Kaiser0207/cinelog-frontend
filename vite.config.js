@@ -17,7 +17,7 @@ export default defineConfig({
         // The function form matches on the resolved path, so it catches the subpaths.
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined
-          if (/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom)\//.test(id)) {
+          if (/node_modules\/(react|react-dom|scheduler|react-router)\//.test(id)) {
             return 'vendor-react'
           }
           // gsap is used by exactly ONE component (the nav menu) and nothing else. It was

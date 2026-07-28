@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FONTS, FONT_MAP } from '../utils/constants';
+import { loadReviewFont, useReviewFont } from '../utils/reviewFonts';
 
 export default function FontSelector({ value, onChange }) {
   const [open, setOpen] = useState(false);
@@ -18,6 +19,7 @@ export default function FontSelector({ value, onChange }) {
   }, []);
 
   const currentFont = FONTS.find((f) => f.name === value) || FONTS[0];
+  useReviewFont(currentFont.name);
 
   return (
     <div className="relative" ref={ref}>
@@ -54,7 +56,11 @@ export default function FontSelector({ value, onChange }) {
                   key={font.name}
                   type="button"
                   onClick={() => { onChange(font.name); setOpen(false); }}
-                  onMouseEnter={() => setHoveredFont(font.name)}
+                  onFocus={() => loadReviewFont(font.name)}
+                  onMouseEnter={() => {
+                    loadReviewFont(font.name);
+                    setHoveredFont(font.name);
+                  }}
                   onMouseLeave={() => setHoveredFont(null)}
                   className="relative w-full flex items-center justify-between px-4 py-3"
                 >

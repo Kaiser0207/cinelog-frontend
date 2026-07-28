@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>CineRooms — Your Cinematic Journal</title>
     <meta name="description" content="A personal cinematic journal: rate, review and revisit the films you love." />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://cinerooms.vercel.app/" />
 
-    <!-- Fonts: preconnect + genuinely non-render-blocking load.
-         Load the (large, ~20-family) stylesheet as media="print" so it doesn't
-         block first paint, then flip to all once it arrives. display=swap means
-         text shows immediately in fallback fonts and swaps in with no blank flash.
-         <noscript> keeps fonts working if JS is disabled. -->
+    <!-- Site chrome uses self-hosted Nevis plus one CJK fallback. The many
+         per-review faces are injected on demand by reviewFonts.js. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
@@ -23,9 +22,9 @@
     <link rel="preconnect" href="https://image.tmdb.org" crossorigin />
     <!-- Preload the self-hosted Nevis display face used for the CINEROOMS wordmark -->
     <link rel="preload" as="font" type="font/ttf" href="/fonts/nevis.ttf" crossorigin />
-    <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Noto+Serif+TC:wght@400;700;900&family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;600;700;800&family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=UnifrakturCook:wght@700&family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Google+Sans+Flex:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=LXGW+WenKai+TC:wght@300;400;700&family=Zhi+Mang+Xing&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" />
     <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Noto+Serif+TC:wght@400;700;900&family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;600;700;800&family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=UnifrakturCook:wght@700&family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Google+Sans+Flex:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=LXGW+WenKai+TC:wght@300;400;700&family=Zhi+Mang+Xing&display=swap" />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" />
     </noscript>
 
     <!-- Open Graph / social link previews -->
@@ -58,7 +57,6 @@
     <!-- Bridge launch screen: painted by the HTML (in <body> below) the instant
          it loads, before React boots, so there's no blank gap after the native
          splash. The inline check tags <html> so a normal browser tab never shows it. -->
-    <link rel="preload" as="image" href="/icons/icon-512.png" />
     <style>
       /* Inline so the launch screen is FULLY styled at first paint, before
          index.css (bundled with the JS) loads — kills the unstyled/white/font-swap
@@ -110,17 +108,7 @@
       }
       #launch-screen.launch-hide { opacity: 0; pointer-events: none; }
     </style>
-    <script>
-      (function () {
-        try {
-          var standalone =
-            (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-            window.navigator.standalone === true ||
-            location.search.indexOf('splash') > -1;
-          if (standalone) document.documentElement.classList.add('pwa-standalone');
-        } catch (e) {}
-      })();
-    </script>
+    <script src="/bootstrap.js"></script>
 
     <!-- iOS launch screens (splash) — app icon on the brand cream, per device -->
     <link rel="apple-touch-startup-image" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/apple-splash-640-1136.png" />

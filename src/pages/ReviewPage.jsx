@@ -1,8 +1,11 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReviewDetail from '../components/ReviewDetail';
-import { API_URL, flattenReview } from '../utils/constants';
+import { API_URL, TMDB_IMG_BASE, flattenReview } from '../utils/constants';
+import { hasReviewDetail } from '../utils/reviewData';
+import { usePageMetadata } from '../components/RouteMetadata';
+import { useLanguage } from '../components/LanguageContext';
 
 const ReviewEditor = lazy(() => import('../components/ReviewEditor'));
 
@@ -10,23 +13,35 @@ export default function ReviewPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
   // When arriving from the feed we already have the full review object — render
   // it instantly and only fall back to a skeleton on a cold/direct load.
-  const preloaded =
+  const routeReview =
     location.state?.review && String(location.state.review.id) === String(id)
       ? location.state.review
       : null;
+  const preloaded = hasReviewDetail(routeReview) ? routeReview : null;
   const [review, setReview] = useState(preloaded ? flattenReview(preloaded) : null);
   const [loading, setLoading] = useState(!preloaded);
   const [error, setError] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
+  const seoReview = review || (routeReview ? flattenReview(routeReview) : null);
+  usePageMetadata({
+    title: seoReview?.title ? `${seoReview.title} — Movie Review | CineRooms` : 'Movie Review | CineRooms',
+    description: seoReview?.overview || seoReview?.review_text || 'Read this CineRooms movie review.',
+    path: `/review/${id}`,
+    image: seoReview?.poster_path ? `${TMDB_IMG_BASE}w780${seoReview.poster_path}` : '/og-image.png',
+    type: 'article',
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
     let cancelled = false;
 
     const hasPreload =
-      location.state?.review && String(location.state.review.id) === String(id);
+      location.state?.review &&
+      String(location.state.review.id) === String(id) &&
+      hasReviewDetail(location.state.review);
     if (hasPreload) {
       // Show the cached review immediately; refresh silently below.
       setReview(flattenReview(location.state.review));
@@ -94,16 +109,16 @@ export default function ReviewPage() {
       >
         <span className="text-7xl mb-4">🎬</span>
         <h2 className="text-2xl font-bold font-syne tracking-tightertext-text-primary mb-2">
-          Review Not Found
+          {t('reviewNotFoundTitle')}
         </h2>
         <p className="text-text-muted mb-6">
-          This review may have been deleted or the link is invalid.
+          {t('reviewNotFoundDesc')}
         </p>
         <button
           onClick={() => navigate('/')}
           className="px-6 py-3 bg-[#FE494A] hover:bg-[#FE494A] text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-all border-none shadow-sm cursor-pointer"
         >
-          ← Back to Feed
+          ← {t('backToFeed')}
         </button>
       </motion.div>
     );

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { useLanguage } from './LanguageContext';
 
 /*
@@ -21,8 +21,22 @@ import { useLanguage } from './LanguageContext';
  */
 
 const DISMISS_KEY = 'cineroom_install_dismissed_until';
+const VISIT_KEY = 'cineroom_visit_count';
 const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
-const REVEAL_DELAY_MS = 2000;
+let recordedPriorVisits = null;
+
+function recordVisit() {
+  if (recordedPriorVisits != null) return recordedPriorVisits;
+  try {
+    const prior = Number(localStorage.getItem(VISIT_KEY) || 0);
+    localStorage.setItem(VISIT_KEY, String(Math.min(prior + 1, 1000)));
+    recordedPriorVisits = prior;
+    return prior;
+  } catch {
+    recordedPriorVisits = 0;
+    return 0;
+  }
+}
 
 function detectEnv() {
   const ua = navigator.userAgent || '';
@@ -77,9 +91,12 @@ export default function InstallPrompt() {
   const [deferred, setDeferred] = useState(() => window.__deferredInstallPrompt || null);
   const [ready, setReady] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [returningVisitor] = useState(() => recordVisit() > 0);
 
   useEffect(() => {
-    if (env.isStandalone || isSnoozed()) {
+    // Never interrupt a first visit. Returning visitors see the prompt only
+    // after they interact with the page, not on an arbitrary two-second timer.
+    if (!returningVisitor || env.isStandalone || isSnoozed()) {
       setDismissed(true);
       return;
     }
@@ -99,14 +116,19 @@ export default function InstallPrompt() {
 
     window.addEventListener('beforeinstallprompt', onBeforeInstall);
     window.addEventListener('appinstalled', onInstalled);
-    const timer = setTimeout(() => setReady(true), REVEAL_DELAY_MS);
+    const reveal = () => setReady(true);
+    window.addEventListener('pointerdown', reveal, { once: true, passive: true });
+    window.addEventListener('keydown', reveal, { once: true });
+    window.addEventListener('scroll', reveal, { once: true, passive: true });
 
     return () => {
       window.removeEventListener('beforeinstallprompt', onBeforeInstall);
       window.removeEventListener('appinstalled', onInstalled);
-      clearTimeout(timer);
+      window.removeEventListener('pointerdown', reveal);
+      window.removeEventListener('keydown', reveal);
+      window.removeEventListener('scroll', reveal);
     };
-  }, [env]);
+  }, [env, returningVisitor]);
 
   // Decide which card (if any) to show.
   const mode = (() => {
@@ -152,7 +174,8 @@ export default function InstallPrompt() {
           exit={{ y: -120, opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
           className="md:hidden fixed top-0 left-0 right-0 z-[120]"
-          role="dialog"
+          role="region"
+          aria-live="polite"
           aria-label={t('installTitle')}
         >
           <div

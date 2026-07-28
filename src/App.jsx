@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router';
+import { AnimatePresence, MotionConfig } from 'framer-motion';
 import { ToastProvider } from './components/Toast';
 import { AdminProvider } from './components/AdminAuth';
 import { LanguageProvider } from './components/LanguageContext';
@@ -8,6 +8,8 @@ import SmoothScroll from './components/SmoothScroll';
 import CustomCursor from './components/CustomCursor';
 import InstallPrompt from './components/InstallPrompt';
 import HomePage from './pages/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
+import RouteMetadata from './components/RouteMetadata';
 
 // We manage scroll ourselves (top-of-feed on mount, top-of-detail on open), so
 // stop the browser from also restoring old offsets on back/forward — that race
@@ -43,6 +45,7 @@ function AnimatedRoutes() {
         <Route path="/stats" element={<StatsPage />} />
         <Route path="/suggestions" element={<SuggestionsPage />} />
         <Route path="/review/:id" element={<ReviewPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AnimatePresence>
   );
@@ -50,15 +53,17 @@ function AnimatedRoutes() {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <AdminProvider>
-        <ToastProvider>
-          <SmoothScroll />
-          <Suspense fallback={null}>
-            <SiteBackground />
-          </Suspense>
-          <CustomCursor />
-          <BrowserRouter>
+    <MotionConfig reducedMotion="user">
+      <LanguageProvider>
+        <AdminProvider>
+          <ToastProvider>
+            <SmoothScroll />
+            <Suspense fallback={null}>
+              <SiteBackground />
+            </Suspense>
+            <CustomCursor />
+            <BrowserRouter>
+              <RouteMetadata />
             {/* Inside the router so it can hide itself off the home feed — its
                 fixed top banner otherwise covers the review page's back/lang
                 buttons (higher z-index) and silently swallows their taps. */}
@@ -66,9 +71,10 @@ export default function App() {
             <Suspense fallback={<div className="min-h-dvh bg-bg-deep" />}>
               <AnimatedRoutes />
             </Suspense>
-          </BrowserRouter>
-        </ToastProvider>
-      </AdminProvider>
-    </LanguageProvider>
+            </BrowserRouter>
+          </ToastProvider>
+        </AdminProvider>
+      </LanguageProvider>
+    </MotionConfig>
   );
 }

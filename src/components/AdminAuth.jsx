@@ -1,7 +1,8 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 import { API_URL } from '../utils/constants';
+import { useDialogA11y } from '../utils/dialogA11y';
 
 const AdminContext = createContext(null);
 
@@ -104,6 +105,8 @@ function AdminAuthModal({ onVerified, onClose }) {
   const [shake, setShake] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [passkeyAttempted, setPasskeyAttempted] = useState(false);
+  const dialogRef = useRef(null);
+  useDialogA11y({ containerRef: dialogRef, onClose });
 
   // Auto-trigger Passkey Login on mount
   useEffect(() => {
@@ -178,6 +181,7 @@ function AdminAuthModal({ onVerified, onClose }) {
       onClick={onClose}
     >
       <motion.div
+        ref={dialogRef}
         initial={{ scale: 0.85, opacity: 0 }}
         animate={{
           scale: 1,
@@ -187,11 +191,15 @@ function AdminAuthModal({ onVerified, onClose }) {
         exit={{ scale: 0.85, opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 350 }}
         className="glass p-8 w-full max-w-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-auth-title"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-center mb-6">
           <div className="text-3xl mb-2">🔐</div>
-          <h2 className="text-xl font-bold font-syne tracking-tightertext-text-primary">
+          <h2 id="admin-auth-title" className="text-xl font-bold font-syne tracking-tightertext-text-primary">
             Admin Access
           </h2>
           <p className="text-text-muted text-sm mt-1">
@@ -259,6 +267,8 @@ function DeviceManagerModal({ password, onClose }) {
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [newDeviceName, setNewDeviceName] = useState('');
+  const dialogRef = useRef(null);
+  useDialogA11y({ containerRef: dialogRef, onClose });
 
   // `password` is fixed for this modal's lifetime (it's what unlocked it), so this
   // genuinely only needs to run on mount — but saying so with a useCallback beats
@@ -340,15 +350,20 @@ function DeviceManagerModal({ password, onClose }) {
       onClick={onClose}
     >
       <motion.div
+        ref={dialogRef}
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         className="bg-bg-card border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="device-manager-title"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-          <h2 className="text-xl font-bold text-white">📱 Device Management</h2>
-          <button onClick={onClose} className="text-text-muted hover:text-white transition-colors bg-transparent border-none cursor-pointer">✕</button>
+          <h2 id="device-manager-title" className="text-xl font-bold text-white">📱 Device Management</h2>
+          <button type="button" onClick={onClose} aria-label="Close device management" className="text-text-muted hover:text-white transition-colors bg-transparent border-none cursor-pointer">✕</button>
         </div>
 
         <div className="space-y-4 mb-6">
@@ -400,4 +415,3 @@ function DeviceManagerModal({ password, onClose }) {
     </motion.div>
   );
 }
-

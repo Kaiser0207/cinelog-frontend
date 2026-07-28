@@ -7,7 +7,8 @@ export default function SmoothScroll() {
     // Lenis fights it and feels janky. Only enable smooth scroll on mouse/trackpad.
     const isTouch = typeof window !== 'undefined' &&
       window.matchMedia('(pointer: coarse)').matches;
-    if (isTouch) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isTouch || reduceMotion) return undefined;
 
     const lenis = new Lenis({
       duration: 1.2,
@@ -21,14 +22,16 @@ export default function SmoothScroll() {
       infinite: false,
     });
 
+    let rafId = 0;
     function raf(time) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     return () => {
+      cancelAnimationFrame(rafId);
       lenis.destroy();
     };
   }, []);

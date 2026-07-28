@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+export const API_URL = import.meta.env?.VITE_API_URL || 'http://localhost:8000';
 
 export const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p/';
 
@@ -20,10 +20,10 @@ export const FONTS = [
   { name: 'Zhi Mang Xing', label: '中文手寫', category: 'Indie' },
 ];
 
-// Literal font stacks, NOT var(--font-*). The site chrome now puts Nevis at the
-// front of those variables (all latin UI text is Nevis), and a review's chosen
-// font must not inherit that — picking "Caveat" has to actually give you Caveat's
-// latin, not Nevis's. So the picker owns its own stacks.
+// Literal font stacks, NOT var(--font-*). Site chrome uses Noto Sans TC/Inter,
+// while Nevis is reserved for display headings. A review's chosen font must not
+// inherit either stack — picking "Caveat" has to actually render as Caveat — so
+// the review font picker owns these explicit stacks.
 export const FONT_MAP = {
   'Outfit': "'Outfit', system-ui, sans-serif",
   'Playfair Display': "'Playfair Display', serif",
@@ -90,8 +90,15 @@ export function getReviewTotal(review) {
   if (review.media_type === 'tv') {
     // Hybrid: a manual overall_score wins; otherwise auto from season averages.
     if (typeof review.overall_score === 'number') return review.overall_score;
+    // Summary payloads expose the already-resolved headline score but omit the
+    // episode arrays required to recompute it.
+    if (typeof review.total_score === 'number') return review.total_score;
     return autoSeriesTotal(review.episode_scores, review.seasons);
   }
+  // Summary payloads intentionally omit the six score dimensions. Trust the
+  // backend's calculated value when present; full detail remains backward-
+  // compatible through the local calculation below.
+  if (typeof review.total_score === 'number') return review.total_score;
   const ent = computeEntertainment(review.emotion, review.pacing);
   const cine = computeCinematic(review.acting, review.cinematography, review.soundtrack, review.story);
   return computeTotal(ent, cine);
@@ -149,10 +156,11 @@ export function autoSeriesTotal(episodeScores, seasons) {
   return Math.round((avgs.reduce((a, b) => a + b, 0) / avgs.length) * 10) / 10;
 }
 
-export function formatDate(dateStr) {
+export function formatDate(dateStr, locale = 'en-US') {
   if (!dateStr) return '';
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 // Postgres TIMESTAMPTZ serializes as "2026-06-10 15:23:18.506250+00:00"

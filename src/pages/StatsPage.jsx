@@ -1,10 +1,11 @@
 import { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import StaggeredMenu from '../components/StaggeredMenu';
 import { useLanguage } from '../components/LanguageContext';
 import { getReviewTotal, flattenReview } from '../utils/constants';
 import { loadAllReviews } from '../utils/catalog';
+import { matchesViewingPeriod, parseReviewGenres, parseWatchDates } from '../utils/statsData';
 
 /**
  * 觀影統計 — a real page (/stats), not a floating card.
@@ -24,59 +25,43 @@ function getLast12Months() {
   return months;
 }
 
-function parseDates(r) {
-  if (typeof r.watch_dates === 'string') {
-    try { return JSON.parse(r.watch_dates); } catch { return []; }
-  }
-  return Array.isArray(r.watch_dates) ? r.watch_dates : [];
-}
-
-function parseGenres(r) {
-  if (typeof r.genres === 'string') {
-    try { return JSON.parse(r.genres); } catch { return []; }
-  }
-  return Array.isArray(r.genres) ? r.genres : [];
-}
-
-// Does a watch date string fall within the selected year + month?
-function matchDate(d, year, month) {
-  const ds = String(d);
-  if (year !== 'all' && !ds.startsWith(year)) return false;
-  if (month !== 'all' && ds.slice(5, 7) !== month) return false;
-  return true;
-}
+const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
 
 export default function StatsPage() {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
   const navigate = useNavigate();
   const [year, setYear] = useState('all');
   const [month, setMonth] = useState('all');
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     let cancelled = false;
+    setLoading(true);
+    setError(false);
     (async () => {
       try {
-        // The same whole-collection walk the shelf's catalogue does — down to a
-        // byte-identical URL — so it used to be a second full download of everything.
-        // One function, one cache: coming here from the shelf now costs nothing.
-        const acc = await loadAllReviews();
+        // Statistics require watch_dates and genres, which the lightweight
+        // homepage summary deliberately omits. Full pages are cached separately,
+        // so returning to this route does not repeat the whole-collection walk.
+        const acc = await loadAllReviews({ view: 'full' });
         if (!cancelled) setData(acc.map(flattenReview));
       } catch {
-        if (!cancelled) setData([]);
+        if (!cancelled) setError(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [reloadKey]);
 
   // Years are derived from the data — 2027 etc. appears automatically.
   const allYears = useMemo(() => {
     const ys = new Set();
-    data.forEach((r) => parseDates(r).forEach((d) => {
+    data.forEach((r) => parseWatchDates(r).forEach((d) => {
       const y = String(d).slice(0, 4);
       if (/^\d{4}$/.test(y)) ys.add(y);
     }));
@@ -89,17 +74,18 @@ export default function StatsPage() {
     const months = year === 'all'
       ? getLast12Months()
       : Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
-    const monthLabels = months.map((m) => m.split('-')[1]);
+    const monthLabels = months.map((m) => m.replace('-', '/'));
 
     const base = {
       totalReviews: 0, avgScore: '—', watchCount: 0,
       topGenres: [], genreAvg: [], highest: null, lowest: null, rewatch: [],
-      timeline: months.map(() => 0), monthLabels, maxCount: 1, hasTimeline: false,
+      timeline: months.map(() => 0), monthLabels, monthKeys: months,
+      maxCount: 1, hasTimeline: false,
     };
     if (!data || data.length === 0) return base;
 
     // Scope = reviews with at least one watch matching the year + month filter.
-    const inScope = data.filter((r) => parseDates(r).some((d) => matchDate(d, year, month)));
+    const inScope = data.filter((r) => parseWatchDates(r).some((d) => matchesViewingPeriod(d, year, month)));
 
     let scoreSum = 0;
     let scoredCount = 0;
@@ -115,7 +101,7 @@ export default function StatsPage() {
         scoredCount += 1;
         scored.push({ title: r.title || '—', score: tot });
       }
-      parseGenres(r).forEach((g) => {
+      parseReviewGenres(r).forEach((g) => {
         genreCount[g] = (genreCount[g] || 0) + 1;
         if (tot != null) {
           genreScoreSum[g] = (genreScoreSum[g] || 0) + tot;
@@ -131,7 +117,7 @@ export default function StatsPage() {
     const rewatch = inScope
       .map((r) => ({
         title: r.title || '—',
-        count: parseDates(r).filter((d) => matchDate(d, year, month)).length,
+        count: parseWatchDates(r).filter((d) => matchesViewingPeriod(d, year, month)).length,
       }))
       .filter((x) => x.count > 1)
       .sort((a, b) => b.count - a.count)
@@ -139,10 +125,10 @@ export default function StatsPage() {
 
     // Timeline counts ignore the month filter (they show the whole year context).
     const timeline = months.map((m) =>
-      data.reduce((acc, r) => acc + parseDates(r).filter((d) => String(d).startsWith(m)).length, 0)
+      data.reduce((acc, r) => acc + parseWatchDates(r).filter((d) => String(d).startsWith(m)).length, 0)
     );
     const watchCount = data.reduce(
-      (acc, r) => acc + parseDates(r).filter((d) => matchDate(d, year, month)).length, 0
+      (acc, r) => acc + parseWatchDates(r).filter((d) => matchesViewingPeriod(d, year, month)).length, 0
     );
 
     return {
@@ -159,12 +145,19 @@ export default function StatsPage() {
       rewatch,
       timeline,
       monthLabels,
+      monthKeys: months,
       maxCount: Math.max(...timeline, 1),
       hasTimeline: timeline.some((c) => c > 0),
     };
   }, [data, year, month]);
 
-  const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const monthOptions = useMemo(() => {
+    const locale = lang === 'zh' ? 'zh-TW' : 'en';
+    return MONTHS.map((value, index) => ({
+      value,
+      label: new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date(2020, index, 1)),
+    }));
+  }, [lang]);
   const selectCls = 'flex-1 text-sm font-bold text-[#1A1A1A] bg-[#F5EFE1] border border-[#1A1A1A]/15 rounded-xl px-3 py-2.5 cursor-pointer';
 
   return (
@@ -194,25 +187,46 @@ export default function StatsPage() {
 
       <main className="px-5 max-w-3xl mx-auto flex flex-col gap-5">
         {/* Year + month dropdowns */}
-        <div className="flex gap-3">
-          <select value={year} onChange={(e) => setYear(e.target.value)} className={selectCls}>
-            <option value="all">{t('allYears') || '全部'}</option>
-            {allYears.map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
-          <select value={month} onChange={(e) => setMonth(e.target.value)} className={selectCls}>
-            <option value="all">{t('allMonths') || '全部月份'}</option>
-            {MONTHS.map((m) => <option key={m} value={m}>{parseInt(m, 10)}月</option>)}
-          </select>
+        <div className="grid grid-cols-2 gap-3">
+          <label htmlFor="stats-year" className="text-xs font-bold text-text-muted">
+            {t('statsYearLabel')}
+            <select id="stats-year" value={year} onChange={(e) => setYear(e.target.value)} className={`${selectCls} mt-1 w-full`}>
+              <option value="all">{t('allYears') || '全部'}</option>
+              {allYears.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </label>
+          <label htmlFor="stats-month" className="text-xs font-bold text-text-muted">
+            {t('statsMonthLabel')}
+            <select id="stats-month" value={month} onChange={(e) => setMonth(e.target.value)} className={`${selectCls} mt-1 w-full`}>
+              <option value="all">{t('allMonths') || '全部月份'}</option>
+              {monthOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+            </select>
+          </label>
         </div>
 
         {loading && (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-3" role="status" aria-label={t('loadingReviews')}>
             {[...Array(3)].map((_, i) => (
               <div key={i} className="h-[86px] rounded-2xl bg-[#1A1A1A]/10 animate-pulse" />
             ))}
           </div>
         )}
 
+        {error && (
+          <div role="alert" className="rounded-2xl border border-[#FE494A]/40 bg-[#F5EFE1] p-6 text-center">
+            <h2 className="text-xl font-black">{t('statsLoadError')}</h2>
+            <p className="mt-2 text-sm text-text-muted">{t('statsLoadErrorDesc')}</p>
+            <button
+              type="button"
+              onClick={() => setReloadKey((key) => key + 1)}
+              className="mt-5 rounded-full bg-[#FE494A] px-5 py-2.5 text-sm font-black text-[#1A1A1A]"
+            >
+              {t('retry')}
+            </button>
+          </div>
+        )}
+
+        <div className={loading || error ? 'hidden' : 'contents'}>
         {/* Top 3 numbers */}
         <div className="grid grid-cols-3 gap-3">
           {[
@@ -224,7 +238,7 @@ export default function StatsPage() {
               <span className="text-3xl md:text-4xl font-black font-[var(--font-bebas)] tracking-wider flex items-center gap-0.5" style={{ color: s.c }}>
                 {s.star && <span className="text-base">✨</span>}{s.v}
               </span>
-              <span className="text-[9px] font-bold font-[var(--font-jetbrains)] text-white/60 uppercase mt-1 text-center leading-tight">
+              <span className="text-xs font-bold font-[var(--font-jetbrains)] text-white/70 uppercase mt-1 text-center leading-tight">
                 {s.label}
               </span>
             </div>
@@ -239,7 +253,7 @@ export default function StatsPage() {
               { label: t('lowest') || 'Lowest', item: stats.lowest, c: '#3B4856' },
             ].map((h, i) => (
               <div key={i} className="bg-[#1A1A1A] rounded-2xl p-4 flex flex-col gap-1 justify-center">
-                <span className="text-[9px] font-bold font-[var(--font-jetbrains)] uppercase" style={{ color: h.c }}>
+                <span className="text-xs font-bold font-[var(--font-jetbrains)] uppercase" style={{ color: h.c }}>
                   {h.label}
                 </span>
                 {h.item ? (
@@ -271,7 +285,7 @@ export default function StatsPage() {
                   </span>
                   <span className="flex-1 text-[12px] font-bold text-white/85 truncate">{m.title}</span>
                   <span className="flex items-baseline gap-0.5 shrink-0">
-                    <span className="text-[10px] text-white/40">×</span>
+                    <span className="text-xs text-white/55">×</span>
                     <span className="text-lg font-black font-[var(--font-bebas)] text-[#FFD15C] tabular-nums leading-none">
                       {m.count}
                     </span>
@@ -290,12 +304,12 @@ export default function StatsPage() {
           {!stats.hasTimeline ? (
             <p className="text-center text-white/40 text-xs py-6">{t('noRecords') || '尚無觀影紀錄'}</p>
           ) : (
-            <div className="flex items-end justify-between gap-1 h-[120px] md:h-[160px]">
+            <div aria-hidden="true" className="flex items-end justify-between gap-1 h-[120px] md:h-[160px]">
               {stats.timeline.map((c, i) => {
-                const isSel = month !== 'all' && stats.monthLabels[i] === month;
+                const isSel = month !== 'all' && stats.monthKeys[i].slice(5) === month;
                 return (
                   <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1 h-full">
-                    <span className={`text-[8px] font-bold leading-none ${c > 0 ? 'text-white/70' : 'text-transparent'}`}>{c}</span>
+                    <span className={`text-xs font-bold leading-none ${c > 0 ? 'text-white/80' : 'text-transparent'}`}>{c}</span>
                     <motion.div
                       className={`w-full rounded-t bg-gradient-to-t ${isSel ? 'from-[#FFD15C] to-[#FE494A]' : 'from-[#FE494A] to-[#D480C0]'}`}
                       initial={{ height: 0 }}
@@ -303,13 +317,26 @@ export default function StatsPage() {
                       transition={{ duration: 0.6, delay: 0.04 * i, ease: 'easeOut' }}
                       style={{ minHeight: c > 0 ? 4 : 2, opacity: c > 0 || isSel ? 1 : 0.18 }}
                     />
-                    <span className={`text-[7px] font-[var(--font-jetbrains)] leading-none ${isSel ? 'text-[#FFD15C]' : 'text-white/40'}`}>
+                    <span className={`origin-top-left -rotate-45 whitespace-nowrap text-xs font-[var(--font-jetbrains)] leading-none ${isSel ? 'text-[#FFD15C]' : 'text-white/60'}`}>
                       {stats.monthLabels[i]}
                     </span>
                   </div>
                 );
               })}
             </div>
+          )}
+          {stats.hasTimeline && (
+            <table className="sr-only">
+              <caption>{t('timelineTableCaption')}</caption>
+              <tbody>
+                {stats.monthKeys.map((key, index) => (
+                  <tr key={key}>
+                    <th scope="row">{stats.monthLabels[index]}</th>
+                    <td>{stats.timeline[index]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
 
@@ -323,7 +350,7 @@ export default function StatsPage() {
               <div className="flex flex-col gap-2.5">
                 {stats.genreAvg.map(([genre, avg], idx) => (
                   <div key={idx} className="flex items-center gap-3">
-                    <span className="w-16 text-[10px] font-bold text-white/70 truncate text-right shrink-0">
+                    <span className="w-20 text-xs font-bold text-white/75 truncate text-right shrink-0">
                       {t(genre) || genre}
                     </span>
                     <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
@@ -334,7 +361,7 @@ export default function StatsPage() {
                         transition={{ duration: 0.8, delay: 0.1 * idx, ease: 'easeOut' }}
                       />
                     </div>
-                    <span className="w-7 text-[10px] font-black text-white/90 text-left shrink-0 tabular-nums">
+                    <span className="w-8 text-xs font-black text-white/90 text-left shrink-0 tabular-nums">
                       {avg.toFixed(1)}
                     </span>
                   </div>
@@ -354,7 +381,7 @@ export default function StatsPage() {
                   const maxCount = Math.max(stats.topGenres[0][1], 1);
                   return (
                     <div key={idx} className="flex items-center gap-3">
-                      <span className="w-16 text-[10px] font-bold text-white/70 truncate text-right shrink-0">
+                      <span className="w-20 text-xs font-bold text-white/75 truncate text-right shrink-0">
                         {t(genre) || genre}
                       </span>
                       <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
@@ -365,7 +392,7 @@ export default function StatsPage() {
                           transition={{ duration: 0.8, delay: 0.1 * idx, ease: 'easeOut' }}
                         />
                       </div>
-                      <span className="w-4 text-[10px] font-black text-white/90 text-left shrink-0">{count}</span>
+                      <span className="w-5 text-xs font-black text-white/90 text-left shrink-0">{count}</span>
                     </div>
                   );
                 })}
@@ -374,9 +401,10 @@ export default function StatsPage() {
           )}
         </div>
 
-        <p className="text-center text-[10px] text-[#1A1A1A]/40 font-[var(--font-inter)] font-medium px-2 pt-2">
+        <p className="text-center text-xs text-[#1A1A1A]/60 font-[var(--font-inter)] font-medium px-2 pt-2">
           {t('statsDesc') || 'Keep watching movies to build your cinematic profile.'}
         </p>
+        </div>
       </main>
     </motion.div>
   );

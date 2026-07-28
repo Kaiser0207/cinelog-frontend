@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MovieSearch from './MovieSearch';
 import FontSelector from './FontSelector';
@@ -11,6 +11,8 @@ import { useAdmin } from './AdminAuth';
 import { useToast } from './Toast';
 import { API_URL, TMDB_IMG_BASE, FONT_MAP, computeEntertainment, computeCinematic, computeTotal, autoSeriesTotal } from '../utils/constants';
 import { pressFx } from '../utils/motion';
+import { useReviewFont } from '../utils/reviewFonts';
+import { useDialogA11y } from '../utils/dialogA11y';
 
 const EMPTY_STATE = {
   // Movie info
@@ -110,6 +112,9 @@ export default function ReviewEditor({ review = null, onClose, onSaved, initialM
   const [animated, setAnimated] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const dialogRef = useRef(null);
+  useReviewFont(form.review_font);
+  useDialogA11y({ containerRef: dialogRef, onClose });
 
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -381,10 +386,15 @@ export default function ReviewEditor({ review = null, onClose, onSaved, initialM
 
   return (
     <motion.div
+      ref={dialogRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[9000] overflow-y-auto overflow-x-hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="review-editor-title"
+      tabIndex={-1}
     >
       {/* Dimmed/blurred backdrop kept OUT of the textarea's ancestor chain — an
           ancestor with backdrop-filter or transform breaks iOS caret tap. */}
@@ -399,11 +409,13 @@ export default function ReviewEditor({ review = null, onClose, onSaved, initialM
         <div className="max-w-5xl mx-auto bg-bg-surface border border-border-subtle md:rounded-2xl overflow-hidden">
           {/* Header */}
           <div style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }} className="sticky top-0 z-10 flex items-center justify-between px-5 pb-4 bg-bg-surface/90 backdrop-blur-xl border-b border-border-subtle">
-            <h2 className="text-lg font-bold font-syne tracking-tighter">
+            <h2 id="review-editor-title" className="text-lg font-bold font-syne tracking-tighter">
               {isEdit ? '✏️ 編輯影評' : '🎬 新增影評'}
             </h2>
             <button
+              type="button"
               onClick={onClose}
+              aria-label="關閉影評編輯器"
               className="w-10 h-10 rounded-full bg-[#E8E2D2] border border-border-subtle flex items-center justify-center text-[#1A1A1A] hover:bg-black/10 hover:border-black/30 hover:scale-105 active:scale-95 transition-all font-bold cursor-pointer"
             >
               ✕

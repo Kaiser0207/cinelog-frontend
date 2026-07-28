@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 
 // --- Capture the install prompt as early as possible ---
 // Chrome fires `beforeinstallprompt` on its own schedule, often before React
@@ -68,6 +69,8 @@ document.addEventListener('visibilitychange', () => {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );

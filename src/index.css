@@ -24,24 +24,19 @@
   --color-accent-amber: #D480C0; /* Neon Lime Green */
   --color-text-primary: #1A1A1A;
   --color-text-muted: #5A5A5A;
-  --color-text-dim: #8A8A8A;
+  --color-text-dim: #606060;
   --color-border-subtle: rgba(26, 26, 26, 0.15);
   --color-border-active: #D480C0;
 
-  /* ── Site chrome: ALL latin text is Nevis ──────────────────────────────
-     Nevis carries only basic latin (116 glyphs), so every Chinese character
-     misses and falls through to Noto Sans TC on its own — "english = Nevis,
-     chinese = Noto" needs no per-element logic, just the stack order.
-
-     These five are the vars the UI's font-* utilities resolve to. A review's
-     own font comes from FONT_MAP (literal stacks, set inline), so the per-review
-     font picker is unaffected by anything here. */
-  --font-inter: 'Nevis', 'Inter', 'Noto Sans TC', system-ui, sans-serif;
+  /* ── UI hierarchy ───────────────────────────────────────────────────────
+     Nevis is a display face, not body copy. General UI uses the one CJK family
+     loaded at startup; optional Latin/data faces fall back to native system
+     families without adding more fonts to the critical path. */
+  --font-inter: 'Noto Sans TC', 'Inter', system-ui, sans-serif;
   --font-bebas: 'Nevis', 'Bebas Neue', 'Noto Sans TC', sans-serif;
-  --font-jetbrains: 'Nevis', 'JetBrains Mono', 'Noto Sans TC', monospace;
-  --font-syne: 'Nevis', 'Syne', 'Noto Sans TC', sans-serif;
-  --font-google-sans: 'Nevis', 'Google Sans Flex', 'Noto Sans TC', 'Inter', system-ui, sans-serif;
-  /* Display title face for big headings, same stack */
+  --font-jetbrains: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, 'Noto Sans TC', monospace;
+  --font-syne: 'Syne', 'Noto Sans TC', system-ui, sans-serif;
+  --font-google-sans: 'Noto Sans TC', 'Google Sans Flex', 'Inter', system-ui, sans-serif;
   --font-nevis: 'Nevis', 'Noto Sans TC', system-ui, sans-serif;
 
   /* ── Review body faces (the per-review font picker) — untouched ── */
@@ -191,11 +186,22 @@ html.has-custom-cursor select {
 
 /* Respect "Reduce Motion": stop the ambient/looping effects */
 @media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
   .animate-dust-a, .animate-dust-b, .animate-dust,
   .animate-projector-breath, .animate-bounce {
     animation: none !important;
   }
   html { scroll-behavior: auto; }
+}
+
+:focus-visible {
+  outline: 3px solid #1A1A1A;
+  outline-offset: 3px;
 }
 
 @keyframes fadeIn {
@@ -415,4 +421,31 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
   border: 2px solid var(--color-bg-deep);
+}
+
+/* Read-only scores are values, not disabled form controls. */
+.score-meter {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-border-subtle);
+}
+.score-meter::-webkit-meter-bar {
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-border-subtle);
+}
+.score-meter::-webkit-meter-optimum-value,
+.score-meter::-webkit-meter-suboptimum-value,
+.score-meter::-webkit-meter-even-less-good-value {
+  border-radius: 999px;
+  background: var(--color-text-primary);
+}
+.score-meter::-moz-meter-bar {
+  border-radius: 999px;
+  background: var(--color-text-primary);
 }

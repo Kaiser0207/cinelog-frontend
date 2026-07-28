@@ -2,15 +2,25 @@ import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
 import ReviewFeed from './ReviewFeed';
+import { useDialogA11y } from '../utils/dialogA11y';
 
 export default function SearchOverlay({ isOpen, onClose, searchInput, searchQuery, onSearchChange, searchMode, onModeToggle }) {
   const { t } = useLanguage();
   const inputRef = useRef(null);
+  const dialogRef = useRef(null);
+
+  useDialogA11y({
+    open: isOpen,
+    containerRef: dialogRef,
+    initialFocusRef: inputRef,
+    onClose,
+  });
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      setTimeout(() => inputRef.current.focus(), 100);
-    }
+    if (!isOpen) return undefined;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -18,15 +28,25 @@ export default function SearchOverlay({ isOpen, onClose, searchInput, searchQuer
   return (
     <AnimatePresence>
       <motion.div
+        ref={dialogRef}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
         className="fixed inset-0 z-[120] bg-[#E8E2D2]/95 backdrop-blur-md flex flex-col md:hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mobile-search-title"
+        tabIndex={-1}
       >
+        <h2 id="mobile-search-title" className="sr-only">
+          {t('navSearch') || 'Search'}
+        </h2>
         <div className="flex items-center p-4 border-b border-[#1A1A1A]/10">
           <button 
+            type="button"
             onClick={onClose}
+            aria-label={t('back') || 'Close search'}
             className="p-3 mr-2 text-[#1A1A1A]/50 hover:text-[#1A1A1A]"
           >
             ←
@@ -37,16 +57,19 @@ export default function SearchOverlay({ isOpen, onClose, searchInput, searchQuer
             <input
               ref={inputRef}
               type="text"
+              aria-label={t('navSearch') || 'Search reviews'}
               value={searchInput}
               onChange={onSearchChange}
               placeholder={searchMode === 'ai' ? (t('searchAiPlaceholder') || 'Describe the feeling...') : (t('searchPlaceholder') || 'Search movies...')}
               className="bg-transparent border-none outline-none focus:ring-0 focus:outline-none text-base font-bold text-[#1A1A1A] placeholder:text-[#1A1A1A]/40 w-full py-2.5"
             />
             <button
+              type="button"
               onClick={onModeToggle}
+              aria-label={searchMode === 'ai' ? 'Switch to standard search' : 'Switch to AI search'}
               className={`ml-2 px-4 py-2 rounded-full text-[10px] font-black font-jetbrains uppercase transition-all shrink-0 mr-1 ${
                 searchMode === 'ai' 
-                  ? 'bg-[#FE494A] text-[#E8E2D2] shadow-sm' 
+                  ? 'bg-[#FE494A] text-[#1A1A1A] shadow-sm'
                   : 'bg-[#E8E2D2] text-[#FE494A] shadow-sm'
               }`}
             >
@@ -66,7 +89,7 @@ export default function SearchOverlay({ isOpen, onClose, searchInput, searchQuer
                 <ReviewFeed
                   searchQuery={searchQuery}
                   searchMode={searchMode}
-                  viewMode="shelf"
+                  viewMode="compact"
                 />
               ) : (
                 <p className="text-center text-sm font-bold text-[#1A1A1A]/40 mt-10">

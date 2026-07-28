@@ -1,6 +1,5 @@
 import js from '@eslint/js'
 import globals from 'globals'
-import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
@@ -20,9 +19,7 @@ export default [
       globals: { ...globals.browser },
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    settings: { react: { version: 'detect' } },
     plugins: {
-      react,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
     },
@@ -30,17 +27,23 @@ export default [
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
 
-      // Without these, no-unused-vars can't see that `motion` is used — it's only ever
-      // referenced as <motion.div>, and the base rule doesn't read JSX. Every single
-      // file that animates anything came back as "'motion' is defined but never used",
-      // which is exactly the kind of noise that gets a linter switched off.
-      'react/jsx-uses-vars': 'error',
-      'react/jsx-uses-react': 'error',
+      // Hooks 7's recommended preset also enables React Compiler-oriented
+      // architecture rules. This app intentionally starts async loads and resets
+      // loading state from effects, uses refs for pointer animation state, and keeps
+      // one score renderer local to its detail view. Treating all three established
+      // patterns as migration-blocking errors would require a broad behavior rewrite,
+      // so retain the two correctness checks below without expanding lint scope here.
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/static-components': 'off',
 
-      // Components legitimately name unused destructured props and caught errors; what
-      // we actually want out of this rule is dead imports and dead locals.
+      // The automatic JSX runtime does not require React-in-scope rules. Core
+      // no-unused-vars still cannot see JSX-only component identifiers (including the
+      // lowercase `motion` namespace), so ignore those names and keep this rule focused
+      // on ordinary dead imports and locals. This also avoids retaining the React
+      // plugin solely for bookkeeping rules it no longer needs to provide.
       'no-unused-vars': ['warn', {
-        varsIgnorePattern: '^[A-Z_]',
+        varsIgnorePattern: '^(?:motion|[A-Z_].*)$',
         args: 'none',
         caughtErrors: 'none',
       }],

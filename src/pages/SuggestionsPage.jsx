@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import StaggeredMenu from '../components/StaggeredMenu';
 import { SuggestionModal } from '../components/SuggestionBox';
 import { useLanguage } from '../components/LanguageContext';

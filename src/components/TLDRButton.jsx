@@ -5,14 +5,14 @@ import { useToast } from './Toast';
 import { useLanguage } from './LanguageContext';
 import { pressFx } from '../utils/motion';
 
-export default function TLDRButton({ reviewText, movieTitle }) {
+export default function TLDRButton({ reviewId, reviewText, movieTitle }) {
   const [tldr, setTldr] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { addToast } = useToast();
   const { t } = useLanguage();
 
-  if (!reviewText || reviewText.trim().length < 50) return null;
+  if (!reviewId || !reviewText || reviewText.trim().length < 50) return null;
 
   const fetchTldr = async () => {
     setLoading(true);
@@ -20,7 +20,14 @@ export default function TLDRButton({ reviewText, movieTitle }) {
       const res = await fetch(`${API_URL}/api/ai/tldr`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ review_text: reviewText, movie_title: movieTitle }),
+        // review_id is authoritative on the new backend. Legacy fields keep the
+        // feature working if Vercel deploys before the older Render instance is
+        // manually refreshed; the new backend ignores them when review_id exists.
+        body: JSON.stringify({
+          review_id: Number(reviewId),
+          review_text: reviewText,
+          movie_title: movieTitle,
+        }),
       });
       if (!res.ok) throw new Error('API error');
       const data = await res.json();

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router';
 import { useLanguage } from './LanguageContext';
 import { useAdmin } from './AdminAuth';
 import './StaggeredMenu.css';
@@ -26,10 +25,13 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
 
   const [open, setOpen] = useState(false);
 
+  const toggleRef = useRef(null);
   const panelRef = useRef(null);
   const preLayersRef = useRef(null);
   const openTlRef = useRef(null);
   const closeTweenRef = useRef(null);
+  const gsapRef = useRef(null);
+  const gsapPromiseRef = useRef(null);
   const busyRef = useRef(false);
   const openRef = useRef(false);
 
@@ -77,15 +79,32 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
 
   // Park the panel + layers off-screen to the left.
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      const panel = panelRef.current;
-      if (!panel) return;
-      gsap.set([panel, ...layerEls()], { xPercent: -100 });
+    const panel = panelRef.current;
+    if (!panel) return undefined;
+    [panel, ...layerEls()].forEach((el) => {
+      el.style.transform = 'translate3d(-100%, 0, 0)';
     });
-    return () => ctx.revert();
+    return undefined;
   }, []);
 
-  const buildOpen = useCallback(() => {
+  const loadGsap = useCallback(async () => {
+    if (gsapRef.current) return gsapRef.current;
+    if (!gsapPromiseRef.current) {
+      // The menu is the only GSAP consumer. Importing it on first open keeps the
+      // animation chunk off the homepage's modulepreload/critical path.
+      gsapPromiseRef.current = import('gsap').then((mod) => {
+        gsapRef.current = mod.gsap;
+        return mod.gsap;
+      });
+    }
+    return gsapPromiseRef.current;
+  }, []);
+
+  const focusFirstItem = useCallback(() => {
+    panelRef.current?.querySelector('.sm-item')?.focus();
+  }, []);
+
+  const buildOpen = useCallback((gsap) => {
     const panel = panelRef.current;
     if (!panel) return null;
     const layers = layerEls();
@@ -126,19 +145,38 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
     return tl;
   }, []);
 
-  const playOpen = useCallback(() => {
+  const playOpen = useCallback(async () => {
     if (busyRef.current) return;
     busyRef.current = true;
-    const tl = buildOpen();
+    const gsap = await loadGsap();
+    if (!openRef.current) {
+      busyRef.current = false;
+      return;
+    }
+
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      const panel = panelRef.current;
+      if (panel) {
+        gsap.set([panel, ...layerEls()], { xPercent: 0 });
+        gsap.set(panel.querySelectorAll('.sm-item-label'), { yPercent: 0, rotate: 0 });
+        gsap.set(panel.querySelectorAll('.sm-item'), { '--sm-num-opacity': 1 });
+      }
+      busyRef.current = false;
+      focusFirstItem();
+      return;
+    }
+
+    const tl = buildOpen(gsap);
     if (!tl) {
       busyRef.current = false;
       return;
     }
     tl.eventCallback('onComplete', () => {
       busyRef.current = false;
+      focusFirstItem();
     });
     tl.play(0);
-  }, [buildOpen]);
+  }, [buildOpen, focusFirstItem, loadGsap]);
 
   const playClose = useCallback(() => {
     openTlRef.current?.kill();
@@ -146,6 +184,14 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
     const panel = panelRef.current;
     if (!panel) return;
     closeTweenRef.current?.kill();
+    const gsap = gsapRef.current;
+    if (!gsap) {
+      [panel, ...layerEls()].forEach((el) => {
+        el.style.transform = 'translate3d(-100%, 0, 0)';
+      });
+      busyRef.current = false;
+      return;
+    }
     closeTweenRef.current = gsap.to([...layerEls(), panel], {
       xPercent: -100,
       duration: 0.32,
@@ -172,6 +218,44 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
     action?.();
   };
 
+  // Hidden panels must leave the keyboard order. While open, Escape closes the
+  // dialog and Tab is contained within the menu; focus returns to the trigger.
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (panel) panel.inert = !open;
+    if (!open || !panel) return undefined;
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        openRef.current = false;
+        setOpen(false);
+        playClose();
+        requestAnimationFrame(() => toggleRef.current?.focus());
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(panel.querySelectorAll('button:not([disabled])'));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open, playClose]);
+
+  useEffect(() => () => {
+    openTlRef.current?.kill();
+    closeTweenRef.current?.kill();
+  }, []);
+
   // Lock page scroll while the menu is open.
   useEffect(() => {
     if (!open) return undefined;
@@ -186,10 +270,12 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
     <>
       {/* = → ✕ */}
       <button
+        ref={toggleRef}
         type="button"
         className={`sm-toggle ${open ? 'open' : ''}`}
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
+        aria-controls="cinerooms-main-menu"
         onClick={toggle}
       >
         <span className="sm-line" />
@@ -201,7 +287,15 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
         <div className="sm-prelayer" style={{ background: '#FE494A' }} />
       </div>
 
-      <aside ref={panelRef} className="sm-panel" aria-hidden={!open}>
+      <aside
+        id="cinerooms-main-menu"
+        ref={panelRef}
+        className="sm-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('mainMenu') || 'Main menu'}
+        aria-hidden={!open}
+      >
         <ul className="sm-list">
           {items.map((it, idx) => (
             <li key={it.key} className="sm-itemWrap">
