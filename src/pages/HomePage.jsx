@@ -4,9 +4,11 @@ import { useLocation, useNavigate } from 'react-router';
 import ReviewFeed from '../components/ReviewFeed';
 import StaggeredMenu from '../components/StaggeredMenu';
 import SearchOverlay from '../components/SearchOverlay';
+import MobileFilterControls from '../components/MobileFilterControls';
 import { SORT_OPTIONS } from '../utils/constants';
 import { invalidateApiCache } from '../utils/apiCache';
 import { normalizeHomeViewMode } from '../utils/homeViewMode';
+import { HOME_GENRE_OPTIONS, HOME_MEDIA_OPTIONS } from '../utils/homeFilters';
 import { useLanguage } from '../components/LanguageContext';
 import { useAdmin } from '../components/AdminAuth';
 import SuggestionBox from '../components/SuggestionBox';
@@ -40,8 +42,6 @@ export default function HomePage() {
     normalizeHomeViewMode(localStorage.getItem('cinelog_view_mode'))
   );
   
-  const activeGenreRef = useRef(null);
-
   // Land at the top of the feed on mount. Without this, returning from a review
   // keeps the document scrolled to wherever the *detail page* was, which then
   // maps to a random middle card here. Two frames so it wins over the route
@@ -161,25 +161,6 @@ export default function HomePage() {
   const titleSkew = useTransform(scrollY, [0, 300], [0, -5]);
   const titleOpacity = useTransform(scrollY, [0, 300], [1, 0.2]);
 
-  const GENRE_PILLS = [
-    '全部', '動作', '喜劇', '劇情', '恐怖', '科幻',
-    '驚悚', '愛情', '動畫', '懸疑',
-  ];
-
-  const genreToKey = {
-    '全部': 'All',
-    '動作': 'Action',
-    '喜劇': 'Comedy',
-    '劇情': 'Drama',
-    '恐怖': 'Horror',
-    '科幻': 'Sci-Fi',
-    '驚悚': 'Thriller',
-    '愛情': 'Romance',
-    '動畫': 'Animation',
-    '懸疑': 'Mystery',
-    '紀錄片': 'Documentary'
-  };
-
   const handleSaved = () => {
     // Remounting the subtree is only half of it — without this the remounted feed just
     // reads the same cached responses straight back and the new review never appears.
@@ -212,11 +193,11 @@ export default function HomePage() {
       className="min-h-screen relative overflow-x-clip"
     >
       {/* Massive Hero Section */}
-      <div className="relative pt-24 pb-12 px-5 flex flex-col items-start md:items-center justify-center min-h-[40vh]">
+      <div className="relative pt-24 pb-8 md:pb-12 px-5 flex flex-col items-start md:items-center justify-center md:min-h-[40vh]">
         <motion.h1
           onClick={handleAdminTrigger}
           style={{ y: titleY, skewX: titleSkew, opacity: titleOpacity }}
-          className="text-8xl md:text-[12rem] lg:text-[15rem] font-black font-nevis tracking-tighter text-[#1A1A1A] uppercase leading-none z-0 select-none"
+          className="text-[clamp(5.25rem,20vw,5.375rem)] md:text-[12rem] lg:text-[15rem] font-black font-nevis tracking-tighter text-[#1A1A1A] uppercase leading-none z-0 select-none"
         >
           <span className="md:hidden">CINE<br/>ROOMS</span>
           <span className="hidden md:inline">CINEROOMS</span>
@@ -225,7 +206,7 @@ export default function HomePage() {
           {t('heroTagline')}
         </p>
         
-        <div className="absolute top-6 right-5 md:right-6 z-[60] flex flex-col md:flex-row items-end md:items-center gap-3" data-cursor="FILTER">
+        <div className="absolute top-[calc(1.5rem+env(safe-area-inset-top,0px))] right-5 md:top-6 md:right-6 z-[60] flex flex-col md:flex-row items-end md:items-center gap-3" data-cursor="FILTER">
           {/* Top Row: Language */}
           <div className="flex items-center gap-2 md:gap-3">
             {/* Desktop Search Bar (Hidden on Mobile) */}
@@ -266,27 +247,34 @@ export default function HomePage() {
         </div>
       </div>
 
+
+      <MobileFilterControls
+        genre={genre}
+        media={mediaFilter}
+        disabled={isSearching}
+        onGenreChange={setGenre}
+        onMediaChange={setMediaFilter}
+      />
       {/* Genre Filter (類型) — primary filter row. Floats up tight under the title
           (original design) via the negative top margin; everything below sits in
           normal flow after it, so the whole cluster rides up with it. */}
-      <div className="relative z-10 w-full px-5 -mt-12 mb-5 overflow-hidden">
+      <div className="relative z-10 hidden w-full px-5 mb-5 overflow-hidden md:block md:-mt-12">
         <div
           className={`flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full ${isSearching ? 'opacity-45' : ''}`}
           role="group"
           aria-label={lang === 'zh' ? '電影類型篩選' : 'Genre filter'}
           aria-describedby={isSearching ? 'search-filter-note' : undefined}
         >
-          {GENRE_PILLS.map((g) => {
-            const isActive = genre === g || (g === '全部' && genre === '');
+          {HOME_GENRE_OPTIONS.map((option) => {
+            const isActive = genre === option.value;
             return (
               <motion.button
-                key={g}
-                ref={isActive ? activeGenreRef : null}
+                key={option.value || 'all'}
                 whileTap={{ scale: 0.9 }}
                 type="button"
                 disabled={isSearching}
                 data-cursor={isActive ? '' : 'FILTER'}
-                onClick={() => setGenre(g === '全部' ? '' : g)}
+                onClick={() => setGenre(option.value)}
                 className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
                   isActive
                     ? 'bg-[#FE494A] shadow-none border-transparent'
@@ -296,7 +284,7 @@ export default function HomePage() {
                 <span className={`inline-block text-sm font-bold font-jetbrains uppercase transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
                   isActive ? 'text-[#1A1A1A]' : 'text-[#1A1A1A]/70'
                 }`}>
-                  {t(genreToKey[g]) || g}
+                  {t(option.labelKey)}
                 </span>
               </motion.button>
             );
@@ -305,28 +293,23 @@ export default function HomePage() {
       </div>
 
       {/* Media-type filter (影視) */}
-      <div className="relative z-10 w-full px-5 mb-7 overflow-hidden">
+      <div className="relative z-10 hidden w-full px-5 mb-7 overflow-hidden md:block">
         <div
           className={`flex gap-4 overflow-x-auto pb-2 scrollbar-none items-center justify-start md:justify-center w-full ${isSearching ? 'opacity-45' : ''}`}
           role="group"
           aria-label={lang === 'zh' ? '媒體類型篩選' : 'Media type filter'}
           aria-describedby={isSearching ? 'search-filter-note' : undefined}
         >
-          {[
-            { key: '', zh: '全部', en: 'All' },
-            { key: 'movie', zh: '電影', en: 'Film' },
-            { key: 'tv', zh: '影集', en: 'Series' },
-            { key: 'anime', zh: '動漫', en: 'Anime' },
-          ].map((opt) => {
-            const isActive = mediaFilter === opt.key;
+          {HOME_MEDIA_OPTIONS.map((option) => {
+            const isActive = mediaFilter === option.value;
             return (
               <motion.button
-                key={opt.key}
+                key={option.value || 'all'}
                 type="button"
                 disabled={isSearching}
                 whileTap={{ scale: 0.9 }}
                 data-cursor={isActive ? '' : 'FILTER'}
-                onClick={() => setMediaFilter(opt.key)}
+                onClick={() => setMediaFilter(option.value)}
                 className={`group flex-shrink-0 px-6 py-2.5 rounded-full transition-all duration-300 hover:bg-[#D480C0] hover:border-[#D480C0] ${
                   isActive
                     ? 'bg-[#FE494A] shadow-none border-transparent'
@@ -336,7 +319,7 @@ export default function HomePage() {
                 <span className={`inline-block text-sm font-bold font-jetbrains uppercase whitespace-nowrap transition-all duration-300 group-hover:text-black group-hover:scale-110 group-hover:font-black ${
                   isActive ? 'text-[#1A1A1A]' : 'text-[#1A1A1A]/70'
                 }`}>
-                  {lang === 'en' ? opt.en : opt.zh}
+                  {t(option.labelKey)}
                 </span>
               </motion.button>
             );

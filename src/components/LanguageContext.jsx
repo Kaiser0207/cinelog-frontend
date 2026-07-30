@@ -14,6 +14,14 @@ export const translations = {
     
     // HomePage
     filterAll: "All",
+    filterAllShort: "All",
+    mediaFilterShort: "Media",
+    genreFilterShort: "Genre",
+    mediaAll: "All media",
+    mediaMovie: "Film",
+    mediaSeries: "Series",
+    mediaAnime: "Anime",
+    closeFilter: "Close filter",
     watched: "Recently Watched",
     newest: "Newest First",
     rating: "Highest Rated",
@@ -207,6 +215,14 @@ export const translations = {
     
     // HomePage
     filterAll: "全部類型",
+    filterAllShort: "全部",
+    mediaFilterShort: "影視",
+    genreFilterShort: "類型",
+    mediaAll: "全部影視",
+    mediaMovie: "電影",
+    mediaSeries: "影集",
+    mediaAnime: "動漫",
+    closeFilter: "關閉篩選",
     watched: "最近觀看",
     newest: "最新發表",
     rating: "評分最高",
