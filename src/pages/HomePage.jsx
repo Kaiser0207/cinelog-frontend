@@ -56,15 +56,20 @@ export default function HomePage() {
   // the overlay on arrival (the overlay lives on this page). Clear the flag so a
   // later back/forward doesn't silently reopen it.
   useEffect(() => {
-    if (location.state?.openSearch) {
+    const { openSearch, openEditor } = location.state || {};
+    if (!openSearch && !openEditor) return;
+
+    if (openEditor && isAdmin) {
+      setShowEditor(true);
+    } else if (openSearch) {
       if (window.matchMedia('(min-width: 768px)').matches) {
         requestAnimationFrame(() => desktopSearchRef.current?.focus());
       } else {
         setShowSearchOverlay(true);
       }
-      navigate('.', { replace: true, state: null });
     }
-  }, [location.state, navigate]);
+    navigate('.', { replace: true, state: null });
+  }, [isAdmin, location.state, navigate]);
 
   useEffect(() => {
     localStorage.setItem('cinelog_view_mode', viewMode);
@@ -545,11 +550,13 @@ export default function HomePage() {
 
       {/* FAB */}
       {isAdmin && (
-          <motion.div
+          <motion.button
+            type="button"
+            aria-label={t('addReview')}
             onClick={() => setShowEditor(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="group fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px)+0.5rem)] md:bottom-6 right-7 md:right-6 z-[110] w-14 h-14 rounded-lg cursor-pointer shadow-lg overflow-hidden"
+            className="group fixed hidden md:block md:bottom-6 right-6 z-[110] w-14 h-14 rounded-lg cursor-pointer shadow-lg overflow-hidden"
           >
             {/* Bottom Layer: Beige background -> Dark Pink */}
             <div className="absolute inset-0 flex items-center justify-center text-3xl font-black bg-[#FE494A] group-hover:bg-[#D480C0] group-hover:text-black text-white transition-all duration-300 pointer-events-none">
@@ -563,7 +570,7 @@ export default function HomePage() {
             >
               +
             </div>
-          </motion.div>
+          </motion.button>
       )}
 
       {/* Editor Modal */}
@@ -591,6 +598,7 @@ export default function HomePage() {
       <StaggeredMenu
         onHomeClick={handleHomeClick}
         onSearchClick={handleOpenSearch}
+        onAddReview={() => setShowEditor(true)}
         searchOpen={showSearchOverlay}
       />
     </motion.div>

@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { gsap } from 'gsap';
 import { useNavigate, useLocation } from 'react-router';
 import { useLanguage } from './LanguageContext';
 import { useAdmin } from './AdminAuth';
+import { setMenuElementsVisible } from '../utils/menuMotion';
 import './StaggeredMenu.css';
 
 /**
@@ -17,7 +19,12 @@ import './StaggeredMenu.css';
  * lock) sitting on screen — so you could never actually get back. Navigating
  * unmounts whatever you were in.
  */
-export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen = false }) {
+export default function StaggeredMenu({
+  onHomeClick,
+  onSearchClick,
+  onAddReview,
+  searchOpen = false,
+}) {
   const { t } = useLanguage();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
@@ -30,8 +37,6 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
   const preLayersRef = useRef(null);
   const openTlRef = useRef(null);
   const closeTweenRef = useRef(null);
-  const gsapRef = useRef(null);
-  const gsapPromiseRef = useRef(null);
   const busyRef = useRef(false);
   const openRef = useRef(false);
 
@@ -52,6 +57,11 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
     else navigate('/', { state: { openSearch: true } });
   };
 
+  const goAddReview = () => {
+    if (isHome && onAddReview) onAddReview();
+    else navigate('/', { state: { openEditor: true } });
+  };
+
   const items = [
     { key: 'home', label: t('navHome') || '首頁', action: goHome },
     { key: 'search', label: t('navSearch') || '搜尋', action: goSearch },
@@ -63,6 +73,9 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
     },
   ];
 
+  if (isAdmin) {
+    items.push({ key: 'add', label: t('addReview'), action: goAddReview });
+  }
   // Where you actually ARE — not just the URL. Search is an overlay on top of
   // the feed, so the path is still "/" while you're searching; keying off the
   // path alone would light up 首頁 instead of 搜尋.
@@ -79,32 +92,25 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
 
   // Park the panel + layers off-screen to the left.
   useLayoutEffect(() => {
-    const panel = panelRef.current;
-    if (!panel) return undefined;
-    [panel, ...layerEls()].forEach((el) => {
-      el.style.transform = 'translate3d(-100%, 0, 0)';
-    });
-    return undefined;
-  }, []);
-
-  const loadGsap = useCallback(async () => {
-    if (gsapRef.current) return gsapRef.current;
-    if (!gsapPromiseRef.current) {
-      // The menu is the only GSAP consumer. Importing it on first open keeps the
-      // animation chunk off the homepage's modulepreload/critical path.
-      gsapPromiseRef.current = import('gsap').then((mod) => {
-        gsapRef.current = mod.gsap;
-        return mod.gsap;
+    let context;
+    try {
+      context = gsap.context(() => {
+        const panel = panelRef.current;
+        if (!panel) return;
+        gsap.set([panel, ...layerEls()], { xPercent: -100 });
       });
+    } catch (error) {
+      console.error('Failed to initialize menu animation:', error);
+      setMenuElementsVisible(panelRef.current, layerEls(), false);
     }
-    return gsapPromiseRef.current;
+    return () => context?.revert();
   }, []);
 
   const focusFirstItem = useCallback(() => {
     panelRef.current?.querySelector('.sm-item')?.focus();
   }, []);
 
-  const buildOpen = useCallback((gsap) => {
+  const buildOpen = useCallback(() => {
     const panel = panelRef.current;
     if (!panel) return null;
     const layers = layerEls();
@@ -145,38 +151,39 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
     return tl;
   }, []);
 
-  const playOpen = useCallback(async () => {
+  const playOpen = useCallback(() => {
     if (busyRef.current) return;
     busyRef.current = true;
-    const gsap = await loadGsap();
-    if (!openRef.current) {
-      busyRef.current = false;
-      return;
-    }
-
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-      const panel = panelRef.current;
-      if (panel) {
-        gsap.set([panel, ...layerEls()], { xPercent: 0 });
-        gsap.set(panel.querySelectorAll('.sm-item-label'), { yPercent: 0, rotate: 0 });
-        gsap.set(panel.querySelectorAll('.sm-item'), { '--sm-num-opacity': 1 });
+    try {
+      if (!openRef.current) {
+        busyRef.current = false;
+        return;
       }
-      busyRef.current = false;
-      focusFirstItem();
-      return;
-    }
 
-    const tl = buildOpen(gsap);
-    if (!tl) {
-      busyRef.current = false;
-      return;
-    }
-    tl.eventCallback('onComplete', () => {
+      if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+        setMenuElementsVisible(panelRef.current, layerEls(), true);
+        busyRef.current = false;
+        focusFirstItem();
+        return;
+      }
+
+      const tl = buildOpen();
+      if (!tl) {
+        busyRef.current = false;
+        return;
+      }
+      tl.eventCallback('onComplete', () => {
+        busyRef.current = false;
+        focusFirstItem();
+      });
+      tl.play(0);
+    } catch (error) {
+      console.error('Failed to open menu animation:', error);
+      setMenuElementsVisible(panelRef.current, layerEls(), true);
       busyRef.current = false;
       focusFirstItem();
-    });
-    tl.play(0);
-  }, [buildOpen, focusFirstItem, loadGsap]);
+    }
+  }, [buildOpen, focusFirstItem]);
 
   const playClose = useCallback(() => {
     openTlRef.current?.kill();
@@ -184,23 +191,21 @@ export default function StaggeredMenu({ onHomeClick, onSearchClick, searchOpen =
     const panel = panelRef.current;
     if (!panel) return;
     closeTweenRef.current?.kill();
-    const gsap = gsapRef.current;
-    if (!gsap) {
-      [panel, ...layerEls()].forEach((el) => {
-        el.style.transform = 'translate3d(-100%, 0, 0)';
+    try {
+      closeTweenRef.current = gsap.to([...layerEls(), panel], {
+        xPercent: -100,
+        duration: 0.32,
+        ease: 'power3.in',
+        overwrite: 'auto',
+        onComplete: () => {
+          busyRef.current = false;
+        },
       });
+    } catch (error) {
+      console.error('Failed to close menu animation:', error);
+      setMenuElementsVisible(panel, layerEls(), false);
       busyRef.current = false;
-      return;
     }
-    closeTweenRef.current = gsap.to([...layerEls(), panel], {
-      xPercent: -100,
-      duration: 0.32,
-      ease: 'power3.in',
-      overwrite: 'auto',
-      onComplete: () => {
-        busyRef.current = false;
-      },
-    });
   }, []);
 
   const toggle = useCallback(() => {
