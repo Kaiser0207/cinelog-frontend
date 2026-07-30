@@ -6,6 +6,7 @@ import StaggeredMenu from '../components/StaggeredMenu';
 import SearchOverlay from '../components/SearchOverlay';
 import { SORT_OPTIONS } from '../utils/constants';
 import { invalidateApiCache } from '../utils/apiCache';
+import { normalizeHomeViewMode } from '../utils/homeViewMode';
 import { useLanguage } from '../components/LanguageContext';
 import { useAdmin } from '../components/AdminAuth';
 import SuggestionBox from '../components/SuggestionBox';
@@ -35,11 +36,8 @@ export default function HomePage() {
   const [sortOpen, setSortOpen] = useState(false);
   // 書脊牆 is the feed. 疊卡 is the alternative; the old grid and list views are
   // gone, so anyone carrying either of those in localStorage lands on the shelf.
-  const [viewMode, setViewMode] = useState(
-    () => {
-      const stored = localStorage.getItem('cinelog_view_mode');
-      return stored === 'deck' || stored === 'compact' ? stored : 'shelf';
-    }
+  const [viewMode, setViewMode] = useState(() =>
+    normalizeHomeViewMode(localStorage.getItem('cinelog_view_mode'))
   );
   
   const activeGenreRef = useRef(null);
@@ -390,21 +388,6 @@ export default function HomePage() {
                 <path d="M8 3h9a2 2 0 0 1 2 2v11"></path>
               </svg>
               <span className="hidden md:inline text-xs font-black">{t('deckView')}</span>
-            </button>
-            <button
-              type="button"
-              aria-pressed={viewMode === 'compact'}
-              aria-label={t('compactView')}
-              onClick={() => setViewMode('compact')}
-              className={`px-3 py-2 rounded-full transition-all duration-200 flex items-center gap-2 ${viewMode === 'compact' ? 'bg-[#FE494A] text-[#1A1A1A] shadow-sm' : 'text-[#1A1A1A]/55 hover:text-[#1A1A1A]'}`}
-            >
-              <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-                <rect x="14" y="14" width="7" height="7" rx="1" />
-              </svg>
-              <span className="hidden md:inline text-xs font-black">{t('compactView')}</span>
             </button>
           </div>
 
