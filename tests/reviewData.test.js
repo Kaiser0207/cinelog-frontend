@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { hasReviewDetail } from '../src/utils/reviewData.js';
+import { hasReviewDetail, latestReviewWatchDate } from '../src/utils/reviewData.js';
 import { absoluteSiteUrl, compactDescription } from '../src/utils/seo.js';
 import { flattenReview, getReviewTotal } from '../src/utils/constants.js';
 import { matchesViewingPeriod, parseReviewGenres, parseWatchDates } from '../src/utils/statsData.js';
@@ -57,4 +57,18 @@ test('statistics read dates and genres from the full review shape', () => {
   assert.deepEqual(parseReviewGenres(review), ['Drama', 'Mystery']);
   assert.equal(matchesViewingPeriod('2026-01-03', '2026', '01'), true);
   assert.equal(matchesViewingPeriod('2025-12-30', '2026', 'all'), false);
+});
+
+test('latest watch date prefers the summary field then newest history date', () => {
+  assert.equal(latestReviewWatchDate({
+    last_watched_date: '2026-07-30',
+    watch_dates: ['2026-07-31'],
+  }), '2026-07-30');
+  assert.equal(latestReviewWatchDate({
+    watch_dates: '["2025-01-02", "2026-06-03"]',
+  }), '2026-06-03');
+  assert.equal(latestReviewWatchDate({
+    watch_dates: ['2026-02-01', '2026-07-01'],
+  }), '2026-07-01');
+  assert.equal(latestReviewWatchDate({ watch_dates: 'bad json' }), undefined);
 });

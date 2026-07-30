@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import CardDeck from './CardDeck';
 import SpineShelf from './SpineShelf';
 import CompactGrid from './CompactGrid';
+import MobileReviewList from './MobileReviewList';
 import { API_URL, flattenReview } from '../utils/constants';
 import { cachedJson } from '../utils/apiCache';
 import { useLanguage } from './LanguageContext';
@@ -196,6 +197,14 @@ export default function ReviewFeed({ sort = 'newest', genre = '', media = '', se
           {t('noReviewsDesc')}
         </p>
       </motion.div>
+    );
+  }
+
+  if (viewMode === 'search-list') {
+    return (
+      <section aria-label={`${t('reviewResults')}: ${items.length}`}>
+        <MobileReviewList reviews={items} featuredIds={featuredIds} />
+      </section>
     );
   }
 

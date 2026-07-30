@@ -6,20 +6,9 @@ import {
   getReviewTotal,
   mediaCategory,
 } from '../utils/constants';
+import { latestReviewWatchDate } from '../utils/reviewData';
 import { useLanguage } from './LanguageContext';
 
-function watchDates(review) {
-  if (Array.isArray(review.watch_dates)) return review.watch_dates;
-  if (typeof review.watch_dates === 'string') {
-    try {
-      const parsed = JSON.parse(review.watch_dates);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
 
 export default function CompactGrid({ reviews = [], featuredIds }) {
   const { lang, t } = useLanguage();
@@ -32,9 +21,7 @@ export default function CompactGrid({ reviews = [], featuredIds }) {
         const year = review.release_date
           ? new Date(review.release_date).getFullYear()
           : null;
-        const latestWatch = review.last_watched_date || watchDates(review)
-          .map(String)
-          .sort((a, b) => b.localeCompare(a))[0];
+        const latestWatch = latestReviewWatchDate(review);
 
         return (
           <Link

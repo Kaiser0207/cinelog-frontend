@@ -42,7 +42,7 @@ export default function SearchOverlay({ isOpen, onClose, searchInput, searchQuer
         <h2 id="mobile-search-title" className="sr-only">
           {t('navSearch') || 'Search'}
         </h2>
-        <div className="flex items-center p-4 border-b border-[#1A1A1A]/10">
+        <div className="flex items-center px-4 pb-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] border-b border-[#1A1A1A]/10">
           <button 
             type="button"
             onClick={onClose}
@@ -78,18 +78,15 @@ export default function SearchOverlay({ isOpen, onClose, searchInput, searchQuer
           </div>
         </div>
         
-        <div className="flex-1 px-4 pb-4 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto px-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
           {searchInput ? (
             // Live results right inside the overlay — no need to close the screen
             <div className="pt-2">
-              {/* viewMode was "list" — an orphan of the deleted list view, which
-                  ReviewFeed silently fell through to the shelf anyway. Say what it
-                  actually does. */}
               {searchQuery ? (
                 <ReviewFeed
                   searchQuery={searchQuery}
                   searchMode={searchMode}
-                  viewMode="compact"
+                  viewMode="search-list"
                 />
               ) : (
                 <p className="text-center text-sm font-bold text-[#1A1A1A]/40 mt-10">
