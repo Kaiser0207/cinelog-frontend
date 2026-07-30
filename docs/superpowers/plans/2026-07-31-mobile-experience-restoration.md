@@ -55,7 +55,7 @@ test('legacy and unknown home views return to the shelf', () => {
 
 - [ ] **Step 2: 執行測試並確認因模組不存在而失敗**
 
-Run: `node --test tests/homeViewMode.test.js`  
+Run: `node --test tests/homeViewMode.test.js`
 Expected: FAIL，錯誤包含 `ERR_MODULE_NOT_FOUND` 與 `homeViewMode.js`。
 
 - [ ] **Step 3: 實作最小的模式正規化函式**
@@ -80,7 +80,7 @@ const [viewMode, setViewMode] = useState(() =>
 
 - [ ] **Step 5: 執行單元測試與靜態檢查**
 
-Run: `node --test tests/homeViewMode.test.js && npm run lint`  
+Run: `node --test tests/homeViewMode.test.js && npm run lint`
 Expected: 2 tests PASS，ESLint 0 errors。
 
 - [ ] **Step 6: 提交模式恢復**
@@ -173,7 +173,7 @@ if (isAdmin) {
 
 - [ ] **Step 5: 驗證選單程式與正式 bundle**
 
-Run: `npm run lint && npm run build`  
+Run: `npm run lint && npm run build`
 Expected: 0 errors，Vite build 成功；輸出不再含獨立的延遲 GSAP chunk 是可接受結果。
 
 手動檢查 390px：連續開關三次、Escape 關閉、Tab 不離開面板、選取首頁／搜尋後關閉；管理員看得到「新增影評」，一般訪客看不到。
@@ -233,7 +233,7 @@ test('unknown filter values fall back to the all option', () => {
 
 - [ ] **Step 2: 執行測試並確認因模組不存在而失敗**
 
-Run: `node --test tests/homeFilters.test.js`  
+Run: `node --test tests/homeFilters.test.js`
 Expected: FAIL with `ERR_MODULE_NOT_FOUND`。
 
 - [ ] **Step 3: 實作共用篩選定義與標籤函式**
@@ -287,7 +287,7 @@ closeFilter: 'Close filter',    // zh: '關閉篩選'
 
 - [ ] **Step 6: 執行單元測試、Lint 與建置**
 
-Run: `node --test tests/homeFilters.test.js && npm run lint && npm run build`  
+Run: `node --test tests/homeFilters.test.js && npm run lint && npm run build`
 Expected: 2 tests PASS，ESLint 0 errors，Vite build 成功。
 
 手動檢查 360、390、430px：摘要維持單排；長英文不撐開；面板可選、背景與 Escape 可關；Home Indicator 不遮住最後一項；書脊比目前版本更早出現。
@@ -336,7 +336,7 @@ test('latest watch date prefers the summary field then newest history date', () 
 
 - [ ] **Step 2: 執行測試並確認函式尚未匯出**
 
-Run: `node --test tests/reviewData.test.js`  
+Run: `node --test tests/reviewData.test.js`
 Expected: FAIL，錯誤指出 `latestReviewWatchDate` 沒有 export。
 
 - [ ] **Step 3: 實作並重用日期解析**
@@ -374,7 +374,7 @@ return <SpineShelf reviews={items} featuredIds={featuredIds} />;
 
 - [ ] **Step 6: 執行測試與完整檢查**
 
-Run: `node --test tests/reviewData.test.js && npm run check`  
+Run: `node --test tests/reviewData.test.js && npm run check`
 Expected: 所有 Node tests PASS、ESLint 0 errors、Vite build 成功。
 
 手動檢查 390px：一般與 AI 搜尋皆顯示單欄；長片名、無海報、無分數、無日期不破版；關閉後焦點回到搜尋入口。桌面搜尋仍是既有 grid。
@@ -400,10 +400,10 @@ git commit -m "改進手機搜尋結果閱讀體驗"
 
 - [ ] **Step 1: 完整本機驗證**
 
-Run: `npm run check`  
+Run: `npm run check`
 Expected: tests PASS、ESLint 0 errors、Vite build 成功。若本機 Node 20 顯示 engine warning，記錄警告；不得把它誤報為 Node 22 驗證，GitHub CI／Vercel 的 Node 22 結果才是正式依據。
 
-Run: `git diff --check && git status --short --branch`  
+Run: `git diff --check && git status --short --branch`
 Expected: 無 whitespace error，工作樹乾淨，`master` 僅領先 `origin/master` 本次提交。
 
 - [ ] **Step 2: 逐尺寸回歸檢查**

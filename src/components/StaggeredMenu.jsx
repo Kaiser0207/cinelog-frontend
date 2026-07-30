@@ -37,7 +37,6 @@ export default function StaggeredMenu({
   const preLayersRef = useRef(null);
   const openTlRef = useRef(null);
   const closeTweenRef = useRef(null);
-  const busyRef = useRef(false);
   const openRef = useRef(false);
 
   const isHome = location.pathname === '/';
@@ -152,35 +151,22 @@ export default function StaggeredMenu({
   }, []);
 
   const playOpen = useCallback(() => {
-    if (busyRef.current) return;
-    busyRef.current = true;
     try {
-      if (!openRef.current) {
-        busyRef.current = false;
-        return;
-      }
+      if (!openRef.current) return;
 
       if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
         setMenuElementsVisible(panelRef.current, layerEls(), true);
-        busyRef.current = false;
         focusFirstItem();
         return;
       }
 
       const tl = buildOpen();
-      if (!tl) {
-        busyRef.current = false;
-        return;
-      }
-      tl.eventCallback('onComplete', () => {
-        busyRef.current = false;
-        focusFirstItem();
-      });
+      if (!tl) return;
+      tl.eventCallback('onComplete', focusFirstItem);
       tl.play(0);
     } catch (error) {
       console.error('Failed to open menu animation:', error);
       setMenuElementsVisible(panelRef.current, layerEls(), true);
-      busyRef.current = false;
       focusFirstItem();
     }
   }, [buildOpen, focusFirstItem]);
@@ -197,14 +183,10 @@ export default function StaggeredMenu({
         duration: 0.32,
         ease: 'power3.in',
         overwrite: 'auto',
-        onComplete: () => {
-          busyRef.current = false;
-        },
       });
     } catch (error) {
       console.error('Failed to close menu animation:', error);
       setMenuElementsVisible(panel, layerEls(), false);
-      busyRef.current = false;
     }
   }, []);
 
