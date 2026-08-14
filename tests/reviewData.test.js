@@ -2,8 +2,22 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { hasReviewDetail, latestReviewWatchDate } from '../src/utils/reviewData.js';
 import { absoluteSiteUrl, compactDescription } from '../src/utils/seo.js';
-import { flattenReview, getReviewTotal } from '../src/utils/constants.js';
+import {
+  computeCinematic,
+  computeEntertainment,
+  computeTotal,
+  flattenReview,
+  getReviewTotal,
+  SCORE_STEP,
+} from '../src/utils/constants.js';
 import { matchesViewingPeriod, parseReviewGenres, parseWatchDates } from '../src/utils/statsData.js';
+
+test('score editing and calculations use one-decimal precision', () => {
+  assert.equal(SCORE_STEP, 0.1);
+  assert.equal(computeEntertainment(8.2, 8.4), 8.3);
+  assert.equal(computeCinematic(8.1, 8.2, 8.3, 8.4), 8.3);
+  assert.equal(computeTotal(8.3, 8.3), 8.3);
+});
 
 test('summary rows are not treated as complete detail payloads', () => {
   assert.equal(hasReviewDetail({ id: 1, title: 'Summary' }), false);

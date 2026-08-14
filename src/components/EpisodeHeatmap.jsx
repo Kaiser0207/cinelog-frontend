@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getEpisodeColor, seasonAverage } from '../utils/constants';
+import { getEpisodeColor, SCORE_STEP, seasonAverage } from '../utils/constants';
 
 /**
  * IMDb-style per-episode heatmap.
@@ -152,7 +152,7 @@ export default function EpisodeHeatmap({
                     type="range"
                     min={0}
                     max={10}
-                    step={0.5}
+                    step={SCORE_STEP}
                     value={activeScore ?? 7}
                     onChange={(e) => {
                       writeScore(active.season, active.episode, parseFloat(e.target.value));

@@ -42,6 +42,8 @@ export const FONT_MAP = {
   'Zhi Mang Xing': "'Zhi Mang Xing', cursive",
 };
 
+export const SCORE_STEP = 0.1;
+
 export const SCORE_LABELS = {
   emotion: 'Emotion',
   pacing: 'Pacing',

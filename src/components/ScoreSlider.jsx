@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { motion } from 'framer-motion';
+import { SCORE_STEP } from '../utils/constants';
 
 export default function ScoreSlider({
   label,
@@ -41,7 +42,7 @@ export default function ScoreSlider({
             type="range"
             min={0}
             max={10}
-            step={0.5}
+            step={SCORE_STEP}
             value={value}
             aria-labelledby={labelId}
             onChange={(e) => { onChange?.(parseFloat(e.target.value)); if (navigator.vibrate) navigator.vibrate(3); }}
